@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Archive - Login</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #88c8bc;
+            --secondary-color: #59988d;
+            --background-color: #f9f9f9;
+            --text-color: #2d3436;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .login-container {
+            background-color: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .login-left {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 4rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .login-left h2 {
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .login-left p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        .login-form {
+            padding: 4rem 2rem;
+        }
+        .login-form h1 {
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
+        }
+        .form-floating {
+            margin-bottom: 1rem;
+        }
+        .form-control {
+            border: none;
+            border-bottom: 2px solid #dfe6e9;
+            border-radius: 0;
+            padding: 0.75rem 0;
+        }
+        .form-control:focus {
+            box-shadow: none;
+            border-color: var(--primary-color);
+        }
+        .form-floating label {
+            padding-left: 0;
+            color: #b2bec3;
+        }
+        .btn-login {
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 50px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-login:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
+        }
+        .forgot-password {
+            text-align: right;
+            margin-top: 0.5rem;
+        }
+        .forgot-password a {
+            color: #b2bec3;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        .forgot-password a:hover {
+            color: var(--primary-color);
+        }
+        .signup-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        .signup-link a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .signup-link a:hover {
+            color: var(--secondary-color);
+        }
+        .login-illustration {
+            max-width: 80%;
+            height: auto;
+            margin-bottom: 2rem;
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #b2bec3;
+            margin: 1.5rem 0;
+          }
+          .divider::before,
+          .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #dfe6e9;
+          }
+          .divider span {
+            padding: 0 1rem;
+          }
+          .btn-google {
+            background-color: white;
+            color: var(--text-color);
+            border: 2px solid #dfe6e9;
+            border-radius: 50px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+          }
+          .btn-google:hover {
+            background-color: #f1f3f5;
+            border-color: var(--text-color);
+          }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="login-container">
+                    <div class="row g-0">
+                        <div class="col-lg-6 login-left">
+                            <img src="" alt="Login Illustration" class="login-illustration">
+                            <h2>Welcome to Archive</h2>
+                            <p>Explore and organize your digital memories with ease.</p>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="login-form">
+                                <h1>Log In</h1>
+                                <form method="POST" action="/login">
+                                    <div class="form-floating">
+                                        <input type="email" class="form-control" id="email" name="email" placeholder="Email address" required>
+                                        <label for="email">Email address</label>
+                                    </div>
+                                    <div class="form-floating mb-3">
+                                        <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                                        <label for="password">Password</label>
+                                    </div>
+                                    <%if(locals.message && message.length>0){%>
+                                        <div class="alert alert-danger text-center">
+                                            <%=message%>
+                                        </div>
+                                    <%}%>
+                                    <div class="forgot-password">
+                                        <a href="#">Forgot password?</a>
+                                    </div>
+                                    <div class="d-grid mt-4">
+                                        <button type="submit" class="btn btn-primary btn-login">Log In</button>
+                                    </div>
+                                </form>
+                                
+                                <div class="divider">
+                                    <span>or</span>
+                                  </div>
+                    
+                                  <div class="d-grid">
+                                    <a href="/auth/google" class="btn btn-google">
+                                      <i class="fab fa-google me-2"></i> Sign up with Google
+                                    </a>
+                                  </div>
+
+                                <div class="signup-link">
+                                    Don't have an account? <a href="/signup">Sign up</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

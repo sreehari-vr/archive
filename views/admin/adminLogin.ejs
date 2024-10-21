@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archive Admin - Login</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --background-color: #ecf0f1;
+            --text-color: #2c3e50;
+            --accent-color: #e74c3c;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .login-container {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .login-left {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .login-left h2 {
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .login-left p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        .login-form {
+            padding: 3rem 2rem;
+        }
+        .login-form h1 {
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
+        }
+        .form-floating {
+            margin-bottom: 1rem;
+        }
+        .form-control {
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
+            border-color: var(--primary-color);
+        }
+        .btn-login {
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 4px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-login:hover {
+            background-color: var(--secondary-color);
+        }
+        .forgot-password {
+            text-align: right;
+            margin-top: 0.5rem;
+        }
+        .forgot-password a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        .forgot-password a:hover {
+            color: var(--primary-color);
+        }
+        .login-illustration {
+            max-width: 60%;
+            height: auto;
+            margin-bottom: 2rem;
+        }
+        .admin-badge {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="login-container">
+                    <div class="row g-0">
+                        <div class="col-lg-5 login-left">
+                            <img src="/api/placeholder/300/200" alt="Admin Dashboard" class="login-illustration">
+                            <h2>Archive Admin Portal</h2>
+                            <p>Access advanced controls and management tools</p>
+                        </div>
+                        <div class="col-lg-7">
+                            <div class="login-form">
+                                <h1>Admin Login <span class="admin-badge">ADMIN</span></h1>
+                                <form id="admin-login" action="/admin/login" method="post">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" id="email" placeholder="email" name="email" required>
+                                        <label for="email">Email Id</label>
+                                    </div>
+                                    <div class="form-floating mb-3">
+                                        <input type="password" class="form-control" id="password" placeholder="Password" name="password" required>
+                                        <label for="password">Password</label>
+                                    </div>
+                                    <%if(locals.message && message.length>0){%>
+                                        <div class="alert alert-danger text-center">
+                                            <%=message%>
+                                        </div>
+                                    <%}%>
+                                    <div class="forgot-password">
+                                        <a href="#">Forgot credentials?</a>
+                                    </div>
+                                    <div class="d-grid mt-4">
+                                        <button type="submit" class="btn btn-primary btn-login">Log In to Admin Panel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
