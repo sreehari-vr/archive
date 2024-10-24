@@ -1,0 +1,98 @@
+<%- include("../../views/partials/admin/header") %>
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+</head>
+<div class="content-header">
+    <div>
+        <h2 class="content-title card-title">Products</h2>
+    </div>
+</div>
+<header class="card-header text-center mb-20 d-flex gap-5">
+    <form action="/admin/products" method="get" class="d-inline">
+        <div class="input-group input-group-sm border border-1 border-grey rounded-pill" style="width: 500px; margin-left: 230px;">
+            <input type="text" class="form-control border-0 rounded-pill" placeholder="Search products or brands" name="search">
+            <button class="btn  border-0" type="submit">Search</button>
+        </div>
+    </form>
+    <form action="/admin/addProduct" method="get" class="d-inline ml-5">
+        <button class="btn btn-success border-0" type="submit">Add new</button>
+    </form>
+</header>
+<div class="right mt-5">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col"><b>No.</b></th>
+                <th scope="col"><b>Product name</b></th>
+                <th scope="col"><b>Category</b></th>
+                <th scope="col"><b>Regular Price</b></th>
+                <th scope="col"><b>Sale Price</b></th>
+                <th scope="col"><b>Quantity</b></th>
+                <th scope="col"><b>Image</b></th>
+                <th scope="col"><b>Status</b></th>
+                <th scope="col"><b>Action</b></th>
+            </tr>
+        </thead>
+        <tbody>
+            
+            <% for(let i = 0; i < data.length; i++) { %>
+                            <tr>
+                                <td><%= i + 1 %></td>
+                                <td><%= data[i].productName %></td>
+                                <td><%= data[i].category %></td>
+                                <td><%= data[i].regularPrice %></td>
+                                <td><%= data[i].salePrice %></td>
+                                <td><%= data[i].quantity %></td>
+                                <td><img src="<%= data[i].imageUrl %>" alt="<%= data[i].productName %>" style="width: 100px; height: auto;" /></td> <!-- Display image -->
+                                
+                                    <td>
+                                        <% if(data[i].isActive === true) { %>
+                                            <h4 style="color: rgb(0, 255, 47);">Active</h4>
+                                            <% } else { %>
+                                            <h4 style="color: rgb(255, 0, 0);">Inactive</h4>
+                                            <% } %>      
+                                    </td>   
+                                
+                                    <td>
+                                    <% if(data[i].isActive === true) { %>
+                                    <button class="btn btn-warning" style="width: 80px;">
+                                        <a href="/admin/unlistProduct?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">unlist</a>
+                                    </button>
+                                    <% } else { %>
+                                    <button class="btn btn-success" style="width: 80px;">
+                                        <a href="/admin/listProduct?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">list</a>
+                                    </button>
+                                    <% } %>
+                                    <button class="btn btn-success" style="width: 80px;">
+                                        <a href="/admin/updateProduct?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Update</a>
+                                    </button>
+                                    <button class="btn btn-danger" style="width: 80px;">
+                                        <a href="/admin/softDeleteProduct?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Delete</a>
+                                    </button>
+                                </td>
+                            </tr>
+                            <% } %>
+        </tbody>
+
+    </table>
+</div>
+</div>
+</div>
+
+<div class="container mt-3">
+</div>
+
+<div class="container mt-3">
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
+            <% for(let i=1; i<=totalPages; i++) { %>
+                <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+                    <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                </li>
+            <% } %>
+        </ul>
+    </nav>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>

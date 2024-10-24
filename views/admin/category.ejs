@@ -1,5 +1,9 @@
 <%-include('../../views/partials/admin/header.ejs')%>
-
+<head>
+    <style>
+        
+    </style>
+</head>
 <div class="content-header row">
     <div class="d-flex justify-content-between align-items-center">
         <h2 class="content-title card-title">Categories</h2>
@@ -8,19 +12,18 @@
 </div>         
         </div>
         
-            <header class="card-header text-center mb-20">
-                <form action="/admin/category" method="get" class="d-inline">
+            <header class="card-header text-center mb-20 d-flex gap-5">
+                <form action="/admin/category" method="get" class="d-inline" onsubmit=" editCategory(e)">
                     <div class="input-group input-group-sm border border-1 border-grey rounded-pill" style="width: 500px; margin-left: 230px;">
                         <input type="text" class="form-control border-0 rounded-pill" placeholder="Search customers..." name="search">
-                        <button class="btn  border-0" type="submit">Search</button>
+                        <button class="btn  border-0" type="submit">Search </button>
                     </div>
                 </form>
-                <form action="/admin/addCategory" method="get" class="d-inline">
-                    <button class="btn btn-success border-0" type="submit">Add</button>
-                
-                
+                <form action="/admin/addCategory" method="get" class="d-inline ml-5">
+                    <button class="btn btn-success border-0" type="submit">Add new</button>
+                </form>
             </header>
-            <div class="right mt-5">
+            <div class="right m-5">
                 <table class="table table-striped">
                     <thead>
                       <tr>
@@ -37,19 +40,28 @@
                                 <td><%= i + 1 %></td>
                                 <td><%= data[i].name %></td>
                                 <td><%= data[i].description %></td>
-                                <td><%= data[i].status %></td>
                                 <td>
-                                    <% if(data[i].isActive === false) { %>
-                                    <button class="btn btn-danger" style="width: 80px;">
-                                        <a href="/admin/delete?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Delete</a>
+                                <% if(data[i].isActive === true) { %>
+                                    <h4 style="color: rgb(0, 255, 47);">Active</h4>
+                                    <% } else { %>
+                                    <h4 style="color: rgb(255, 0, 0);">Inactive</h4>
+                                    <% } %>      
+                                </td>
+                                    <td>
+                                    <% if(data[i].isActive === true) { %>
+                                    <button class="btn btn-warning" style="width: 80px;">
+                                        <a href="/admin/unlist?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">unlist</a>
                                     </button>
                                     <% } else { %>
                                     <button class="btn btn-success" style="width: 80px;">
-                                        <a href="/admin/restore?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Restore</a>
+                                        <a href="/admin/list?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">list</a>
                                     </button>
                                     <% } %>
                                     <button class="btn btn-success" style="width: 80px;">
                                         <a href="/admin/updateCategory?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Update</a>
+                                    </button>
+                                    <button class="btn btn-danger" style="width: 80px;" onclick="return confirmDelete()">
+                                        <a href="/admin/softDeleteCategory?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Delete</a>
                                     </button>
                                 </td>
                             </tr>
@@ -71,5 +83,11 @@
                 </ul>
             </nav>
         </div>
+
         
-        
+            <script>
+               function confirmDelete(){
+                alert("Are you sure?")
+               }
+            </script>
+       

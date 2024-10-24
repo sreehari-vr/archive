@@ -2,20 +2,68 @@
 
 <div class="container mt-5">
     <h2>Update Category</h2>
-    <form action="/admin/updateCategory" method="post">
+    <form action="/admin/updateCategory" method="post" onsubmit="editCategory(event)">
         <input type="hidden" name="id" value="<%= data._id %>">
 
         <div class="form-group">
             <label for="name">Category Name:</label>
-            <input type="text" id="name" name="name" class="form-control" value="<%= data.name %>" required>
+            <input type="text" id="name" name="name" class="form-control" value="<%= data.name %>">
         </div>
 
         <div class="form-group">
             <label for="description">Category Description:</label>
-            <textarea id="description" name="description" class="form-control" required><%= data.description %></textarea>
+            <textarea id="description" name="description" class="form-control" ><%= data.description %></textarea>
         </div>
 
         <button type="submit" class="btn btn-primary">Update</button>
     </form>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  function editCategory(event){
+    event.preventDefault()
+     const name=document.getElementById('name').value
+     const description=document.getElementById('description').value
+     const id = document.querySelector('input[name="id"]').value;
+
+
+     $.ajax({
+        method:'post',
+        url:'/admin/updateCategory',
+        data:{
+            id,
+            name,
+            description
+        },
+        success:function(response){
+            console.log(response)
+            if(response.success){
+               Swal.fire({
+                icon:'success',
+                title:'successfully updated',
+                text:'category updated'
+               }).then(()=>{
+                window.location.href='/admin/category'
+               })
+            }else{
+                Swal.fire({
+                    icon:'error',
+                    title:'not  updated',
+                    text: response.error || 'category not updated'
+                   })
+            }
+        },
+        error:function(){
+            Swal.fire({
+                icon:'error',
+                title:'error occured',
+                text:'something went wrong'
+            })
+        }
+
+     })
+  }
+</script>
 

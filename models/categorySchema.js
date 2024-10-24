@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const{Schema} = mongoose
 
-const categorySchema = new Schema({
+const categorySchema = new mongoose.Schema({
     name: {
       type: String,
       required: false,
@@ -18,6 +18,10 @@ const categorySchema = new Schema({
     createdAt: {
       type: Date,
       default: Date.now
+    },
+    deletedAt:{
+      type:Date,
+      default: null
     }
   });
 
