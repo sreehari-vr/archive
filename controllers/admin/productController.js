@@ -4,38 +4,45 @@ const user = require("../../models/userSchema");
 const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
-const multer = require('multer');
+const multer = require("multer");
 const category = require("../../models/categorySchema");
- 
+const { Console } = require("console");
+
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-      cb(null, 'uploads/');  // Ensure the 'uploads' folder exists
+    cb(null, "uploads/"); // Ensure the 'uploads' folder exists
   },
   filename: (req, file, cb) => {
-      cb(null, Date.now() + path.extname(file.originalname));  // Append timestamp to avoid filename collisions
-  }
+    cb(null, Date.now() + path.extname(file.originalname)); // Append timestamp to avoid filename collisions
+  },
 });
 
 // File filter to allow specific types of images
 const fileFilter = (req, file, cb) => {
   const allowedTypes = /jpeg|jpg|png|gif/;
-  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const extname = allowedTypes.test(
+    path.extname(file.originalname).toLowerCase()
+  );
   const mimetype = allowedTypes.test(file.mimetype);
 
   if (mimetype && extname) {
-      return cb(null, true);
+    return cb(null, true);
   }
-  cb(new Error('Only images are allowed!'));
+  cb(new Error("Only images are allowed!"));
 };
 
 // Initialize multer with storage, file size limit, and file filter
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: fileFilter
+  limits: {
+    fileSize: 10 * 1024 * 1024, // Limit file size to 10MB
+    fieldSize: 10 * 1024 * 1024, // Limit the field size to 10MB
+    fields: 20, // Allow up to 20 fields
+    files: 10, // Allow up to 10 files
+  },
+  fileFilter: fileFilter,
 });
-
 
 const productInfo = async (req, res) => {
   try {
@@ -57,8 +64,7 @@ const productInfo = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-      const categories = await Category.find({ deletedAt: null });
-      console.log('Product Data:', productData);
+    const categories = await Category.find({ deletedAt: null });
     const totalProducts = await Product.countDocuments();
     const totalPages = Math.ceil(totalProducts / limit);
     res.render("product", {
@@ -77,21 +83,27 @@ const getAddProduct = async (req, res) => {
     const categories = await Category.find({ deletedAt: null }); // Fetching categories
     const statusOptions = ["Available", "Out of stock"];
     res.render("addProducts", { categories, statusOptions }); // Passing the categories to the EJS template
-  } catch (error) { 
+  } catch (error) {
     res.status(500).json({ error: "Internal server error" });
-    console.log(error)
+    console.log(error);
   }
 };
 
 const addProducts = async (req, res) => {
   try {
-    const{ productName, description, category, regularPrice, salePrice, quantity, }=req.body
-    
-        // Extract the filenames of the uploaded images
-    const productImages = req.files.map(file => file.filename); // Storing filenames of uploaded images
+    const {
+      productName,
+      description,
+      category,
+      regularPrice,
+      salePrice,
+      quantity,
+    } = req.body;
+
+    // Extract the filenames of the uploaded images
+    const productImages = req.files.map((file) => file.filename); // Storing filenames of uploaded images
 
     const newProduct = new Product({
-
       productName: req.body.productName,
       description: req.body.description,
       category: req.body.category,
@@ -100,60 +112,64 @@ const addProducts = async (req, res) => {
       quantity: req.body.quantity,
       productImage: productImages,
       status: req.body.status,
-
     });
-  
-  await newProduct.save();
-  console.log(newProduct)
-    res.redirect('/admin/products');
-} catch (error) {
-  console.error(error);
-  res.status(500).json({ error: 'Internal server error' });
-}
-}
 
-
-const updateProduct = async (req, res) => {
-
-  try {
-
-    const{ productName, description, category, regularPrice, salePrice, quantity, } = req.body
-
-    const productImages = req.files.map(file => file.filename); // Storing filenames of uploaded images
-
-  const existProduct = await Product.findOne({productName})
-  if(existProduct){
-    return res.status(400).json({success:false,error:'Product is already there'})
-  }
-
-  const updatedProduct = await Product.updateOne(
-    { _id: req.query.id },
-    {
-        $set: {
-            productName,
-            description,
-            category,
-            regularPrice,
-            salePrice,
-            quantity,
-            productImage: productImages,
-        },
-    }
-)
-
-
-    if (!updatedProduct) {
-      return res.status(404).json({success:false, error: "Product not found" });
-    }
-    return res.json({success:true, error: "Product updated successfully" });
-
-    
+    await newProduct.save();
+    console.log(newProduct);
+    res.redirect("/admin/products");
   } catch (error) {
-    res.status(500).json({ error: "internal server error" });
-    console.log(error)
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
+const updateProduct = async (req, res) => {
+  try {
+    const {
+      id,
+      productName,
+      description,
+      regularPrice,
+      salePrice,
+      quantity,
+    } = req.body;
+    console.log(
+     req.body
+    );
+    const productImages = req.files.map((file) => file.filename); // Storing filenames of uploaded images
+
+    console.log(req.files)
+    console.log(req.file)
+    const existProduct = await Product.findOne({ productName });
+    if (existProduct) {
+      return res.json({ success: false, error: "Product is already there" });
+    }
+    console.log(existProduct);
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      {
+        productName,
+        description,
+        regularPrice,
+        salePrice,
+        quantity,
+        productImage: productImages,
+      },
+      { new: true }
+    );
+    console.log("SKDJLF");
+    if (!updatedProduct) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Product not found" });
+    }
+    return res.status(200).json({ success: true, message: "prouduct updated" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
 
 const renderUpdateProductForm = async (req, res) => {
   const id = req.query.id;
@@ -163,18 +179,17 @@ const renderUpdateProductForm = async (req, res) => {
       return res.status(400).json({ error: "Product not found" });
     }
     const categories = await Category.find({ deletedAt: null });
-    console.log('Product Data:', productData); // Log product data for debugging
-    res.render("updateProduct", { data: productData, categories });
+    return res.render("updateProduct", { data: productData, categories });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 
 const unlistProduct = async (req, res) => {
   const id = req.query.id;
   try {
-    await Product.updateOne({ _id: id },{ $set:  { isActive: false }});
+    await Product.updateOne({ _id: id }, { $set: { isActive: false } });
     res.redirect("/admin/products");
   } catch (error) {
     console.error(error);
@@ -185,7 +200,7 @@ const unlistProduct = async (req, res) => {
 const listProduct = async (req, res) => {
   const id = req.query.id;
   try {
-    await Product.updateOne({ _id: id }, { $set: { isActive: true }});
+    await Product.updateOne({ _id: id }, { $set: { isActive: true } });
     res.redirect("/admin/products");
   } catch (error) {
     console.error(error);
@@ -196,15 +211,23 @@ const listProduct = async (req, res) => {
 const softDeleteProduct = async (req, res) => {
   const id = req.query.id;
   try {
-    await Product.updateOne({_id:id},{$set:{deletedAt: new Date}})
+    await Product.updateOne({ _id: id }, { $set: { deletedAt: new Date() } });
     res.redirect("/admin/products");
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
-  } 
+  }
 };
 
-
-module.exports = { productInfo, addProducts, getAddProduct, softDeleteProduct, listProduct, unlistProduct, renderUpdateProductForm, updateProduct };
+module.exports = {
+  productInfo,
+  addProducts,
+  getAddProduct,
+  softDeleteProduct,
+  listProduct,
+  unlistProduct,
+  renderUpdateProductForm,
+  updateProduct,
+};
 
 module.exports.upload = upload;

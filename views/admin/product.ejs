@@ -28,7 +28,7 @@
                 <th scope="col"><b>Regular Price</b></th>
                 <th scope="col"><b>Sale Price</b></th>
                 <th scope="col"><b>Quantity</b></th>
-                <th scope="col"><b>Image</b></th>
+                <!-- <th scope="col"><b>Image</b></th> -->
                 <th scope="col"><b>Status</b></th>
                 <th scope="col"><b>Action</b></th>
             </tr>
@@ -43,7 +43,7 @@
                                 <td><%= data[i].regularPrice %></td>
                                 <td><%= data[i].salePrice %></td>
                                 <td><%= data[i].quantity %></td>
-                                <td><img src="<%= data[i].imageUrl %>" alt="<%= data[i].productName %>" style="width: 100px; height: auto;" /></td> <!-- Display image -->
+                                <!-- <td><img src="<%=data[i].imageUrl %>" alt="<%= data[i].productName %>" style="width: 100px; height: auto;" /></td> -->
                                 
                                     <td>
                                         <% if(data[i].isActive === true) { %>
