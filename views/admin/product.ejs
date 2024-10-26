@@ -28,7 +28,7 @@
                 <th scope="col"><b>Regular Price</b></th>
                 <th scope="col"><b>Sale Price</b></th>
                 <th scope="col"><b>Quantity</b></th>
-                <!-- <th scope="col"><b>Image</b></th> -->
+                <th scope="col"><b>Image</b></th>
                 <th scope="col"><b>Status</b></th>
                 <th scope="col"><b>Action</b></th>
             </tr>
@@ -36,15 +36,20 @@
         <tbody>
             
             <% for(let i = 0; i < data.length; i++) { %>
-                            <tr>
+                            <tr style="height: 150px;">
                                 <td><%= i + 1 %></td>
                                 <td><%= data[i].productName %></td>
-                                <td><%= data[i].category %></td>
+                                <td><%= data[i].category.name %></td>
                                 <td><%= data[i].regularPrice %></td>
                                 <td><%= data[i].salePrice %></td>
                                 <td><%= data[i].quantity %></td>
-                                <!-- <td><img src="<%=data[i].imageUrl %>" alt="<%= data[i].productName %>" style="width: 100px; height: auto;" /></td> -->
-                                
+                                <td>
+                                    <% if (data[i].productImage && data[i].productImage.length > 0) { %>
+                                        <img src="/uploads/<%= data[i].productImage[0] %>" alt="<%= data[i].productName %>" style="width: 100px; height: auto;" />
+                                    <% } else { %>
+                                        <span>No Image</span>
+                                    <% } %>
+                                </td>                                
                                     <td>
                                         <% if(data[i].isActive === true) { %>
                                             <h4 style="color: rgb(0, 255, 47);">Active</h4>
@@ -55,18 +60,18 @@
                                 
                                     <td>
                                     <% if(data[i].isActive === true) { %>
-                                    <button class="btn btn-warning" style="width: 80px;">
+                                    <button class="btn btn-warning" style="width: 80px;" onclick="return confirm('Are you sure you want to unlist')">
                                         <a href="/admin/unlistProduct?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">unlist</a>
                                     </button>
                                     <% } else { %>
-                                    <button class="btn btn-success" style="width: 80px;">
+                                    <button class="btn btn-success" style="width: 80px;" onclick="return confirm('Are you sure you want to list')">
                                         <a href="/admin/listProduct?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">list</a>
                                     </button>
                                     <% } %>
                                     <button class="btn btn-success" style="width: 80px;">
                                         <a href="/admin/updateProduct?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Update</a>
                                     </button>
-                                    <button class="btn btn-danger" style="width: 80px;">
+                                    <button class="btn btn-danger" style="width: 80px;" onclick="return confirm('Are you sure you want to delete')">
                                         <a href="/admin/softDeleteProduct?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Delete</a>
                                     </button>
                                 </td>
@@ -77,9 +82,6 @@
     </table>
 </div>
 </div>
-</div>
-
-<div class="container mt-3">
 </div>
 
 <div class="container mt-3">
