@@ -1,29 +1,111 @@
 <%- include('../../views/partials/admin/header.ejs') %>
-
+<style>
+    .error-message {
+      color: red;
+    }
+  
+    .thumbnails-container {
+      display: flex;
+      overflow-x: auto;
+    }
+  
+    .thumbnail {
+      margin-right: 10px;
+    }
+  </style>
 <div class="container mt-5">
     <h2>Add Category</h2>
-    <form action="/admin/addCategory" method="post">
+    <form action="/admin/addCategory" method="post" onsubmit="addCategory(event)">
         <div class="form-group">
             <label for="name">Category Name:</label>
             <input type="text" id="name" name="name" class="form-control" >
+            <span id="name-error" class="error-message"></span>
         </div>
 
         <div class="form-group">
             <label for="description">Category Description:</label>
             <textarea id="description" name="description" class="form-control" ></textarea>
+            <span id="description-error" class="error-message"></span>
         </div>
 
         <button type="submit" class="btn btn-primary">Add Category</button>
     </form>
 </div>
 
-<!-- SweetAlert2 -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- Axios -->
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 
 <script>
     
+    function formValidate() {
+        document.querySelectorAll('.error-message').forEach(el => el.innerText = '');
+        let isValid = true;
+        let numVal = /^[0-9]{10}$/;
+    
+        let name = document.getElementById("name").value.trim();
+    
+        if (name === "") {
+          document.getElementById("name-error").innerText =
+            "Category name is required";
+          isValid = false;
+        }
+    
+        let description = document.getElementById("description").value.trim();
+        if (description === "") {
+          document.getElementById("description-error").innerText =
+            "Description is required";
+          isValid = false;
+        }
+    
+        return isValid
+      }
+
+      function addCategory(event){
+        event.preventDefault()
+        if(!formValidate()){
+            return
+        }
+         const name=document.getElementById('name').value
+         const description=document.getElementById('description').value
+         const id = document.querySelector('input[name="id"]').value;
+    
+    
+         $.ajax({
+            method:'post',
+            url:'/admin/addCategory',
+            data:{
+                id,
+                name,
+                description
+            },
+            success:function(response){
+                console.log(response)
+                if(response.success){
+                   Swal.fire({
+                    icon:'success',
+                    title:'successfully updated',
+                    text:'category added'
+                   }).then(()=>{
+                    window.location.href='/admin/category'
+                   })
+                }else{
+                    Swal.fire({
+                        icon:'error',
+                        title:'not  updated',
+                        text: response.error || 'category not added'
+                       })
+                }
+            },
+            error:function(){
+                Swal.fire({
+                    icon:'error',
+                    title:'error occured',
+                    text:'something went wrong'
+                })
+            }
+    
+         })
+      }
 </script>

@@ -40,7 +40,10 @@ app.use(express.static(path.join(__dirname,"public")))
 
 app.use("/",userRouter);
 app.use("/admin",adminRouter);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/css', express.static(path.join(__dirname, 'css')));
 
+ 
 app.listen(process.env.PORT,()=>{
     console.log(`Server running on http://localhost:${process.env.PORT}`);
 })

@@ -1,14 +1,45 @@
 const user = require("../../models/userSchema");
+const Product = require("../../models/productSchema");
+const category = require("../../models/categorySchema");
 const env = require("dotenv").config();
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 
 const loadHomepage = async (req, res) => {
   try {
-    return res.render("Home");
+    const User = req.session.user;
+    const categories = await category.find({ isActive: true });
+    let productData = await Product.find({
+      isActive: true,
+      deletedAt: null,
+      category: { $in: categories.map((category) => category._id) }
+    });
+    productData = productData.sort((a, b) => b.createdAt - a.createdAt);
+
+    // console.log("Fetched Products:", productData); // Log product data
+    // console.log("categories:", categories);
+    if (User) {
+      const userData = await user.findOne({ _id: User._id });
+      return res.render("home", { product: productData, userData });
+    } else {
+      return res.render("home", { product: productData });
+    }
   } catch (error) {
-    console.log("Home page not found");
+    console.log("Home page not found", error);
     res.status(500).send("Server error");
+  }
+};
+
+const loadDetailPage = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const product = await Product.findById(productId);
+    if(!product){
+      res.status(500).send('Product not found');
+    }
+    return res.render("productDetail",{product});
+  } catch (error) {
+    console.log(error);
   }
 };
 
@@ -24,12 +55,11 @@ const loadSignup = async (req, res) => {
 const loadLogin = async (req, res) => {
   try {
     // return res.render("login");
-    if(!req.session.user){
-      return res.render("login")
-    }else{
-      res.redirect("/")
+    if (!req.session.user) {
+      return res.render("login");
+    } else {
+      res.redirect("/");
     }
-
   } catch (error) {
     console.log("Home page not loading:", error);
     res.status(500).send("Server error");
@@ -140,24 +170,20 @@ const resendOtp = async (req, res) => {
   try {
     const { email } = req?.session?.userData; // Retrieve email from session
     if (!email) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Session expired. Please sign up again.",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Session expired. Please sign up again.",
+      });
     }
 
     const newOtp = generateOtp();
     const emailSent = await sendVerificationEmail(email, newOtp);
 
     if (!emailSent) {
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: "Failed to resend OTP. Try again later.",
-        });
+      return res.status(500).json({
+        success: false,
+        message: "Failed to resend OTP. Try again later.",
+      });
     }
 
     req.session.userOtp = newOtp; // Update session with the new OTP
@@ -165,40 +191,38 @@ const resendOtp = async (req, res) => {
     console.log("OTP Resent", newOtp);
   } catch (error) {
     console.error("Error resending OTP", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "An error occurred while resending OTP",
-      });
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while resending OTP",
+    });
   }
 };
 
-const login = async(req,res)=>{
+const login = async (req, res) => {
   try {
-    const {email,password} = req.body;
-    const findUser = await user.findOne({isAdmin:0,email:email});
+    const { email, password } = req.body;
+    const findUser = await user.findOne({ isAdmin: 0, email: email });
 
-    if(!findUser){
-      return res.render("login",{message:"User not found"})
+    if (!findUser) {
+      return res.render("login", { message: "User not found" });
     }
-    if(findUser.isBlocked){
-      return res.render("login",{message:"User is blocked by admin"})
-    }
-
-    const passwordMatch = await bcrypt.compare(password,findUser.password);
-
-    if(!passwordMatch){
-      return res.render("login",{message:"Incorrect Password"})
+    if (findUser.isBlocked) {
+      return res.render("login", { message: "User is blocked by admin" });
     }
 
-      req.session.user = findUser._id;
-      res.redirect("/")
+    const passwordMatch = await bcrypt.compare(password, findUser.password);
+
+    if (!passwordMatch) {
+      return res.render("login", { message: "Incorrect Password" });
+    }
+
+    req.session.user = findUser._id;
+    res.redirect("/");
   } catch (error) {
-    console.error("login error",error);
-    res.render("login",{message:"login failed.please try again"})
+    console.error("login error", error);
+    res.render("login", { message: "login failed.please try again" });
   }
-}
+};
 
 module.exports = {
   loadHomepage,
@@ -207,5 +231,6 @@ module.exports = {
   signup,
   verifyOtp,
   resendOtp,
-  login
+  login,
+  loadDetailPage,
 };

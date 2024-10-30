@@ -56,10 +56,10 @@ const check = async (req, res) => {
               description,
               });
          await newCategory.save();
-         return res.redirect('/admin/category');
-     } catch (error) {
+         return res.json({success:true, error: "Category added successfully" });
+        } catch (error) {
          console.error(error);
-         return res.status(500).render('addCategory', { error: "Internal server error" });
+         return res.status(500).render({success:false, error: "Category not added" });
      }
   };
 
@@ -88,7 +88,7 @@ const updateCategory = async (req, res) => {
 
     
   } catch (error) {
-    res.status(500).json({ error: "internal server error" });
+    return res.status(500).json({ error: "internal server error" });
   }
 };
 

@@ -6,7 +6,6 @@ const path = require("path");
 const sharp = require("sharp");
 const multer = require("multer");
 const category = require("../../models/categorySchema");
-const { Console } = require("console");
 
 
 const storage = multer.diskStorage({
@@ -60,7 +59,7 @@ const productInfo = async (req, res) => {
     const productData = await Product.find({
       deletedAt: null,
       $or: [{ productName: { $regex: ".*" + search + ".*", $options: "i" } }],
-    })
+    }).populate('category')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -100,9 +99,14 @@ const addProducts = async (req, res) => {
       quantity,
     } = req.body;
 
+    const categories = await Category.find({ deletedAt: null }); // Fetching categories
+
     // Extract the filenames of the uploaded images
     const productImages = req.files.map((file) => file.filename); // Storing filenames of uploaded images
 
+
+    
+   
     const newProduct = new Product({
       productName: req.body.productName,
       description: req.body.description,
@@ -111,17 +115,18 @@ const addProducts = async (req, res) => {
       salePrice: req.body.salePrice,
       quantity: req.body.quantity,
       productImage: productImages,
-      status: req.body.status,
     });
 
     await newProduct.save();
     console.log(newProduct);
-    res.redirect("/admin/products");
+    return res.status(200).json({success:true,message:"Product added"})
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
 
 const updateProduct = async (req, res) => {
   try {
@@ -132,18 +137,18 @@ const updateProduct = async (req, res) => {
       regularPrice,
       salePrice,
       quantity,
+      category
     } = req.body;
     console.log(
      req.body
     );
-    const productImages = req.files.map((file) => file.filename); // Storing filenames of uploaded images
+    const productImages = req.files ? req.files.map((file) => file.filename) : [];
 
     console.log(req.files)
     console.log(req.file)
     const existProduct = await Product.findOne({ productName });
-    if (existProduct) {
-      return res.json({ success: false, error: "Product is already there" });
-    }
+
+    
     console.log(existProduct);
 
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -154,7 +159,8 @@ const updateProduct = async (req, res) => {
         regularPrice,
         salePrice,
         quantity,
-        productImage: productImages,
+        productImage: productImages.length ? productImages : existProduct.productImage,
+        category
       },
       { new: true }
     );
@@ -174,7 +180,7 @@ const updateProduct = async (req, res) => {
 const renderUpdateProductForm = async (req, res) => {
   const id = req.query.id;
   try {
-    const productData = await Product.findById(id);
+    const productData = await Product.findById(id).populate('category');
     if (!productData) {
       return res.status(400).json({ error: "Product not found" });
     }

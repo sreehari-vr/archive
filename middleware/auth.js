@@ -7,7 +7,8 @@ const userAuth = async (req,res,next) => {
             if (data && !data.isBlocked){
                 next();
             }else{
-                res.render('/login')
+                delete req.session.user
+                res.render('login',{ message: "User is blocked by admin" })
             }
         }).catch(error =>{
             console.log("error in auth middleware",error)

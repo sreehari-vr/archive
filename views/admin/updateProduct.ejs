@@ -48,7 +48,7 @@
                             <div class="col-lg-4">
                                 <div class="mb-4">
                                     <label class="form-label">Regular price</label>
-                                    <input placeholder="$" name="regularPrice" id="regularPrice" type="text"
+                                    <input placeholder="INR" name="regularPrice" id="regularPrice" type="text"
                                         class="form-control border" value="<%= data.regularPrice %>" required>
                                     <div id="regularPrice-error" class="error-message"></div>
                                 </div>
@@ -56,7 +56,7 @@
                             <div class="col-lg-4">
                                 <div class="mb-4">
                                     <label class="form-label">Sale price</label>
-                                    <input placeholder="$" name="salePrice" type="text" class="form-control border"
+                                    <input placeholder="INR" name="salePrice" type="text" class="form-control border"
                                         id="salePrice" value="<%= data.salePrice %>" required>
                                     <div id="salePrice-error" class="error-message"></div>
                                 </div>
@@ -70,26 +70,41 @@
                                 </div>
                             </div>
                         </div>
-<!-- 
+
                         <div class="card mb-4">
                             <div class="card-body">
                                 <div class="row gx-2">
                                     <div class="col-sm-6 mb-3">
                                         <label class="form-label">Category</label>
-                                        <select class="form-select border" style="width: 150px;" name="category">
+                                        <select class="form-select border" style="width: 150px;" name="category" id="category">
                                             <% categories.forEach(category => { %>
-                                                <option value="<%= category._id %>" <%= category._id === data.category ? 'selected' : '' %> >
+                                                <option value="<%= category._id %>" <%= category._id === data.category ? "selected" : "" %>>
                                                     <%= category.name %>
                                                 </option>
                                             <% }) %>
                                         </select>
+                                        
+                                        
                                         <div id="category-error" class="error-message"></div>
                                     </div>
                                 </div>
                             </div>
-                        </div> -->
+                        </div>
+
+                        <% if (data.productImage && data.productImage.length) { %>
+                            <div>
+                              <h4>Existing Images:</h4>
+                              <div>
+                                <% data.productImage.forEach((image) => { %>
+                                  <img src="/uploads/<%= image %>" alt="Product Image" width="100" height="100"/>
+                                <% }); %>
+                              </div>
+                            </div>
+                          <% } %>
+                          
 
                         <!-- Image Upload and Cropper -->
+
                         <div class="card mb-2">
                             <div class="card-header">
                                 <h4>Choose images</h4>
@@ -149,10 +164,57 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 <script>
+
+    function formValidate() {
+        document.querySelectorAll('.error-message').forEach(el => el.innerText = '');
+        let isValid = true;
+        let numVal = /^[0-9]{10}$/;
+    
+        let name = document.getElementById("product_name").value.trim();
+    
+        if (name === "") {
+          document.getElementById("productName-error").innerText =
+            "Product name is required";
+          isValid = false;
+        }
+    
+        let description = document.getElementById("descriptionid").value.trim();
+        if (description === "") {
+          document.getElementById("description-error").innerText =
+            "Description is required";
+          isValid = false;
+        }
+    
+        let regularPrice = document.getElementById("regularPrice").value.trim();
+    
+        if (regularPrice === "" || isNaN(regularPrice) || Number(regularPrice) < 0) {
+            document.getElementById("regularPrice-error").innerText =
+              "Enter a valid Price";
+            isValid = false;
+          }
+    
+        let salePrice = document.getElementById("salePrice").value.trim();
+        if (salePrice > regularPrice) {
+          document.getElementById("salePrice-error").innerText =
+            "sale price cannot be greater than regular price ";
+          isValid = false;
+        }else if (salePrice === "" || isNaN(salePrice) || Number(salePrice) < 0) {
+            document.getElementById("salePrice-error").innerText =
+              "Enter a valid Price";
+            isValid = false;
+          }
+    
+        const quantity = document.getElementById("quantity").value.trim();
+        if (quantity === "" || isNaN(quantity) || Number(quantity) < 0) {
+          document.getElementById("quantity-error").innerText =
+            "Enter a valid Quantity";
+          isValid = false;
+        }
+        return isValid
+      }
+
     let cropper;
 
- 
-    
     document.getElementById('input1').addEventListener('change', function (e) {
         const file = e.target.files[0];
         if (file) {
@@ -240,6 +302,9 @@
 
     function editProduct(event) {
         event.preventDefault();
+        if(!formValidate()){
+            return
+        }
         const formData = new FormData();
         formData.append('id', document.getElementById('Updateid').value);
         formData.append('productName', document.getElementById('product_name').value);
@@ -247,6 +312,8 @@
         formData.append('regularPrice', document.getElementById('regularPrice').value);
         formData.append('salePrice', document.getElementById('salePrice').value);
         formData.append('quantity', document.getElementById('quantity').value);
+        formData.append('category', document.getElementById('category').value);
+
 
         const croppedImage1 = document.getElementById('croppedImg1').src;
         const croppedImage2 = document.getElementById('croppedImg2').src;

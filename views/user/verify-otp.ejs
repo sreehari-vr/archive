@@ -102,6 +102,25 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <script>
+
+      document.getElementById("otpInput").addEventListener("input", () => {
+        const otpInput = document.getElementById("otpInput");
+        const verifyBtn = document.querySelector(".verify-btn");
+      
+        // Remove any non-numeric characters
+        otpInput.value = otpInput.value.replace(/[^0-9]/g, "");
+      
+        // Enable button only if input length is exactly 6
+        if (otpInput.value.length !== 6) {
+          verifyBtn.disabled = true;
+        }
+      });
+      
+      // Initialize verify button as disabled when the page loads
+      
+
+
+
       document
         .getElementById("resendBtn")
         .addEventListener("click", async () => {
@@ -137,12 +156,16 @@
 
       // Function to start and update the timer
       function startTimer() {
-        let timeLeft = 60; // Set time duration for OTP
+        let timeLeft = 10; // Set time duration for OTP
         
         const timerElement = document.getElementById("timer");
         const resendBtn = document.getElementById("resendBtn");
+        const verifyBtn = document.querySelector(".verify-btn"); // Select the verify button
+
 
         resendBtn.disabled = true; // Disable resend button during countdown
+        verifyBtn.disabled = false; // Enable verify button initially
+
 
         const timerId = setInterval(() => {
           const minutes = Math.floor(timeLeft / 60);
@@ -154,6 +177,7 @@
             clearInterval(timerId);
             timerElement.textContent = "You can now resend OTP";
             resendBtn.disabled = false; // Enable resend button after countdown
+            verifyBtn.disabled = true; 
           } else {
             timeLeft--;
           }
