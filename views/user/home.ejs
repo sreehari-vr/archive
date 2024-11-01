@@ -142,7 +142,12 @@
 						<div class="col-lg-3 mb-4 text-center">
 						  <div class="product-entry border">
 							<a href="/productDetail/<%= product[i]._id %>" class="prod-img">
-							  <img src="/uploads/<%= product[i].productImage[0] %>" class="img-fluid" alt="<%= product[i].productName %>" style="height: 280px; width:300px">
+							  <% 
+								// Normalize the path
+								const imagePath = product[i].productImage[0].replace(/\\/g, '/'); 
+								const finalImagePath = imagePath.startsWith('uploads/') ? '/' + imagePath : '/uploads/' + imagePath; 
+							  %>
+							  <img src="<%= finalImagePath %>" class="img-fluid" alt="<%= product[i].productName %>" style="height: 280px; width:300px">
 							</a>
 							<div class="desc">
 							  <h2><a href="/productDetail/<%= product[i]._id %>"><%= product[i].productName %></a></h2>
@@ -150,7 +155,8 @@
 							</div>
 						  </div>
 						</div>
-					  <% } %>	
+					  <% } %>
+						  
 			</div>
 			<div class="row">
 				<div class="col-md-12 text-center">

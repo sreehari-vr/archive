@@ -43,35 +43,17 @@
 				<div class="row row-pb-lg product-detail-wrap">
 					<div class="col-sm-8">
 						<div class="owl-carousel">
-							<div class="item">
-								<div class="product-entry border pd_image">
-								
-										<img id="zoom-image" src="/uploads/<%= product.productImage[0] %>"  class="img-fluid" alt="Product Image">
-									
+							<% for (let i = 0; i < product.productImage.length; i++) { %>
+								<div class="item">
+									<div class="product-entry border">
+										<a href="#" class="prod-img">
+											<img src="/<%= product.productImage[i].replace(/\\/g, '/') %>" class="img-fluid" alt="Product Image">
+										</a>
+									</div>
 								</div>
-							</div>
-							<div class="item">
-								<div class="product-entry border">
-									<a href="#" class="prod-img">
-										<img src="/uploads/<%=product.productImage[1]%>" class="img-fluid" alt="Free html5 bootstrap 4 template">
-									</a>
-								</div>
-							</div>
-							<div class="item">
-								<div class="product-entry border">
-									<a href="#" class="prod-img">
-										<img src="/uploads/<%=product.productImage[2]%>" class="img-fluid" alt="Free html5 bootstrap 4 template">
-									</a>
-								</div>
-							</div>
-							<div class="item">
-								<div class="product-entry border">
-									<a href="#" class="prod-img">
-										<img src="/uploads/<%=product.productImage[3]%>" class="img-fluid" alt="Free html5 bootstrap 4 template">
-									</a>
-								</div>
-							</div>
+							<% } %>
 						</div>
+						
 					</div>
 					<div class="col-sm-4">
 						<div class="product-desc">
@@ -301,7 +283,15 @@
 									   		</div>
 								   		</div>
 										
-
+										   <h2>Related Products</h2>
+										   <div class="related-products">
+											 <% relatedProducts.forEach((relatedProduct) => { %>
+											   <div class="product">
+												 <h3><%= relatedProduct.name %></h3>
+												 <p><%= relatedProduct.description %></p>
+											   </div>
+											 <% }); %>
+										   </div>
 										
 								   	</div>
 								    </div>

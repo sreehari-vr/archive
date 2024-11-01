@@ -13,13 +13,13 @@ router.post("/login",userController.login)
 router.post("/signup",userController.signup)
 router.post("/verify-otp",userController.verifyOtp)
 router.post("/resend-otp",userController.resendOtp)
-router.get("/isBlocked",(req,res)=>{
-
-})
 router.get('/auth/google',passport.authenticate('google',{scope:['profile','email']}));
 router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/signup'}),(req,res)=>{
     req.session.user = req.user._id;
     res.redirect('/')})
 router.get("/productDetail/:id",userController.loadDetailPage)
+router.get("/logout",userController.logout)
+
+
 
 module.exports = router

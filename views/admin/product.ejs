@@ -45,11 +45,14 @@
                                 <td><%= data[i].quantity %></td>
                                 <td>
                                     <% if (data[i].productImage && data[i].productImage.length > 0) { %>
-                                        <img src="/uploads/<%= data[i].productImage[0] %>" alt="<%= data[i].productName %>" style="width: 100px; height: auto;" />
+                                        <% const imagePath = data[i].productImage[0].replace(/\\/g, '/'); %>
+                                        <img src="/<%= imagePath %>" alt="<%= data[i].productName %>" style="width: 100px; height: auto;" />
                                     <% } else { %>
                                         <span>No Image</span>
                                     <% } %>
-                                </td>                                
+                                </td>
+                                
+                                                        
                                     <td>
                                         <% if(data[i].isActive === true) { %>
                                             <h4 style="color: rgb(0, 255, 47);">Active</h4>

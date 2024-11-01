@@ -12,17 +12,19 @@ const login = async (req,res) =>{
     try {
         const{email,password}=req.body;
         const admin = await User.findOne({email: email,isAdmin: true});
-        if(!admin){
-            return res.render('adminLogin', { message: 'Admin not found' });
+        if(admin){
+
+        const passwordMatch =  bcrypt.compare(password, admin.password);
+        if (passwordMatch) {
+            req.session.admin = true;
+            return res.redirect('/admin/adminDash')
+        }else{
+            return res.redirect("/admin/login")
         }
 
-        const passwordMatch = await bcrypt.compare(password, admin.password);
-        if (!passwordMatch) {
-        return res.render('adminLogin', { message: 'Incorrect password' });
-        }
-
-        req.session.admin = admin._id; // Set session for the admin
-        res.redirect('/admin/adminDash');  // Redirect to the admin dashboard or desired page
+    }else{
+        return res.redirect("/admin/login")
+    }
 
     } catch (error) {
         console.error('Admin login error:', error);
@@ -33,7 +35,7 @@ const login = async (req,res) =>{
 
     const loadAdminDash = async (req,res)=>{
         try {
-            if (!req.session.admin) {
+            if (req.session.admin) {
                 return res.render("adminDash")
 
             }

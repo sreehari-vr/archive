@@ -93,14 +93,19 @@
 
                         <% if (data.productImage && data.productImage.length) { %>
                             <div>
-                              <h4>Existing Images:</h4>
-                              <div>
-                                <% data.productImage.forEach((image) => { %>
-                                  <img src="/uploads/<%= image %>" alt="Product Image" width="100" height="100"/>
-                                <% }); %>
-                              </div>
+                                <h4>Existing Images:</h4>
+                                <div>
+                                    <% data.productImage.forEach((image) => { %>
+                                        <div style="position: relative; display: inline-block; margin: 5px;">
+                                            <img src="/<%= image.replace(/\\/g, '/') %>" alt="Product Image" width="100" height="100" />
+                                            
+                                        </div>
+                                    <% }); %>
+                                </div>
                             </div>
-                          <% } %>
+                        <% } %>
+                        
+                          
                           
 
                         <!-- Image Upload and Cropper -->
@@ -213,25 +218,34 @@
         return isValid
       }
 
-    let cropper;
+  let croppers = {};  // Object to store cropper instances by input ID
 
-    document.getElementById('input1').addEventListener('change', function (e) {
+// Generalized function to initialize cropper for each input
+function initializeCropper(inputId, imgViewId, cropContainerId) {
+    document.getElementById(inputId).addEventListener('change', function (e) {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = function (event) {
-                document.getElementById('imgView1').src = event.target.result;
-                document.getElementById('imgView1').style.display = 'block';
-                document.getElementById('cropContainer1').style.display = 'block';
-                cropper = new Cropper(document.getElementById('imgView1'), {
+                const imgView = document.getElementById(imgViewId);
+                imgView.src = event.target.result;
+                imgView.style.display = 'block';
+                document.getElementById(cropContainerId).style.display = 'block';
+                
+                // If there's already a cropper instance, destroy it
+                if (croppers[imgViewId]) croppers[imgViewId].destroy();
+                
+                // Create and store new cropper instance
+                croppers[imgViewId] = new Cropper(imgView, {
                     aspectRatio: 1,
                     viewMode: 1,
-                    autoCropArea: 1
+                    autoCropArea: 1,
                 });
             };
             reader.readAsDataURL(file);
         }
     });
+}
 
     document.getElementById('input2').addEventListener('change', function (e) {
         const file = e.target.files[0];
@@ -300,6 +314,8 @@
         }, "image/png");
     }
 
+
+
     function editProduct(event) {
         event.preventDefault();
         if(!formValidate()){
@@ -359,4 +375,6 @@
             }
         });
     }
+
+        
 </script>

@@ -91,6 +91,7 @@ const getAddProduct = async (req, res) => {
 const addProducts = async (req, res) => {
   try {
     const {
+      id,
       productName,
       description,
       category,
@@ -100,25 +101,44 @@ const addProducts = async (req, res) => {
     } = req.body;
 
     const categories = await Category.find({ deletedAt: null }); // Fetching categories
-
+    const existProduct = await Product.findOne({ productName, _id: { $ne: id } });
+    if (existProduct) {
+      return res.status(400).json({ success: false, error: 'Product name already exists' });
+    }
     // Extract the filenames of the uploaded images
-    const productImages = req.files.map((file) => file.filename); // Storing filenames of uploaded images
+    // const productImages = req.files.map((file) => file.filename); // Storing filenames of uploaded images
+
+    const images = [];
+if (req.files && req.files.length > 0) {
+  for (let i = 0; i < req.files.length; i++) {
+    const originalImagePath = req.files[i].path;
+    const resizedImagePath = path.join(
+      'uploads',
+      `${path.parse(req.files[i].filename).name}-resized${path.extname(req.files[i].filename)}`
+    );    
+    await sharp(originalImagePath)
+      .resize({ height: 440, width: 440 })
+      .toFile(resizedImagePath);
+
+    images.push(resizedImagePath); // Only the relative path is pushed
+  }
+}
 
 
-    
    
     const newProduct = new Product({
-      productName: req.body.productName,
-      description: req.body.description,
-      category: req.body.category,
-      regularPrice: req.body.regularPrice,
-      salePrice: req.body.salePrice,
-      quantity: req.body.quantity,
-      productImage: productImages,
+      productName,
+      description,
+      category,
+      regularPrice,
+      salePrice,
+      quantity,
+      productImage: images,
+      createdAt:new Date()
     });
 
     await newProduct.save();
-    console.log(newProduct);
+    console.log(newProduct.productImage);
     return res.status(200).json({success:true,message:"Product added"})
   } catch (error) {
     console.error(error);
@@ -139,48 +159,64 @@ const updateProduct = async (req, res) => {
       quantity,
       category
     } = req.body;
-    console.log(
-     req.body
-    );
-    const productImages = req.files ? req.files.map((file) => file.filename) : [];
 
-    console.log(req.files)
-    console.log(req.file)
-    const existProduct = await Product.findOne({ productName });
-
-    
-    console.log(existProduct);
-
-    const updatedProduct = await Product.findByIdAndUpdate(
-      id,
-      {
-        productName,
-        description,
-        regularPrice,
-        salePrice,
-        quantity,
-        productImage: productImages.length ? productImages : existProduct.productImage,
-        category
-      },
-      { new: true }
-    );
-    console.log("SKDJLF");
-    if (!updatedProduct) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Product not found" });
+    const existProduct = await Product.findOne({ productName, _id: { $ne: id } });
+    if (existProduct) {
+      return res.status(400).json({ success: false, error: 'Product name already exists' });
     }
-    return res.status(200).json({ success: true, message: "prouduct updated" });
+
+    const updatedProduct = {
+      productName,
+      description,
+      regularPrice,
+      salePrice,
+      quantity,
+      category
+    };
+
+    const images = [];
+    if (req.files && req.files.length > 0) {
+      for (let i = 0; i < req.files.length; i++) {
+        const originalImagePath = req.files[i].path;
+        const resizedImagePath = path.join(
+          'uploads',
+          `${path.parse(req.files[i].filename).name}-resized${path.extname(req.files[i].filename)}`
+        );
+
+        
+        await sharp(originalImagePath)
+          .resize({ height: 440, width: 440 })
+          .toFile(resizedImagePath);
+
+        // images.push(path.basename(resizedImagePath)); // Only the filename is pushed
+        images.push(`uploads/${path.basename(resizedImagePath)}`); // Use the same prefix
+
+      }
+
+      await Product.findByIdAndUpdate(id, {
+        $set: updatedProduct,
+        $push: { productImage: { $each: images } },
+      }, { new: true });
+    } else {  
+      await Product.findByIdAndUpdate(id, { $set: updatedProduct }, { new: true });
+    }
+    console.log(images);
+
+
+    res.status(200).json({ success: true, message: "product updated" });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ error: "internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 const renderUpdateProductForm = async (req, res) => {
   const id = req.query.id;
   try {
     const productData = await Product.findById(id).populate('category');
+    console.log("Fetched Product Data for Rendering:", productData); // Add this line to confirm correct image paths
+
     if (!productData) {
       return res.status(400).json({ error: "Product not found" });
     }
@@ -224,6 +260,12 @@ const softDeleteProduct = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
+
+
+
+
 
 module.exports = {
   productInfo,

@@ -32,12 +32,22 @@ const loadHomepage = async (req, res) => {
 
 const loadDetailPage = async (req, res) => {
   try {
+    
     const productId = req.params.id;
     const product = await Product.findById(productId);
     if(!product){
       res.status(500).send('Product not found');
     }
-    return res.render("productDetail",{product});
+
+    const relatedProducts = await Product.find({
+      isDeleted:null,
+      isActive:true,
+      category:product.category,
+      _id:{$ne:productId}
+    }).limit(4)
+
+    return res.render("productDetail",{product,relatedProducts});
+
   } catch (error) {
     console.log(error);
   }
@@ -224,6 +234,20 @@ const login = async (req, res) => {
   }
 };
 
+
+const logout = async (req,res)=>{
+  try {
+    req.session.destroy(err=>{
+      if(err){
+        console.log("Error destroying session",err);
+      }
+      res.redirect('/admin/login')
+    })
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 module.exports = {
   loadHomepage,
   loadSignup,
@@ -232,5 +256,6 @@ module.exports = {
   verifyOtp,
   resendOtp,
   login,
+  logout,
   loadDetailPage,
 };
