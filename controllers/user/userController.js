@@ -272,14 +272,6 @@ const renderUserProfile = async (req,res) => {
   }
 }
 
-const loadChangePass = async (req, res) => {
-  try {
-    return res.render("changePassword");
-  } catch (error) {
-    console.log("Home page not loading:", error);
-    res.status(500).send("Server error");
-  }
-};
 
 const loadChangeEmail = async (req, res) => {
   try {
@@ -293,7 +285,7 @@ const loadChangeEmail = async (req, res) => {
 const verifyEmail = async (req, res) => {
   try {
     const{email} = req.body;
-
+    
     userExist = await user.findOne({email});
     if(userExist){
       otp = generateOtp();
@@ -313,8 +305,8 @@ const verifyEmail = async (req, res) => {
         message:"User with this email not exist"
       })
     }
-
-
+    
+    
   } catch (error) {
     console.log(error)
   }
@@ -339,20 +331,68 @@ const updateEmail = async (req, res) => {
     const newEmail = req.body.newEmail;
     const id = req.session.user;
     console.log(id)
-
+    
     if (!id) {
       return res.status(400).json({ message: "User not logged in" });
     }
-
+    
     await user.findByIdAndUpdate(id,{ email: newEmail });
-
+    
     res.redirect('/userProfile');
-
+    
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "An error occurred while updating the email" });
   }
 };
+
+const loadChangePass = async (req, res) => {
+  try {
+    return res.render("changePassword");
+  } catch (error) {
+    console.log("Home page not loading:", error);
+    res.status(500).send("Server error");
+  }
+};
+
+const changePassword = async (req,res) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    const userId = req.session.user;
+
+    if (!userId) {
+      return res.status(401).json({ message: "User not logged in" });
+    }
+
+    const User = await user.findById(userId); // Fetch user from the database
+
+    // Check if the current password matches
+    const isMatch = await bcrypt.compare(currentPassword, User.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
+
+    // Validate new password requirements (e.g., length and complexity)
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: "New passwords do not match" });
+    }
+
+    if (newPassword === currentPassword) {
+      return res.status(400).json({ message: "New password must be different from the current password" });
+    }
+
+    // Hash and save the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    User.password = hashedPassword;
+    await User.save();
+    res.redirect('/userProfile')
+
+  } catch (error) {
+    console.error("Error updating password:", error);
+    res.status(500).json({ message: "An error occurred while changing the password" });
+  }
+}
+
 
 
 
@@ -372,5 +412,6 @@ module.exports = {
   loadChangePass,
   verifyEmail,
   verifyEmailOtp,
-  updateEmail
+  updateEmail,
+  changePassword
 };

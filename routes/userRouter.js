@@ -21,9 +21,12 @@ router.get("/productDetail/:id",userController.loadDetailPage)
 router.get("/logout",userController.logout)
 router.get("/userProfile",userController.renderUserProfile)
 
-router.get("/changePassword",userController.loadChangePass)
-router.get("/changeEmail",userController.loadChangeEmail)
 
+router.get("/changePassword",userAuth,userController.loadChangePass)
+router.post("/changePassword",userAuth,userController.changePassword)
+
+
+router.get("/changeEmail",userAuth,userController.loadChangeEmail)
 router.post("/changeEmail",userAuth,userController.verifyEmail)
 router.post("/verify-email-otp",userAuth,userController.verifyEmailOtp)
 router.post('/update-email',userAuth,userController.updateEmail)
