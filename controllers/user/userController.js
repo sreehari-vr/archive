@@ -235,18 +235,126 @@ const login = async (req, res) => {
 };
 
 
-const logout = async (req,res)=>{
+
+
+const logout = async (req,res) =>{
   try {
-    req.session.destroy(err=>{
-      if(err){
-        console.log("Error destroying session",err);
+      req.session.user=null
+      res.redirect('/login')
+  } catch (error) {
+      console.error("Logout not working:",error)
+  }
+}
+
+
+const userProfile = async (req, res) => {
+  try {
+    return res.render("userProfile");
+  } catch (error) {
+    console.log("Home page not loading:", error);
+    res.status(500).send("Server error");
+  }
+};
+
+const renderUserProfile = async (req,res) => {
+  try {
+    const id = req.session.user;
+    const data = await  user.findById(id)
+    if(!data){
+      console.log("user does not exist");
+      return res.status(404).json({error:"User not found"})
+    }
+    return res.render('userProfile',{data})
+    
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+const loadChangePass = async (req, res) => {
+  try {
+    return res.render("changePassword");
+  } catch (error) {
+    console.log("Home page not loading:", error);
+    res.status(500).send("Server error");
+  }
+};
+
+const loadChangeEmail = async (req, res) => {
+  try {
+    return res.render("changeEmail");
+  } catch (error) {
+    console.log("Home page not loading:", error);
+    res.status(500).send("Server error");
+  }
+};
+
+const verifyEmail = async (req, res) => {
+  try {
+    const{email} = req.body;
+
+    userExist = await user.findOne({email});
+    if(userExist){
+      otp = generateOtp();
+      emailSend = await sendVerificationEmail(email,otp);
+      if(emailSend){
+        req.session.userOtp = otp;
+        req.session.userData = req.body;
+        req.session.email = email;
+        res.render("changeEmailOtp");
+        console.log("Email sent:",email);
+        console.log("OTP:",otp);
+      }else{
+        res.json("email-error");
       }
-      res.redirect('/admin/login')
-    })
+    }else{
+      res.render("changeEmail",{
+        message:"User with this email not exist"
+      })
+    }
+
+
   } catch (error) {
     console.log(error)
   }
 }
+
+const verifyEmailOtp = async (req,res) => {
+  try {
+    otpEntered = req.body.otp;
+    if(otpEntered===req.session.userOtp){
+      req.session.userData = req.body.userData;
+      res.render('newEmail',{userData:req.session.userData});
+    }else{
+      res.render('changeEmail',{message:'otp not matching'});
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+const updateEmail = async (req, res) => {
+  try {
+    const newEmail = req.body.newEmail;
+    const id = req.session.user;
+    console.log(id)
+
+    if (!id) {
+      return res.status(400).json({ message: "User not logged in" });
+    }
+
+    await user.findByIdAndUpdate(id,{ email: newEmail });
+
+    res.redirect('/userProfile');
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "An error occurred while updating the email" });
+  }
+};
+
+
 
 module.exports = {
   loadHomepage,
@@ -258,4 +366,11 @@ module.exports = {
   login,
   logout,
   loadDetailPage,
+  userProfile,
+  renderUserProfile,
+  loadChangeEmail,
+  loadChangePass,
+  verifyEmail,
+  verifyEmailOtp,
+  updateEmail
 };

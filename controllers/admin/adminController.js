@@ -44,14 +44,18 @@ const login = async (req,res) =>{
         } 
     }
 
-    const logout = async (req,res) =>{
+    const logout = async (req,res)=>{
         try {
-            req.session.admin=null
+          req.session.destroy(err=>{
+            if(err){
+              console.log("Error destroying session",err);
+            }
             res.redirect('/admin/login')
+          })
         } catch (error) {
-            console.error("Logout not working:",error)
+          console.log(error)
         }
-    }
+      }
 
     
 
