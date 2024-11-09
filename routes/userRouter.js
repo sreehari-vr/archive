@@ -31,6 +31,15 @@ router.post("/changeEmail",userAuth,userController.verifyEmail)
 router.post("/verify-email-otp",userAuth,userController.verifyEmailOtp)
 router.post('/update-email',userAuth,userController.updateEmail)
 
+router.get('/addAddress',userAuth,userController.loadAddAddress)
+router.post('/addAddress',userAuth,userController.addAddress)
+
+// router.get('/editAddress',userAuth,userController.loadEditAddress)
+// router.post('/editAddress',userAuth,userController.editAddress)
+
+
+// router.post('/deleteAddress',userAuth,userController.deleteAddress)
+
 
 
 module.exports = router

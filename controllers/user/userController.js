@@ -1,5 +1,6 @@
 const user = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
+const Address = require("../../models/addressSchema")
 const category = require("../../models/categorySchema");
 const env = require("dotenv").config();
 const nodemailer = require("nodemailer");
@@ -260,11 +261,22 @@ const renderUserProfile = async (req,res) => {
   try {
     const id = req.session.user;
     const data = await  user.findById(id)
+    const userAddress = await Address.findOne({userId:id})
+
     if(!data){
       console.log("user does not exist");
       return res.status(404).json({error:"User not found"})
     }
-    return res.render('userProfile',{data})
+    const addressCount = userAddress ? userAddress.address.length : 0;
+    const maxCount = 3;
+    console.log(id)
+    return res.render('userProfile',{
+      data,
+      address: userAddress ? userAddress.address : [],
+      addressCount,
+      maxCount
+
+    })
     
   } catch (error) {
     console.error(error);
@@ -350,7 +362,7 @@ const loadChangePass = async (req, res) => {
   try {
     return res.render("changePassword");
   } catch (error) {
-    console.log("Home page not loading:", error);
+    console.log("page not loading:", error);
     res.status(500).send("Server error");
   }
 };
@@ -393,7 +405,75 @@ const changePassword = async (req,res) => {
   }
 }
 
+const loadAddAddress = async (req,res) => {
+  try {
+    return res.render('addAddress')
+  } catch (error) {
+    console.log("Address page not loading:", error);
+    res.status(500).send("Server error");
+  }
+}
 
+
+const addAddress = async (req,res) => {
+  try {
+    const {addressType,name,city,landMark,state,pincode,phone,altPhone} = req.body;
+    const userId = req.session.user;
+    const data = await user.findById(userId);
+    const userAddress = await Address.findOne({userId});
+    const addressCount = userAddress ? userAddress.address.length : 0;
+    const maxCount = 3;
+    if(userAddress){
+      userAddress.address.push({
+        addressType,
+          name,
+          city,
+          landMark,
+          state,
+          pincode,
+          phone,
+          altPhone
+      })
+      await userAddress.save();
+    }else{
+      const newAddress = new Address({
+        userId,
+        address:[{
+          addressType,
+          name,
+          city,
+          landMark,
+          state,
+          pincode,
+          phone,
+          altPhone
+      }]
+      });
+      await newAddress.save()
+    }
+    
+
+    res.render('userProfile',{data,
+      address: userAddress?userAddress.address:[],
+      addressCount,
+      maxCount
+
+    })
+
+  } catch (error) {
+    console.log("Error occured while adding address:", error);
+    res.status(500).send("Server error");
+  }
+}
+
+const loadEditAddress = async (req,res) => {
+  try {
+    return res.render('editAddress')
+  } catch (error) {
+    console.log("Address page not loading:", error);
+    res.status(500).send("Server error");
+  }
+}
 
 
 module.exports = {
@@ -413,5 +493,8 @@ module.exports = {
   verifyEmail,
   verifyEmailOtp,
   updateEmail,
-  changePassword
+  changePassword,
+  loadAddAddress,
+  addAddress,
+  loadEditAddress
 };
