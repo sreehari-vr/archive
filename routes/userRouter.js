@@ -34,11 +34,10 @@ router.post('/update-email',userAuth,userController.updateEmail)
 router.get('/addAddress',userAuth,userController.loadAddAddress)
 router.post('/addAddress',userAuth,userController.addAddress)
 
-// router.get('/editAddress',userAuth,userController.loadEditAddress)
-// router.post('/editAddress',userAuth,userController.editAddress)
+ router.get('/editAddress/:id',userAuth,userController.loadEditAddress)
+ router.post('/editAddress/:id',userAuth,userController.editAddress)
 
-
-// router.post('/deleteAddress',userAuth,userController.deleteAddress)
+ router.get('/deleteAddress/:id',userAuth,userController.deleteAddress)
 
 
 

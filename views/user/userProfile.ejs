@@ -229,6 +229,14 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #6bb87d;
     }
+
+    .edt-btn{
+      color: #88c8bc;
+    }
+    
+   .dlt-btn{
+      color: #d12727;
+    } 
   </style>
 
 
@@ -327,14 +335,20 @@
                                 <ul>
                                   <li>
                                     <p>Type: <%= addr.addressType %></p>
+                                    <p>Name: <%= addr.name %></p>
                                     <p>City: <%= addr.city %></p>
+                                    <p>Land mark: <%= addr.landMark %></p>
                                     <p>State: <%= addr.state %></p>
                                     <p>Pincode: <%= addr.pincode %></p>
+                                    <p>Phone: <%= addr.phone %></p>
+                                    <p>Alternate phone: <%= addr.altPhone %></p>
+
+
                                   </li>
                                 </ul>
                                 <div class="d-flex justify-content-between">
-                                  <a href="/editAddress" class="btn-small">Edit</a>
-                                  <a href="/deleteAddress/<%= addr._id %>" class="btn-small" onclick="return confirm('Are you sure you want to delete this address?')">Delete</a>
+                                  <a href="/editAddress/<%= addr._id %>" class="btn-small edt-btn">Edit</a>
+                                  <a href="/deleteAddress/<%= addr._id %>" class="btn-small dlt-btn" onclick="return confirm('Are you sure you want to delete this address?')">Delete</a>
                                 </div>
                               </div>
                             </div>

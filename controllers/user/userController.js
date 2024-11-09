@@ -467,10 +467,71 @@ const addAddress = async (req,res) => {
 }
 
 const loadEditAddress = async (req,res) => {
+  const addressId = req.params.id;
+  const userId = req.session.user;
   try {
-    return res.render('editAddress')
+    const userAddress = await Address.findOne({userId});
+    const address = userAddress.address.find(addr => addr._id.toString() === addressId);
+
+    return res.render('editAddress',{address})
   } catch (error) {
-    console.log("Address page not loading:", error);
+    console.log(" page not loading:", error);
+    res.status(500).send("Server error");
+  }
+}
+
+const editAddress  = async (req, res) => {
+  const addressId = req.params.id;
+  const userId = req.session.user;
+  const updatedData = {
+    addressType: req.body.addressType,
+    name: req.body.name,
+    city: req.body.city,
+    landMark: req.body.landMark,
+    state: req.body.state,
+    pincode: req.body.pincode,
+    phone: req.body.phone,
+    altPhone: req.body.altPhone
+  };
+
+  try {
+    const userAddress = await Address.findOne({ userId });
+    if (!userAddress) {
+      return res.status(404).send("User address document not found");
+    }
+
+    const addressIndex = userAddress.address.findIndex(addr => addr._id.toString() === addressId);
+    if (addressIndex === -1) {
+      return res.status(404).send("Address not found");
+    }
+
+    // Update the address fields
+    userAddress.address[addressIndex] = { ...userAddress.address[addressIndex].toObject(), ...updatedData };
+    
+    // Save the updated document
+    await userAddress.save();
+
+    res.redirect("/userProfile"); // Redirect to the user’s profile or the desired page
+  } catch (error) {
+    console.log("Error updating address:", error);
+    res.status(500).send("Server error");
+  }
+};
+
+const deleteAddress = async (req,res) => {
+  const addressId = req.params.id; 
+  const userId = req.session.user;
+
+  try {
+    const userAddress = await Address.findOne({userId});
+    const address = userAddress.address.find(addr => addr._id.toString() === addressId)
+    await Address.updateOne(
+      { userId }, 
+      { $pull: { address: { _id: addressId } } }
+    );
+    res.redirect('/userProfile')
+  } catch (error) {
+    console.log("Error deleting address:", error);
     res.status(500).send("Server error");
   }
 }
@@ -496,5 +557,7 @@ module.exports = {
   changePassword,
   loadAddAddress,
   addAddress,
-  loadEditAddress
+  loadEditAddress,
+  editAddress,
+  deleteAddress
 };
