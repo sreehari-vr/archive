@@ -31,7 +31,7 @@
 			<div class="container">
 				<div class="row">
 					<div class="col">
-						<p class="bread"><span><a href="index.html">Home</a></span> / <span>Product Details</span></p>
+						<p class="bread"><span><a href="">Home</a></span> / <span>Product Details</span></p>
 					</div>
 				</div>
 			</div>
@@ -74,11 +74,11 @@
 								<div class="block-26 mb-2">
 									<h4>Size</h4>
 				               <ul>
-				                  <li><a href="#">7</a></li>
-				                  <li><a href="#">7.5</a></li>
-				                  <li><a href="#">8</a></li>
-				                  <li><a href="#">8.5</a></li>
-				                  <li><a href="#">9</a></li>
+				                  <li><a href="#">S</a></li>
+				                  <li><a href="#">M</a></li>
+				                  <li><a href="#">L</a></li>
+				                  <li><a href="#">XL</a></li>
+				                  <!-- <li><a href="#">9</a></li>
 				                  <li><a href="#">9.5</a></li>
 				                  <li><a href="#">10</a></li>
 				                  <li><a href="#">10.5</a></li>
@@ -88,14 +88,7 @@
 				                  <li><a href="#">12.5</a></li>
 				                  <li><a href="#">13</a></li>
 				                  <li><a href="#">13.5</a></li>
-				                  <li><a href="#">14</a></li>
-				               </ul>
-				            </div>
-				            <div class="block-26 mb-4">
-									<h4>Width</h4>
-				               <ul>
-				                  <li><a href="#">M</a></li>
-				                  <li><a href="#">W</a></li>
+				                  <li><a href="#">14</a></li> -->
 				               </ul>
 				            </div>
 							</div>
@@ -105,7 +98,7 @@
                            <i class="icon-minus2"></i>
                         	</button>
                     		</span>
-                     	<input type="text" id="quantity" name="quantity" class="form-control input-number" value="1" min="1" max="100">
+                     	<input type="text" id="quantity" name="quantity" class="form-control input-number" value="1" min="1" max="10">
                      	<span class="input-group-btn ml-1">
                         	<button type="button" class="quantity-right-plus btn" data-type="plus" data-field="">
                              <i class="icon-plus2"></i>
@@ -113,15 +106,19 @@
                      	</span>
                   	</div>
                   	<div class="row">
-	                  	<div class="col-sm-12 text-center">
-
-                            <% if(product.quantity>0) { %>
-									<p class="addtocart"><a href="cart.html" class="btn btn-primary btn-addtocart"><i class="icon-shopping-cart"></i> Add to Cart</a></p>
-                            <% }else{ %>
-                                <h2 style="color: rgb(255, 0, 0);">Out of stock</h2>
-                            <% } %>
-								</div>
-							</div>
+						<div class="col-sm-12 text-center">
+							<% if (product.quantity > 0) { %>
+								<form action="/cart/<%= product._id %>" method="POST" class="d-inline">
+									<button type="submit" class="btn btn-primary btn-addtocart">
+										<i class="icon-shopping-cart"></i> Add to Cart
+									</button>
+								</form>
+							<% } else { %>
+								<h2 style="color: rgb(255, 0, 0);">Out of stock</h2>
+							<% } %>
+						</div>
+					</div>
+					
 						</div>
 					</div>
 				</div>
@@ -283,73 +280,47 @@
 									   		</div>
 								   		</div>
 
-										<div class="row">
-					<div class="col-sm-8 offset-sm-2 text-center colorlib-heading colorlib-heading-sm">
-						<h2>Related Products</h2>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-md-3 col-lg-3 mb-4 text-center">
-						<div class="product-entry border">
-							<a href="#" class="prod-img">
-								<img src="images/item-1.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
-							</a>
-							<div class="desc">
-								<h2><a href="#">Women's Boots Shoes Maca</a></h2>
-								<span class="price">$139.00</span>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-3 col-lg-3 mb-4 text-center">
-						<div class="product-entry border">
-							<a href="#" class="prod-img">
-								<img src="images/item-2.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
-							</a>
-							<div class="desc">
-								<h2><a href="#">Women's Minam Meaghan</a></h2>
-								<span class="price">$139.00</span>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-3 col-lg-3 mb-4 text-center">
-						<div class="product-entry border">
-							<a href="#" class="prod-img">
-								<img src="images/item-3.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
-							</a>
-							<div class="desc">
-								<h2><a href="#">Men's Taja Commissioner</a></h2>
-								<span class="price">$139.00</span>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-3 col-lg-3 mb-4 text-center">
-						<div class="product-entry border">
-							<a href="#" class="prod-img">
-								<img src="images/item-4.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
-							</a>
-							<div class="desc">
-								<h2><a href="#">Russ Men's Sneakers</a></h2>
-								<span class="price">$139.00</span>
-							</div>
-						</div>
-					</div>
-				</div>
+										
+				
 			</div>
 		</div>
 										
 
-										   <h2>Related Products</h2>
 
 										   
-										   <div class="related-products">
-											 <% relatedProducts.forEach((relatedProduct) => { %>
-											   <div class="product">
-												
-												 <h3><%= relatedProduct.productName %></h3>
-												 <p><%= relatedProduct.description %></p>
-											   </div>
-											 <% }); %>
-										   </div>
+										   <div class="colorlib-product">
+											<div class="container">
+												<div class="row">
+													<div class="col-sm-12">
+														<h2 class="text-center mb-4">Related Products</h2>
+														<div class="row">
+															<% relatedProducts.forEach((relatedProduct)=> { %>
+																<div class="col-md-3 col-sm-6 mb-4">
+																	<div class="product-entry border">
+																		<a href="/product/<%= relatedProduct._id %>" class="prod-img">
+																			<img src="/<%= relatedProduct.productImage[0].replace(/\\/g, '/') %>" class="img-fluid" alt="<%= relatedProduct.productName %>">
+																		</a>
+																		<div class="desc">
+																			<h2><a href="/product/<%= relatedProduct._id %>"><%= relatedProduct.productName %></a></h2>
+																			<span class="price">₹<%= relatedProduct.salePrice %></span>
+																		</div>
+																		<% if(relatedProduct.quantity > 0) { %>
+																			<p class="text-center">
+																				<a href="#" class="btn btn-primary btn-sm add-to-cart" data-product-id="<%= relatedProduct._id %>">
+																					<i class="icon-shopping-cart"></i> Add to Cart
+																				</a>
+																			</p>
+																		<% } else { %>
+																			<p class="text-center text-danger">Out of stock</p>
+																		<% } %>
+																	</div>
+																</div>
+															<% }); %>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
 										
 								   	</div>
 								    </div>
@@ -379,6 +350,29 @@
 						  height:'auto',
 					  });
 				  });
+
+				  document.addEventListener("DOMContentLoaded", function() {
+					const quantityInput = document.getElementById("quantity");
+					const btnMinus = document.querySelector(".quantity-left-minus");
+					const btnPlus = document.querySelector(".quantity-right-plus");
+				
+					// Decrease quantity
+					btnMinus.addEventListener("click", function() {
+						let currentQuantity = parseInt(quantityInput.value);
+						if (currentQuantity > parseInt(quantityInput.min)) {
+							quantityInput.value = currentQuantity - 1;
+						}
+					});
+				
+					// Increase quantity
+					btnPlus.addEventListener("click", function() {
+						let currentQuantity = parseInt(quantityInput.value);
+						if (currentQuantity < parseInt(quantityInput.max)) {
+							quantityInput.value = currentQuantity + 1;
+						}
+					});
+				});
+				
 
 			  
 			
