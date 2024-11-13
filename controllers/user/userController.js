@@ -3,6 +3,7 @@ const Product = require("../../models/productSchema");
 const Address = require("../../models/addressSchema")
 const category = require("../../models/categorySchema");
 const Cart = require("../../models/cartSchema");
+const Order = require("../../models/orderSchema");
 
 const env = require("dotenv").config();
 const nodemailer = require("nodemailer");
@@ -264,6 +265,7 @@ const renderUserProfile = async (req,res) => {
     const id = req.session.user;
     const data = await  user.findById(id)
     const userAddress = await Address.findOne({userId:id})
+    const orders = await Order.find({userId:id}).populate('items.productId')
 
     if(!data){
       console.log("user does not exist");
@@ -276,8 +278,8 @@ const renderUserProfile = async (req,res) => {
       data,
       address: userAddress ? userAddress.address : [],
       addressCount,
-      maxCount
-
+      maxCount,
+      orders
     })
     
   } catch (error) {

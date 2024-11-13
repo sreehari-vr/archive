@@ -8,7 +8,11 @@ const placeOrder = async(req,res) => {
     try {
         const userId = req.session.user;
         const { selectedAddress, paymentMethod } = req.body;
-    
+        const userAddresses = await Address.findOne({userId});
+        console.log(userAddresses)
+
+        const address = userAddresses.address.find(addr=>addr._id.toString()===selectedAddress)
+        console.log('addressooi'+address)
         const cart = await Cart.findOne({ userId }).populate("items.productId");
         if (!cart || cart.items.length === 0) {
           return res.status(400).send("Your cart is empty.");
@@ -23,11 +27,20 @@ const placeOrder = async(req,res) => {
           items: cart.items.map(item => ({
             productId: item.productId._id,
             quantity: item.quantity,
-            price: item.productId.salePrice
+            price: item.productId.salePrice,
+            status: "Pending",
           })),
           totalAmount,
-          address: selectedAddress,
-          status: "Pending",
+          address: {
+            addressType:address.addressType,
+            name:address.name,
+            city:address.city,
+            landMark:address.landMark,
+            state:address.state,
+            pincode:address.pincode,
+            phone:address.phone,
+            altPhone:address.altPhone
+          },
           paymentMethod
         });
     
@@ -55,8 +68,29 @@ const orderConfirmation = async (req, res) => {
     }
   };
 
+  const orderCancel = async (req, res) => {
+    try {  
+      const {orderId,itemId} = req.params;
+      const userId = req.session.user;
+      const order = await Order.findOne({_id:orderId,userId});
+      if (!order) {
+        return res.status(404).send("Order not found");
+      }
+      const item = order.items.id(itemId)
+
+      item.status = 'Cancelled'
+
+      await order.save();
+
+      res.redirect("/userProfile");
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Error fetching order");
+    }
+  };
 
 module.exports = {
     placeOrder,
-    orderConfirmation
+    orderConfirmation,
+    orderCancel
 }

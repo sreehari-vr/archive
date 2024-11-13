@@ -52,4 +52,6 @@ router.get('/checkout',userAuth,userController.loadCheckout)
 router.post('/placeOrder',userAuth,orderController.placeOrder)
 router.get('/orderConfirmation/:id',userAuth,orderController.orderConfirmation)
 
+
+router.get('/orderCancel/:orderId/:itemId',userAuth,orderController.orderCancel)
 module.exports = router

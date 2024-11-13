@@ -371,16 +371,17 @@
 
 
                   <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
-                    <div class="card">
+                    <div class="card" style="width: 800px;">
                       <div class="card-header">
                         <h5 class="mb-0">Your Orders</h5>
                       </div>
                       <div class="card-body">
                         <div class="table-responsive">
-                          <table class="table">
+                          <table class="table" >
                             <thead>
                               <tr>
-                                <th>Order</th>
+                                <th>Order Id</th>
+                                <th>Product</th>
                                 <th>Status</th>
                                 <th>Total</th>
                                 <th>Actions</th>
@@ -388,12 +389,25 @@
                             </thead>
                             <tbody>
                               <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td>
-                                  <a href="" class="btn-small d-block">View</a>
-                                </td>
+
+                                <% orders.forEach(order => { %>
+                                  
+                                  <% order.items.forEach(item => { %>
+                                    <tr>
+                                      <td><%= order._id %></td>
+                                      <td><%= item.productId.productName %></td>
+                                      <td><%= item.status %></td>
+                                      <td><%= item.price %></td>
+                                      <td>
+                                        <a href="/orderCancel/<%= order._id %>/<%= item._id %>">
+                                          <button class="btn">cancel</button>
+                                        </a>
+                                      </td>
+                                    </tr>
+                                  <% }) %>
+                                <% }) %>
+                                
+
                               </tr>
                             </tbody>
                           </table>
