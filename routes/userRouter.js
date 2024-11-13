@@ -3,6 +3,7 @@ const router = express.Router()
 const passport = require("passport")
 const userController = require("../controllers/user/userController")
 const cartController = require("../controllers/user/cartController")
+const orderController = require("../controllers/user/orderController")
 const { adminAuth, userAuth } = require("../middleware/auth");
 const { find } = require("../models/productSchema");
 const user = require('../models/userSchema')
@@ -44,5 +45,11 @@ router.get('/deleteAddress/:id', userAuth, userController.deleteAddress)
 router.get('/cart',userAuth,cartController.cartLoad)
 router.post('/cart/:id',userAuth,cartController.cartAdd)
 router.get('/cart/remove/:id',userAuth,cartController.removeFromCart)
+
+router.get('/checkout',userAuth,userController.loadCheckout)
+
+
+router.post('/placeOrder',userAuth,orderController.placeOrder)
+router.get('/orderConfirmation/:id',userAuth,orderController.orderConfirmation)
 
 module.exports = router

@@ -2,6 +2,8 @@ const user = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Address = require("../../models/addressSchema")
 const category = require("../../models/categorySchema");
+const Cart = require("../../models/cartSchema");
+
 const env = require("dotenv").config();
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
@@ -536,6 +538,27 @@ const deleteAddress = async (req,res) => {
   }
 }
 
+const loadCheckout = async (req,res) => {
+  const id = req.session.user;
+  try {
+    const cart = await Cart.findOne({userId:id}).populate('items.productId')
+    const data = await  user.findById(id)
+    const userAddress = await Address.findOne({userId:id})
+    const addressCount = userAddress ? userAddress.address.length : 0;
+    const maxCount = 3;
+    console.log(cart)
+    res.render('checkOut',{
+      data,
+      address: userAddress ? userAddress.address : [],
+      maxCount,
+      addressCount,
+      cart
+    })
+  } catch (error) {
+    console.error(error)
+  }
+}
+
 
 module.exports = {
   loadHomepage,
@@ -559,5 +582,6 @@ module.exports = {
   addAddress,
   loadEditAddress,
   editAddress,
-  deleteAddress
+  deleteAddress,
+  loadCheckout
 };

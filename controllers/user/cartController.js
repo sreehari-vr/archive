@@ -56,6 +56,8 @@ const removeFromCart = async (req,res) => {
     }
 }
 
+
+
 module.exports=({
     cartLoad,
     cartAdd,

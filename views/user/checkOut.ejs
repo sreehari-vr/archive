@@ -1,0 +1,153 @@
+<%- include('../../views/partials/user/header')%>
+
+<div class="sale">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-8 offset-sm-2 text-center">
+                <div class="owl-carousel2">
+                    <div class="item">
+                        <h3><a href="#">25% off (Almost) Everything! Use Code: Summer Sale</a></h3>
+                    </div>
+                    <div class="item">
+                        <h3><a href="#">Our biggest sale yet 50% off all summer shoes</a></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <p class="bread"><span><a href="index.html">Home</a></span> / <span>Checkout</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="colorlib-product">
+    <div class="container">
+        <div class="row row-pb-lg">
+            <div class="col-sm-10 offset-md-1">
+                <div class="process-wrap">
+                    <div class="process text-center active">
+                        <p><span>01</span></p>
+                        <h3>Shopping Cart</h3>
+                    </div>
+                    <div class="process text-center active">
+                        <p><span>02</span></p>
+                        <h3>Checkout</h3>
+                    </div>
+                    <div class="process text-center">
+                        <p><span>03</span></p>
+                        <h3>Order Complete</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            
+            <div class="col-lg-8">
+                <% if (address && address.length < maxCount) { %>
+                    <div class="mb-3">
+                      <a href="/addAddress">
+                        <button class="btn btn-outline-success w-70">+ Add new address</button>
+                      </a>
+                    </div>
+                  <% } %>
+                <form action="/placeOrder" method="POST">
+                    <div class="address-section">
+                        <h4 class="mb-4">Select Delivery Address</h4>
+                        <div class="row">
+                            <% if (address && address.length > 0) { %>
+                                <% address.forEach((addr, index) => { %>
+                                    <div class="col-lg-12 my-3">
+                                        <div class="card mb-3">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-start">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="selectedAddress" 
+                                                               id="address<%= index %>" value="<%= addr._id %>" 
+                                                               <%= index === 0 ? 'checked' : '' %>>
+                                                        <label class="form-check-label" for="address<%= index %>">
+                                                            <strong><%= addr.addressType %></strong>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="ml-4 mt-2">
+                                                    <p class="mb-1"><%= addr.name %></p>
+                                                    <p class="mb-1"><%= addr.city %>, <%= addr.landMark %></p>
+                                                    <p class="mb-1"><%= addr.state %> - <%= addr.pincode %></p>
+                                                    <p class="mb-1">Phone: <%= addr.phone %></p>
+                                                    <% if (addr.altPhone) { %>
+                                                        <p class="mb-1">Alt Phone: <%= addr.altPhone %></p>
+                                                    <% } %>
+                                                </div>
+                                                <div class="d-flex justify-content-end mt-3">
+                                                    <a href="/editAddress/<%=addr._id%>" class="btn btn-sm btn-primary mr-2">Edit</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            <% } else { %>
+                                <div class="col-lg-12">
+                                    <p>No addresses available.</p>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                
+                    <div class="cart-details mt-4">
+                        <h2>Payment Method</h2>
+                        <div class="form-group">
+                            <div class="radio">
+                                <label ><input type="radio" name="paymentMethod" value="cod" required> Cash on delivery</label>
+                            </div>
+                            <div class="radio">
+                                <label><input type="radio" name="paymentMethod" value="wallet" required> Wallet</label>
+                            </div>
+                            <div class="radio">
+                                <label><input type="radio" name="paymentMethod" value="razorpay" required> Razorpay</label>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="row mt-3">
+                        <div class="col-md-12 text-center">
+                            <button type="submit" class="btn btn-success w-100 h-5"><h1>Place order</h1></button>
+                        </div>
+                    </div>
+                </form>
+                
+
+
+               
+            </div>
+
+            <div class="col-lg-4">
+                <div class="cart-detail mb-4">
+                    <h2>Cart Total</h2>
+                    <ul class="list-unstyled">
+                        <li><span>Subtotal</span> <span><h2>₹<%= cart.items.reduce((total, item) => total + (item.productId.salePrice * item.quantity), 0).toFixed(2) %></h2></span></li>
+                            <% cart.items.forEach(item=> { %>
+
+                                <li><span><%=item.quantity%> x <%=item.productId.productName%> </span> <span><h2>₹<%=(item.quantity * item.productId.salePrice).toFixed(2) %></h2></span> </li>
+                                
+                            <% } ) %>
+                            
+                        <li><span>Shipping</span> <span><h2>₹0.00</h2></span></li>
+                        <li><span>Order Total</span> <span><h2>₹<%= cart.items.reduce((total, item) => total + (item.productId.salePrice * item.quantity), 0).toFixed(2) %></h2></span></li>
+                    </ul>
+                </div>
+            </div>
+
+            
+        </div>
+    </div>
+</div>
+
+<%- include('../../views/partials/user/footer')%>
