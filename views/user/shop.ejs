@@ -1,0 +1,158 @@
+<%- include("../../views/partials/user/header") %>
+
+<style>
+    .product-filters {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+      }
+      
+      .sort-by,
+      .filter-by {
+        display: flex;
+        align-items: center;
+        color: #495057;
+        font-size: 0.95rem;
+      }
+      
+      .sort-by label,
+      .filter-by label {
+        margin-right: 0.5rem;
+        font-weight: 500;
+      }
+      
+      .form-select {
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        padding: 0.5rem 1rem;
+        font-size: 0.95rem;
+        background-color: #fff;
+        color: #495057;
+        cursor: pointer;
+      }
+      
+      .form-select:focus {
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+      }
+      
+      @media (max-width: 768px) {
+        .product-filters {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      
+        .sort-by,
+        .filter-by {
+          margin-bottom: 1rem;
+        }
+      }
+</style>
+
+<div class="product-filters">
+        <div class="sort-by">
+          <label for="sort-select">Sort by:</label>
+          <select id="sort-select" class="form-select">
+            <option value="default" <%= sort === 'default' ? 'selected' : '' %>>Default</option>
+            <!-- <option value="popular" <%= sort === 'popular' ? 'selected' : '' %>>Popularity</option> -->
+            <option value="price-asc" <%= sort === 'price-asc' ? 'selected' : '' %>>Price: Low to High</option>
+            <option value="price-desc" <%= sort === 'price-desc' ? 'selected' : '' %>>Price: High to Low</option>
+            <option value="new" <%= sort === 'new' ? 'selected' : '' %>>New arrivals</option>
+            <option value="name-asc" <%= sort === 'name-asc' ? 'selected' : '' %>>Name: A to Z</option>
+            <option value="name-desc" <%= sort === 'name-desc' ? 'selected' : '' %>>Name: Z to A</option>
+          </select>
+        </div>
+      
+    <div class="filter-by">
+      <label for="filter-select">Filter by:</label>
+      <select id="filter-select" class="form-select">
+        <option value="all">All</option>
+        <option value="category">Category</option>
+        <option value="all">All products</option>
+        <option value="available">Available</option>
+
+
+
+      </select>
+    </div>
+  </div>
+
+<div class="colorlib-product">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-8 offset-sm-2 text-center colorlib-heading">
+                <h2>Shop products</h2>
+            </div>
+        </div>
+        <div class="row row-pb-md">
+            <% for(let i = 0; i < product.length; i++) { %>
+                <div class="col-lg-3 mb-4 text-center">
+                  <div class="product-entry border">
+                    <a href="/productDetail/<%= product[i]._id %>" class="prod-img">
+                      <% 
+                        // Normalize the path
+                        const imagePath = product[i].productImage[0].replace(/\\/g, '/'); 
+                        const finalImagePath = imagePath.startsWith('uploads/') ? '/' + imagePath : '/uploads/' + imagePath; 
+                      %>
+                      <img src="<%= finalImagePath %>" class="img-fluid" alt="<%= product[i].productName %>" style="height: 280px; width:300px">
+                    </a>
+                    <div class="desc">
+                      <h2><a href="/productDetail/<%= product[i]._id %>"><%= product[i].productName %></a></h2>
+                      <span class="price">₹ <%= product[i].salePrice %></span>
+                    </div>
+                  </div>
+                </div>
+              <% } %>
+                  
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <p><a href="#" class="btn btn-primary btn-lg">Shop All Products</a></p>
+        </div>
+    </div>
+</div>
+</div>
+
+
+
+        
+
+    <div class="colorlib-partner">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-8 offset-sm-2 text-center colorlib-heading colorlib-heading-sm">
+                    <h2>Trusted Partners</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col partner-col text-center">
+                    <img src="images/brand-1.jpg" class="img-fluid" alt="Free html4 bootstrap 4 template">
+                </div>
+                <div class="col partner-col text-center">
+                    <img src="images/brand-2.jpg" class="img-fluid" alt="Free html4 bootstrap 4 template">
+                </div>
+                <div class="col partner-col text-center">
+                    <img src="images/brand-3.jpg" class="img-fluid" alt="Free html4 bootstrap 4 template">
+                </div>
+                <div class="col partner-col text-center">
+                    <img src="images/brand-4.jpg" class="img-fluid" alt="Free html4 bootstrap 4 template">
+                </div>
+                <div class="col partner-col text-center">
+                    <img src="images/brand-5.jpg" class="img-fluid" alt="Free html4 bootstrap 4 template">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('sort-select').addEventListener('change', function () {
+          const sortOption = this.value;
+          window.location.href = `/shop?sort=${sortOption}`;
+        });
+      </script>
+      
+    <%- include("../../views/partials/user/footer") %>

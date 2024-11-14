@@ -427,22 +427,11 @@ const addAddress = async (req,res) => {
     const userAddress = await Address.findOne({userId});
     const addressCount = userAddress ? userAddress.address.length : 0;
     const maxCount = 3;
-    if(userAddress){
-      userAddress.address.push({
-        addressType,
-          name,
-          city,
-          landMark,
-          state,
-          pincode,
-          phone,
-          altPhone
-      })
-      await userAddress.save();
-    }else{
-      const newAddress = new Address({
-        userId,
-        address:[{
+    if (userAddress) {
+      const addressCount = userAddress.address.length;
+
+      if (addressCount < maxCount) {
+        userAddress.address.push({
           addressType,
           name,
           city,
@@ -451,19 +440,29 @@ const addAddress = async (req,res) => {
           pincode,
           phone,
           altPhone
-      }]
+        });
+        await userAddress.save();
+        res.redirect('/userProfile');
+      } else {
+        res.status(400).send("Maximum of 3 addresses allowed");
+      }
+    } else {
+      const newAddress = new Address({
+        userId,
+        address: [{
+          addressType,
+          name,
+          city,
+          landMark,
+          state,
+          pincode,
+          phone,
+          altPhone
+        }]
       });
       await newAddress.save()
+      res.redirect('/userProfile')
     }
-    
-
-    res.render('userProfile',{data,
-      address: userAddress?userAddress.address:[],
-      addressCount,
-      maxCount
-
-    })
-
   } catch (error) {
     console.log("Error occured while adding address:", error);
     res.status(500).send("Server error");
@@ -509,13 +508,11 @@ const editAddress  = async (req, res) => {
       return res.status(404).send("Address not found");
     }
 
-    // Update the address fields
     userAddress.address[addressIndex] = { ...userAddress.address[addressIndex].toObject(), ...updatedData };
     
-    // Save the updated document
     await userAddress.save();
 
-    res.redirect("/userProfile"); // Redirect to the user’s profile or the desired page
+    res.redirect("/userProfile");
   } catch (error) {
     console.log("Error updating address:", error);
     res.status(500).send("Server error");
@@ -561,6 +558,127 @@ const loadCheckout = async (req,res) => {
   }
 }
 
+const loadShop = async (req,res) => {
+  try {
+    const { sort } = req.query;
+    const categories = await category.find({ isActive: true });
+    let productData = await Product.find({
+      isActive: true,
+      deletedAt: null,
+      category: { $in: categories.map((category) => category._id) }
+    });
+
+    switch (sort) {
+      // case 'popular':
+      //   productData = productData.sort((a, b) => b.popularity - a.popularity);
+      //   break;
+      case 'price-asc':
+        productData = productData.sort((a, b) => a.salePrice - b.salePrice);
+        break;
+      case 'price-desc':
+        productData = productData.sort((a, b) => b.salePrice - a.salePrice);
+        break;
+      case 'new':
+        productData = productData.sort((a, b) => b.createdAt - a.createdAt);
+        break;
+      case 'name-asc':
+        productData.sort((a, b) => a.productName.localeCompare(b.productName));
+        break;
+      case 'name-desc':
+        productData.sort((a, b) => b.productName.localeCompare(a.productName));
+        break;
+      default:
+        productData = productData.sort((a, b) => b.createdAt - a.createdAt);
+        break;
+    }
+
+    res.render('shop',{product:productData, sort})
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+
+const loadForgotPassword = async (req, res) => {
+  try {
+    return res.render("forgotPass");
+  } catch (error) {
+    console.log("page not loading:", error);
+    res.status(500).send("Server error");
+  }
+};
+
+
+const verifyForgotPass = async (req,res) => {
+  try {
+    const {email} =req.body;
+    userExist = await user.findOne({email});
+    if(userExist){
+      otp = generateOtp();
+      emailSend = await sendVerificationEmail(email,otp);
+      if(emailSend){
+        req.session.userOtp = otp;
+        req.session.userData = req.body;
+        req.session.email = email;
+        res.render("verifyForgotOtp");
+        console.log("Email sent:",email);
+        console.log("OTP:",otp);
+      }else{
+        res.json("email-error");
+      }
+    }else{
+      res.render("forgotPass",{
+        message:"User with this email not exist"
+      })
+    } 
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+const verifyForgotPassOtp = async (req,res) => {
+  try {
+    otpEntered = req.body.otp;
+    if(otpEntered===req.session.userOtp){
+      req.session.userData = req.body.userData;
+      res.render('newPassword',{userData:req.session.userData});
+    }else{
+      res.render('changeEmail',{message:'otp not matching'});
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+const newPassword = async (req, res) => {
+  try {
+    const { newPassword, confirmPassword } = req.body;
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: "New passwords do not match" });
+    }
+
+    const User = await user.findOne({ email: req.session.email });
+    if (!User) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    User.password = await bcrypt.hash(newPassword, 10);
+    await User.save();
+
+    req.session.userOtp = null;
+    req.session.userData = null;
+    req.session.email = null;
+
+    res.redirect('/login');
+  } catch (error) {
+    console.error("Error updating password:", error);
+    res.status(500).json({ message: "An error occurred while changing the password" });
+  }
+};
+
+
+
 
 module.exports = {
   loadHomepage,
@@ -585,5 +703,10 @@ module.exports = {
   loadEditAddress,
   editAddress,
   deleteAddress,
-  loadCheckout
+  loadCheckout,
+  loadShop,
+  verifyForgotPass,
+  loadForgotPassword,
+  verifyForgotPassOtp,
+  newPassword
 };

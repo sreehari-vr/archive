@@ -18,20 +18,23 @@ const cartLoad = async (req,res) => {
 const cartAdd = async (req,res) => {
     const userId = req.session.user;
     const productId = req.params.id;
+    const { quantity } = req.body;
     try {
         let cart = await Cart.findOne({userId});
-        if(cart){
-            const productIndex = cart.items.findIndex(item=>item.productId.toString()===productId);
-            if(productIndex > -1){
-                cart.items[productIndex].quantity += 1;
-            }else{
-                cart.items.push({productId,quantity:1});
+        const quantityToAdd = parseInt(quantity, 10);
+        if (cart) {
+            const productIndex = cart.items.findIndex(item => item.productId.toString() === productId);
+
+            if (productIndex > -1) {
+                cart.items[productIndex].quantity += quantityToAdd;
+            } else {
+                cart.items.push({ productId, quantity: quantityToAdd });
             }
-        }else{
+        } else {
             cart = new Cart({
                 userId,
-                items:[{productId,quantity:1}]
-            })
+                items: [{ productId, quantity: quantityToAdd }]
+            });
         }
         await cart.save()
 

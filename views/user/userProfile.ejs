@@ -396,8 +396,8 @@
                                     <tr>
                                       <td><%= order._id %></td>
                                       <td><%= item.productId.productName %></td>
-                                      <td><%= item.status %></td>
-                                      <td><%= item.price %></td>
+                                      <td style="color:darkmagenta;"><%= item.status %></td>
+                                      <td><%= item.price * item.quantity %></td>
                                       <td>
                                         <a href="/orderCancel/<%= order._id %>/<%= item._id %>">
                                           <button class="btn">cancel</button>

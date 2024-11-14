@@ -5,6 +5,8 @@ const { adminAuth, userAuth  } = require("../middleware/auth");
 const customerController = require("../controllers/admin/customerController");
 const categoryController = require("../controllers/admin/categoryController");
 const productController = require("../controllers/admin/productController");
+const orderController = require("../controllers/admin/orderController");
+
 router.get("/login", adminController.loadAdminLogin);
 router.post("/login", adminController.login);
 router.get('/logout',adminController.logout)
@@ -60,6 +62,11 @@ router.get(
   productController.renderUpdateProductForm
 );
 
+router.get(
+  "/orderManage",
+  adminAuth,
+  orderController.loadOrderManage
+);
 
 
 module.exports = router;

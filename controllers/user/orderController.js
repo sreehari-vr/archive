@@ -9,10 +9,8 @@ const placeOrder = async(req,res) => {
         const userId = req.session.user;
         const { selectedAddress, paymentMethod } = req.body;
         const userAddresses = await Address.findOne({userId});
-        console.log(userAddresses)
 
         const address = userAddresses.address.find(addr=>addr._id.toString()===selectedAddress)
-        console.log('addressooi'+address)
         const cart = await Cart.findOne({ userId }).populate("items.productId");
         if (!cart || cart.items.length === 0) {
           return res.status(400).send("Your cart is empty.");
@@ -46,7 +44,16 @@ const placeOrder = async(req,res) => {
     
         await newOrder.save();
     
+        for (const item of cart.items) {
+          const Product = await product.findById(item.productId._id);
+          if (Product) {
+              Product.quantity = Math.max(0, Product.quantity - item.quantity);
+              await Product.save();
+          }
+      }
+
         await Cart.findOneAndUpdate({ userId }, { items: [] });
+
     
         res.redirect(`/orderConfirmation/${newOrder._id}`);
       } catch (error) {
