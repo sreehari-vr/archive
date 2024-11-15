@@ -39,35 +39,33 @@ const addCategory = async (req, res) => {
 };
 
 const check = async (req, res) => {
-     const { name, description } = req.body;
-     console.log(name,description)
-     try {
-         if (!name) {
-             return res.status(400).render('addCategory', { error: "Category name is required" });
-         }
-  
-         const existingCategory = await Category.findOne({ name });
-         if (existingCategory) {
-             return res.status(400).render('addCategory', { error: "Category already exists" });
-         }
-  
-         const newCategory = new Category({
-              name,
-              description,
-              });
-         await newCategory.save();
-         return res.json({success:true, error: "Category added successfully" });
-        } catch (error) {
-         console.error(error);
-         return res.status(500).render({success:false, error: "Category not added" });
-     }
-  };
+  const { name, description } = req.body;
+
+  try {
+      if (!name) {
+          return res.status(400).json({ success: false, error: "Category name is required" });
+      }
+
+      const existingCategory = await Category.findOne({ name });
+      if (existingCategory) {
+          return res.status(400).json({ success: false, error: "Category already exists" });
+      }
+
+      const newCategory = new Category({ name, description });
+      await newCategory.save();
+
+      return res.status(200).json({ success: true, message: "Category added successfully" });
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
+
 
 
 const updateCategory = async (req, res) => {
   const { id, name, description } = req.body;
   try {
-
 
   const existCategory = await Category.findOne({name})
   if(existCategory){
@@ -99,7 +97,7 @@ const renderUpdateCategoryForm = async (req, res) => {
     if (!categoryData) {
       return res.status(400).json({ error: "Category not found" });
     }
-    res.render("updateCategory", { data: categoryData }); // Pass the category data to the EJS view
+    res.render("updateCategory", { data: categoryData }); 
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });

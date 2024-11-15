@@ -48,20 +48,22 @@
                                     <% } %>      
                                 </td>
                                     <td>
-                                    <% if(data[i].isActive === true) { %>
-                                    <button class="btn btn-warning" style="width: 80px;" onclick="return alert('Are you sure?')">
-                                        <a href="/admin/unlist?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">unlist</a>
-                                    </button>
-                                    <% } else { %>
-                                    <button class="btn btn-success" style="width: 80px;" onclick="return alert('Are you sure?')">
-                                        <a href="/admin/list?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">list</a>
-                                    </button>
-                                    <% } %>
+                                            <% if(data[i].isActive === true) { %>
+                                                <button class="btn btn-warning" style="width: 80px;" onclick="confirmAction('/admin/unlist?id=<%= data[i]._id %>', 'unlist this category?')">
+                                                    Unlist
+                                                </button>
+                                            <% } else { %>
+                                                <button class="btn btn-success" style="width: 80px;" onclick="confirmAction('/admin/list?id=<%= data[i]._id %>', 'list this category?')">
+                                                    List
+                                                </button>
+                                            <% } %>
+                                            
+                                        
                                     <button class="btn btn-success" style="width: 80px;">
                                         <a href="/admin/updateCategory?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Update</a>
                                     </button>
-                                    <button class="btn btn-danger" style="width: 80px;" onclick="return alert('Are you sure?')">
-                                        <a href="/admin/softDeleteCategory?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Delete</a>
+                                    <button class="btn btn-danger" style="width: 80px;" onclick="confirmAction('/admin/softDeleteCategory?id=<%= data[i]._id %>', 'delete this category?')">
+                                        Delete
                                     </button>
                                 </td>
                             </tr>
@@ -84,6 +86,38 @@
             </nav>
         </div>
 
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <script>
+            function confirmAction(url, message) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: `Do you want to ${message}`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'No'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Redirect to the URL
+                        window.location.href = url;
+                    }
+                });
+            }
         
-           
+            // For success and error notifications
+            function showNotification(type, message) {
+                Swal.fire({
+                    icon: type, // 'success', 'error', 'warning'
+                    title: message,
+                    timer: 3000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-right'
+                });
+            }
+        </script>
+        
        

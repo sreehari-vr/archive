@@ -23,7 +23,7 @@
         <thead>
             <tr>
                 <th scope="col"><b>No.</b></th>
-                <th scope="col"><b>Product name</b></th>
+                <th scope="col" style="width: 200px;"><b>Product name</b></th>
                 <th scope="col" style="width: 400px;"><b>Description</b></th>
                 <th scope="col"><b>Category</b></th>
                 <th scope="col"><b>Regular Price</b></th>
@@ -64,21 +64,25 @@
                                     </td>   
                                 
                                     <td>
-                                    <% if(data[i].isActive === true) { %>
-                                    <button class="btn btn-warning" style="width: 80px;" onclick="return confirm('Are you sure you want to unlist')">
-                                        <a href="/admin/unlistProduct?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">unlist</a>
-                                    </button>
-                                    <% } else { %>
-                                    <button class="btn btn-success" style="width: 80px;" onclick="return confirm('Are you sure you want to list')">
-                                        <a href="/admin/listProduct?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">list</a>
-                                    </button>
-                                    <% } %>
+                                        
+                                            <% if (data[i].isActive === true) { %>
+                                              <button class="btn btn-warning unlist-btn" style="width: 80px;" data-href="/admin/unlistProduct?id=<%= data[i]._id %>">
+                                                Unlist
+                                              </button>
+                                            <% } else { %>
+                                              <button class="btn btn-success list-btn" style="width: 80px;" data-href="/admin/listProduct?id=<%= data[i]._id %>">
+                                                List
+                                              </button>
+                                            <% } %>
+                                            
+                                          
+                                          
                                     <button class="btn btn-success" style="width: 80px;">
                                         <a href="/admin/updateProduct?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Update</a>
                                     </button>
-                                    <button class="btn btn-danger" style="width: 80px;" onclick="return confirm('Are you sure you want to delete')">
-                                        <a href="/admin/softDeleteProduct?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Delete</a>
-                                    </button>
+                                    <button class="btn btn-danger delete-btn" style="width: 80px;" data-href="/admin/softDeleteProduct?id=<%= data[i]._id %>">
+                                        Delete
+                                      </button>
                                 </td>
                             </tr>
                             <% } %>
@@ -103,3 +107,64 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    // SweetAlert for Unlisting Product
+    $(".unlist-btn").click(function (event) {
+      event.preventDefault();
+      const url = $(this).data("href");
+      Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to unlist this product?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, unlist!"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = url; // Navigate to the unlist endpoint
+        }
+      });
+    });
+
+    // SweetAlert for Listing Product
+    $(".list-btn").click(function (event) {
+      event.preventDefault();
+      const url = $(this).data("href");
+      Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to list this product?",
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, list!"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = url; // Navigate to the list endpoint
+        }
+      });
+    });
+
+    // SweetAlert for Deleting Product
+    $(".delete-btn").click(function (event) {
+      event.preventDefault();
+      const url = $(this).data("href");
+      Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to delete this product?",
+        icon: "error",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete!"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = url; // Navigate to the delete endpoint
+        }
+      });
+    });
+  });
+</script>

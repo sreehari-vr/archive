@@ -1,0 +1,53 @@
+<%- include("../../views/partials/admin/header") %>
+
+<body>
+
+  <div style="margin: 100px;">
+    <h1>Order Details</h1>
+
+    <p><strong>Order ID:</strong> <%= order._id %></p>
+    <p><strong>User:</strong> <%= order.userId ? order.userId.name : "Unknown User" %></p>
+    <p><strong>Total Amount:</strong> ₹<%= order.totalAmount %></p>
+    <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+    <p><strong>Order Date:</strong> <%= order.orderDate.toDateString() %></p>
+  
+    <h2>Shipping Address</h2>
+    <p><strong>Name:</strong> <%= order.address.name %></p>
+    <p><strong>Address Type:</strong> <%= order.address.addressType %></p>
+    <p><strong>City:</strong> <%= order.address.city %></p>
+    <p><strong>State:</strong> <%= order.address.state %></p>
+    <p><strong>Landmark:</strong> <%= order.address.landMark %></p>
+    <p><strong>Pincode:</strong> <%= order.address.pincode %></p>
+    <p><strong>Phone:</strong> <%= order.address.phone %></p>
+    <% if (order.address.altPhone) { %>
+      <p><strong>Alternate Phone:</strong> <%= order.address.altPhone %></p>
+    <% } %>
+  
+    <h2>Items</h2>
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Quantity</th>
+          <th>Price</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% order.items.forEach(item => { %>
+          <tr>
+            <td><%= item.productId ? item.productId.productName : "Product Not Found" %></td>
+            <td><%= item.quantity %></td>
+            <td>₹<%= item.price %></td>
+            <td><%= item.status %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  
+    <a href="/admin/orders">Back to Orders</a>
+  </div>
+
+  
+</body>
+

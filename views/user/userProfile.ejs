@@ -348,8 +348,10 @@
                                 </ul>
                                 <div class="d-flex justify-content-between">
                                   <a href="/editAddress/<%= addr._id %>" class="btn-small edt-btn">Edit</a>
-                                  <a href="/deleteAddress/<%= addr._id %>" class="btn-small dlt-btn" onclick="return confirm('Are you sure you want to delete this address?')">Delete</a>
-                                </div>
+                                  <div class="d-flex justify-content-between">
+                                    <a href="/deleteAddress/<%= addr._id %>" class="btn-small dlt-btn" id="delete-<%= addr._id %>">Delete</a>
+                                  </div>
+                                                                  </div>
                               </div>
                             </div>
                           </div>
@@ -398,10 +400,14 @@
                                       <td><%= item.productId.productName %></td>
                                       <td style="color:darkmagenta;"><%= item.status %></td>
                                       <td><%= item.price * item.quantity %></td>
-                                      <td>
-                                        <a href="/orderCancel/<%= order._id %>/<%= item._id %>">
-                                          <button class="btn">cancel</button>
-                                        </a>
+                                        <td>
+                                          <button 
+                                            class="btn cancel-btn" 
+                                            data-order-id="<%= order._id %>" 
+                                            data-item-id="<%= item._id %>">
+                                            Cancel
+                                          </button>
+                                        
                                       </td>
                                     </tr>
                                   <% }) %>
@@ -539,6 +545,64 @@
         }
       });
     </script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  // Select all delete buttons
+  const deleteButtons = document.querySelectorAll('.dlt-btn');
+
+  deleteButtons.forEach(button => {
+    button.addEventListener('click', function (event) {
+      event.preventDefault(); // Prevent default redirection
+      const deleteUrl = this.href; // Get the link's href value
+
+      // SweetAlert confirmation dialog
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to delete this address? This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Redirect to the delete route if confirmed
+          window.location.href = deleteUrl;
+        }
+      });
+    });
+  });
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.querySelectorAll('.cancel-btn').forEach(button => {
+    button.addEventListener('click', function () {
+      const orderId = this.dataset.orderId; // Get order ID from data attribute
+      const itemId = this.dataset.itemId; // Get item ID from data attribute
+      const cancelUrl = `/orderCancel/${orderId}/${itemId}`; // Construct cancel URL
+
+      // SweetAlert confirmation dialog
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to cancel this order? This action cannot be undone.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, cancel it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Redirect to the cancel route if confirmed
+          window.location.href = cancelUrl;
+        }
+      });
+    });
+  });
+</script>
 
   </main>
   <%- include("../../views/partials/user/footer") %>
