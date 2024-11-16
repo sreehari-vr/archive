@@ -39,71 +39,81 @@
 
 
 <script>
-    
-    function formValidate() {
-        document.querySelectorAll('.error-message').forEach(el => el.innerText = '');
-        let isValid = true;
-        let numVal = /^[0-9]{10}$/;
-    
-        let name = document.getElementById("name").value.trim();
-    
-        if (name === "") {
-          document.getElementById("name-error").innerText =
-            "Category name is required";
+  function formValidate() {
+      // Clear previous error messages
+      document.querySelectorAll('.error-message').forEach(el => el.innerText = '');
+      let isValid = true;
+
+      const namePattern = /^[a-z\s]+$/i;
+
+      const name = document.getElementById("name").value.trim();
+      const description = document.getElementById("description").value.trim();
+
+      // Validate name
+      if (!name) {
+          document.getElementById("name-error").innerText = "Category name is required.";
           isValid = false;
-        }
-    
-        let description = document.getElementById("description").value.trim();
-        if (description === "") {
-          document.getElementById("description-error").innerText =
-            "Description is required";
+      } else if (!namePattern.test(name)) {
+          document.getElementById("name-error").innerText = "Category name can only contain letters and spaces.";
           isValid = false;
-        }
-    
-        return isValid
       }
 
-      function addCategory(event) {
-        event.preventDefault(); // Prevent default form submission
-        
-        if (!formValidate()) {
-            return;
-        }
-    
-        const name = document.getElementById('name').value.trim();
-        const description = document.getElementById('description').value.trim();
-    
-        $.ajax({
-            method: 'POST',
-            url: '/admin/addCategory',
-            data: { 
-                name, 
-                description 
-            },
-            success: function (response) {
-                if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: 'Category added successfully',
-                    }).then(() => {
-                        window.location.href = '/admin/category';
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: response.error || 'Category could not be added',
-                    });
-                }
-            },
-            error: function (xhr) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: xhr.responseJSON?.error || 'Something went wrong',
-                });
-            },
-        });
-    }
-    </script>
+      // Validate description
+      if (!description) {
+          document.getElementById("description-error").innerText = "Description is required.";
+          isValid = false;
+      } else if (description.length < 10) {
+          document.getElementById("description-error").innerText = "Description must be at least 10 characters.";
+          isValid = false;
+      }
+
+      return isValid;
+  }
+
+  // Add category function with form validation
+  function addCategory(event) {
+      event.preventDefault();
+      
+      // Validate form inputs
+      if (!formValidate()) {
+          return;
+      }
+
+      const name = document.getElementById('name').value.trim();
+      const description = document.getElementById('description').value.trim();
+
+      $.ajax({
+          method: 'POST',
+          url: '/admin/addCategory',
+          data: { 
+              name, 
+              description 
+          },
+          success: function (response) {
+              if (response.success) {
+                  Swal.fire({
+                      icon: 'success',
+                      title: 'Success',
+                      text: 'Category added successfully.',
+                  }).then(() => {
+                      window.location.href = '/admin/category';
+                  });
+              } else {
+                  Swal.fire({
+                      icon: 'error',
+                      title: 'Error',
+                      text: response.error || 'Category could not be added.',
+                  });
+              }
+          },
+          error: function (xhr) {
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: xhr.responseJSON?.error || 'Something went wrong.',
+              });
+          },
+      });
+  }
+</script>
+

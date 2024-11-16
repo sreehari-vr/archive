@@ -5,7 +5,7 @@
    <div class="card mx-auto card-login col-4">
        <div class="card-body">
            <h4 class="card-title mb-4">Enter New Email</h4>
-           <form method="post" action="/update-email" onsubmit="return validateEmailForm()">
+           <form method="post" action="/update-email" id="emailForm">
                <div class="mb-3">
                    <input class="form-control" name="newEmail" placeholder="New Email" type="text" id="email">
                    <div class="error-message" id="email-error"></div>
@@ -18,30 +18,67 @@
    </div>
 </section>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-   function validateEmailForm() {
-       const emailInput = document.getElementById('email');
-       const emailError = document.getElementById('email-error');
-       const emailValue = emailInput.value.trim();
-       const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    document.getElementById('emailForm').addEventListener('submit', async function (e) {
+        e.preventDefault(); // Prevent default form submission
+        
+        const emailInput = document.getElementById('email');
+        const emailError = document.getElementById('email-error');
+        const emailValue = emailInput.value.trim();
+        
+        // Clear previous errors
+        emailError.textContent = "";
 
+        // Validate email format
+        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+        if (!emailValue.match(emailPattern)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Email',
+                text: 'Please enter a valid email address.',
+            });
+            return;
+        }
 
-       if (emailValue === '') {
-           emailError.textContent = 'Please enter your new email.';
-           emailInput.classList.add('is-invalid');
-           return false;
-       } else if (!emailValue.match(emailPattern)) {
-           emailError.textContent = 'Please enter a valid email address';
-           emailInput.classList.add('is-invalid');
-           return false;
-       } else {
-           emailError.textContent = '';
-           emailInput.classList.remove('is-invalid');
-           return true;
-       }
-   }
+        try {
+            // Send the request
+            const response = await fetch('/update-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ newEmail: emailValue }),
+            });
+
+            const result = await response.json();
+            console.log(result); // Log the result for debugging
+
+            if (response.ok && result.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: result.message,
+                }).then(() => {
+                    window.location.href = '/userProfile';
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: result.message || 'An error occurred.',
+                });
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An unexpected error occurred. Please try again.',
+            });
+        }
+    });
 </script>
+
 <%- include("../../views/partials/user/footer") %>
 
 

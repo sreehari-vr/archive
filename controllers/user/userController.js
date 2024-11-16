@@ -302,7 +302,7 @@ const verifyEmail = async (req, res) => {
   try {
     const{email} = req.body;
     
-    userExist = await user.findOne({email});
+    userExist = await user.findOne({email,phone:{$ne:null}});
     if(userExist){
       otp = generateOtp();
       emailSend = await sendVerificationEmail(email,otp);
@@ -346,21 +346,24 @@ const updateEmail = async (req, res) => {
   try {
     const newEmail = req.body.newEmail;
     const id = req.session.user;
-    console.log(id)
-    
+
     if (!id) {
-      return res.status(400).json({ message: "User not logged in" });
+      return res.status(400).json({ success: false, message: "User not logged in" });
     }
-    
-    await user.findByIdAndUpdate(id,{ email: newEmail });
-    
-    res.redirect('/userProfile');
-    
+
+    if (!newEmail) {
+      return res.status(400).json({ success: false, message: "Email cannot be empty" });
+    }
+
+    await user.findByIdAndUpdate(id, { email: newEmail });
+
+    return res.status(200).json({ success: true, message: "Email updated successfully!" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "An error occurred while updating the email" });
+    console.error("Error updating email:", error);
+    return res.status(500).json({ success: false, message: "An error occurred while updating the email." });
   }
 };
+
 
 const loadChangePass = async (req, res) => {
   try {
@@ -371,13 +374,13 @@ const loadChangePass = async (req, res) => {
   }
 };
 
-const changePassword = async (req,res) => {
+const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword, confirmPassword } = req.body;
     const userId = req.session.user;
 
     if (!userId) {
-      return res.status(401).json({ message: "User not logged in" });
+      return res.status(401).json({ success: false, message: "User not logged in" });
     }
 
     const User = await user.findById(userId); // Fetch user from the database
@@ -385,29 +388,30 @@ const changePassword = async (req,res) => {
     // Check if the current password matches
     const isMatch = await bcrypt.compare(currentPassword, User.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Current password is incorrect" });
+      return res.status(400).json({ success: false, message: "Current password is incorrect" });
     }
 
     // Validate new password requirements (e.g., length and complexity)
     if (newPassword !== confirmPassword) {
-      return res.status(400).json({ message: "New passwords do not match" });
+      return res.status(400).json({ success: false, message: "New passwords do not match" });
     }
 
     if (newPassword === currentPassword) {
-      return res.status(400).json({ message: "New password must be different from the current password" });
+      return res.status(400).json({ success: false, message: "New password must be different from the current password" });
     }
 
     // Hash and save the new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     User.password = hashedPassword;
     await User.save();
-    res.redirect('/userProfile')
 
+    return res.status(200).json({ success: true, message: "Password changed successfully" });
   } catch (error) {
     console.error("Error updating password:", error);
-    res.status(500).json({ message: "An error occurred while changing the password" });
+    res.status(500).json({ success: false, message: "An error occurred while changing the password" });
   }
-}
+};
+
 
 const loadAddAddress = async (req,res) => {
   try {
@@ -558,20 +562,32 @@ const loadCheckout = async (req,res) => {
   }
 }
 
-const loadShop = async (req,res) => {
+const loadShop = async (req, res) => {
   try {
-    const { sort } = req.query;
+    const { sort, filter } = req.query;
     const categories = await category.find({ isActive: true });
+
+    // Default to 'all' filter if no filter is provided
+    let filterCategory = filter || 'all';
+
     let productData = await Product.find({
       isActive: true,
       deletedAt: null,
       category: { $in: categories.map((category) => category._id) }
     });
 
+    // Filter by selected category
+    if (filterCategory !== 'all' && filterCategory !== 'available') {
+      productData = productData.filter(product => product.category.toString() === filterCategory);
+    }
+
+    // Filter out out-of-stock products if "available" is selected
+    if (filterCategory === 'available') {
+      productData = productData.filter(product => product.quantity > 0);
+    }
+
+    // Sort products based on selected sort option
     switch (sort) {
-      // case 'popular':
-      //   productData = productData.sort((a, b) => b.popularity - a.popularity);
-      //   break;
       case 'price-asc':
         productData = productData.sort((a, b) => a.salePrice - b.salePrice);
         break;
@@ -592,11 +608,12 @@ const loadShop = async (req,res) => {
         break;
     }
 
-    res.render('shop',{product:productData, sort})
+    res.render('shop', { product: productData, sort, categories, filterCategory });
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
 }
+
 
 
 const loadForgotPassword = async (req, res) => {
@@ -643,7 +660,7 @@ const verifyForgotPassOtp = async (req,res) => {
       req.session.userData = req.body.userData;
       res.render('newPassword',{userData:req.session.userData});
     }else{
-      res.render('changeEmail',{message:'otp not matching'});
+      res.render('forgotPass',{message:'otp not matching'});
     }
   } catch (error) {
     console.log(error)

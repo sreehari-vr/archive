@@ -58,7 +58,9 @@ const productInfo = async (req, res) => {
     const skip = (page - 1) * limit;
     const productData = await Product.find({
       deletedAt: null,
+      category: { $ne: null },
       $or: [{ productName: { $regex: ".*" + search + ".*", $options: "i" } }],
+      
     }).populate('category')
       .sort({ createdAt: -1 })
       .skip(skip)

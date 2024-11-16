@@ -82,7 +82,7 @@ const updateCategory = async (req, res) => {
     if (!updatedCategory) {
       return res.status(404).json({success:false, error: "Category not found" });
     }
-    return res.json({success:true, error: "Category updated successfully" });
+    return res.status(200).json({success:true, error: "Category updated successfully" });
 
     
   } catch (error) {
@@ -91,7 +91,7 @@ const updateCategory = async (req, res) => {
 };
 
 const renderUpdateCategoryForm = async (req, res) => {
-  const id = req.query.id; // Get the category ID from the query parameter
+  const id = req.query.id;
   try {
     const categoryData = await Category.findById(id);
     if (!categoryData) {

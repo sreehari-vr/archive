@@ -314,8 +314,13 @@
                         <p class="card-text">
                           <strong>Email: <%= data.email%></strong>
                         </p>
-                        <a href="/changeEmail" class="btn btn-sm btn-success ml-2">Change Email</a>
-                        <a href="/changePassword" class="btn btn-sm btn-success">Change Password</a>
+
+                        <%if(data.phone != null){%>
+                          <a href="/changeEmail" class="btn btn-sm btn-success ml-2">Change Email</a>
+                          <a href="/changePassword" class="btn btn-sm btn-success">Change Password</a>
+                          <%}%>
+
+
                       </div>
                     </div>
                   </div>
@@ -596,7 +601,6 @@
         confirmButtonText: 'Yes, cancel it!'
       }).then((result) => {
         if (result.isConfirmed) {
-          // Redirect to the cancel route if confirmed
           window.location.href = cancelUrl;
         }
       });

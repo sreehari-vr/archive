@@ -67,18 +67,17 @@
           </select>
         </div>
       
-    <div class="filter-by">
-      <label for="filter-select">Filter by:</label>
-      <select id="filter-select" class="form-select">
-        <option value="all">All</option>
-        <option value="category">Category</option>
-        <option value="all">All products</option>
-        <option value="available">Available</option>
-
-
-
-      </select>
-    </div>
+        <div class="filter-by">
+          <label for="filter-select">Filter by:</label>
+          <select id="filter-select" class="form-select">
+            <option value="all" <%= filterCategory === 'all' ? 'selected' : '' %>>All</option>
+            <% categories.forEach(category => { %>
+              <option value="<%= category._id %>" <%= filterCategory === category._id.toString() ? 'selected' : '' %>><%= category.name %></option>
+            <% }) %>
+            <option value="available" <%= filterCategory === 'available' ? 'selected' : '' %>>Available Products</option>
+          </select>
+        </div>
+        
   </div>
 
 <div class="colorlib-product">
@@ -109,11 +108,7 @@
               <% } %>
                   
     </div>
-    <div class="row">
-        <div class="col-md-12 text-center">
-            <p><a href="#" class="btn btn-primary btn-lg">Shop All Products</a></p>
-        </div>
-    </div>
+
 </div>
 </div>
 
@@ -149,10 +144,18 @@
     </div>
 
     <script>
-        document.getElementById('sort-select').addEventListener('change', function () {
-          const sortOption = this.value;
-          window.location.href = `/shop?sort=${sortOption}`;
-        });
+      document.getElementById('sort-select').addEventListener('change', function () {
+        const sortOption = this.value;
+        const filterOption = document.getElementById('filter-select').value;
+        window.location.href = `/shop?sort=${sortOption}&filter=${filterOption}`;
+      });
+      
+      document.getElementById('filter-select').addEventListener('change', function () {
+        const filterOption = this.value;
+        const sortOption = document.getElementById('sort-select').value;
+        window.location.href = `/shop?sort=${sortOption}&filter=${filterOption}`;
+      });
+      
       </script>
       
     <%- include("../../views/partials/user/footer") %>

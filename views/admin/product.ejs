@@ -41,8 +41,14 @@
                                 <td><%= i + 1 %></td>
                                 <td><%= data[i].productName %></td>
                                 <td><%= data[i].description %></td>
-                                <td><%= data[i].category.name %></td>
-                                <td><%= data[i].regularPrice %></td>
+                                <td>
+                                  <% if (data[i].category) { %>
+                                    <%= data[i].category.name %>
+                                  <% } else { %>
+                                    <span>No Category</span>
+                                  <% } %>
+                                </td>
+                                                                <td><%= data[i].regularPrice %></td>
                                 <td><%= data[i].salePrice %></td>
                                 <td><%= data[i].quantity %></td>
                                 <td>
