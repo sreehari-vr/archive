@@ -2,11 +2,10 @@ const Category = require("../../models/categorySchema");
 
 const categoryInfo = async (req, res) => {
   try {
-
     let search = "";
-        if(req.query.search){
-            search = req.query.search;
-        }
+    if (req.query.search) {
+      search = req.query.search;
+    }
 
     let page = 1;
     if (req.query.page) {
@@ -14,8 +13,9 @@ const categoryInfo = async (req, res) => {
     }
     const limit = 4;
     const skip = (page - 1) * limit;
-    const categoryData = await Category.find({deletedAt:null,
-      $or:[{ name: { $regex: ".*" + search + ".*", $options: 'i' } }]
+    const categoryData = await Category.find({
+      deletedAt: null,
+      $or: [{ name: { $regex: ".*" + search + ".*", $options: "i" } }],
     })
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -35,56 +35,59 @@ const categoryInfo = async (req, res) => {
 };
 
 const addCategory = async (req, res) => {
-   res.render("addCategory");
+  res.render("addCategory");
 };
 
 const check = async (req, res) => {
   const { name, description } = req.body;
-
   try {
-      if (!name) {
-          return res.status(400).json({ success: false, error: "Category name is required" });
-      }
-
-      const existingCategory = await Category.findOne({ name });
-      if (existingCategory) {
-          return res.status(400).json({ success: false, error: "Category already exists" });
-      }
-
-      const newCategory = new Category({ name, description });
-      await newCategory.save();
-
-      return res.status(200).json({ success: true, message: "Category added successfully" });
+    if (!name) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Category name is required" });
+    }
+    const existingCategory = await Category.findOne({ name });
+    if (existingCategory) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Category already exists" });
+    }
+    const newCategory = new Category({ name, description });
+    await newCategory.save();
+    return res
+      .status(200)
+      .json({ success: true, message: "Category added successfully" });
   } catch (error) {
-      console.error(error);
-      return res.status(500).json({ success: false, error: "Internal server error" });
+    console.error(error);
+    return res
+      .status(500)
+      .json({ success: false, error: "Internal server error" });
   }
 };
-
-
 
 const updateCategory = async (req, res) => {
   const { id, name, description } = req.body;
   try {
-
-  const existCategory = await Category.findOne({name})
-  if(existCategory){
-    return res.status(400).json({success:false,error:'category is already there'})
-  }
+    const existCategory = await Category.findOne({ name });
+    if (existCategory) {
+      return res
+        .status(400)
+        .json({ success: false, error: "category is already there" });
+    }
 
     const updatedCategory = await Category.updateOne(
       { _id: id },
-      { $set: { name,description } }
+      { $set: { name, description } }
     );
 
-
-
     if (!updatedCategory) {
-      return res.status(404).json({success:false, error: "Category not found" });
+      return res
+        .status(404)
+        .json({ success: false, error: "Category not found" });
     }
-    return res.status(200).json({success:true, error: "Category updated successfully" });
-
-    
+    return res
+      .status(200)
+      .json({ success: true, error: "Category updated successfully" });
   } catch (error) {
     return res.status(500).json({ error: "internal server error" });
   }
@@ -97,7 +100,7 @@ const renderUpdateCategoryForm = async (req, res) => {
     if (!categoryData) {
       return res.status(400).json({ error: "Category not found" });
     }
-    res.render("updateCategory", { data: categoryData }); 
+    res.render("updateCategory", { data: categoryData });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
@@ -107,7 +110,7 @@ const renderUpdateCategoryForm = async (req, res) => {
 const unlistCategory = async (req, res) => {
   const id = req.query.id;
   try {
-    await Category.updateOne({ _id: id },{ $set:  { isActive: false }});
+    await Category.updateOne({ _id: id }, { $set: { isActive: false } });
     res.redirect("/admin/category");
   } catch (error) {
     console.error(error);
@@ -118,7 +121,7 @@ const unlistCategory = async (req, res) => {
 const listCategory = async (req, res) => {
   const id = req.query.id;
   try {
-    await Category.updateOne({ _id: id }, { $set: { isActive: true }});
+    await Category.updateOne({ _id: id }, { $set: { isActive: true } });
     res.redirect("/admin/category");
   } catch (error) {
     console.error(error);
@@ -129,12 +132,12 @@ const listCategory = async (req, res) => {
 const softDeleteCategory = async (req, res) => {
   const id = req.query.id;
   try {
-    await Category.updateOne({_id:id},{$set:{deletedAt: new Date}})
+    await Category.updateOne({ _id: id }, { $set: { deletedAt: new Date() } });
     res.redirect("/admin/category");
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
-  } 
+  }
 };
 
 module.exports = {
@@ -145,5 +148,5 @@ module.exports = {
   unlistCategory,
   renderUpdateCategoryForm,
   check,
-  softDeleteCategory
+  softDeleteCategory,
 };

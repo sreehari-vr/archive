@@ -81,9 +81,9 @@ const productInfo = async (req, res) => {
 
 const getAddProduct = async (req, res) => {
   try {
-    const categories = await Category.find({ deletedAt: null }); // Fetching categories
+    const categories = await Category.find({ deletedAt: null });
     const statusOptions = ["Available", "Out of stock"];
-    res.render("addProducts", { categories, statusOptions }); // Passing the categories to the EJS template
+    res.render("addProducts", { categories, statusOptions });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
     console.log(error);
@@ -102,14 +102,10 @@ const addProducts = async (req, res) => {
       quantity,
     } = req.body;
 
-    const categories = await Category.find({ deletedAt: null }); // Fetching categories
     const existProduct = await Product.findOne({ productName, _id: { $ne: id } });
     if (existProduct) {
       return res.status(400).json({ success: false, error: 'Product name already exists' });
     }
-    // Extract the filenames of the uploaded images
-    // const productImages = req.files.map((file) => file.filename); // Storing filenames of uploaded images
-
     const images = [];
 if (req.files && req.files.length > 0) {
   for (let i = 0; i < req.files.length; i++) {
@@ -122,7 +118,7 @@ if (req.files && req.files.length > 0) {
       .resize({ height: 440, width: 440 })
       .toFile(resizedImagePath);
 
-    images.push(resizedImagePath); // Only the relative path is pushed
+    images.push(resizedImagePath);
   }
 }
 
@@ -190,8 +186,7 @@ const updateProduct = async (req, res) => {
           .resize({ height: 440, width: 440 })
           .toFile(resizedImagePath);
 
-        // images.push(path.basename(resizedImagePath)); // Only the filename is pushed
-        images.push(`uploads/${path.basename(resizedImagePath)}`); // Use the same prefix
+        images.push(`uploads/${path.basename(resizedImagePath)}`);
 
       }
 
@@ -217,7 +212,7 @@ const renderUpdateProductForm = async (req, res) => {
   const id = req.query.id;
   try {
     const productData = await Product.findById(id).populate('category');
-    console.log("Fetched Product Data for Rendering:", productData); // Add this line to confirm correct image paths
+    console.log("Fetched Product Data for Rendering:", productData);
 
     if (!productData) {
       return res.status(400).json({ error: "Product not found" });

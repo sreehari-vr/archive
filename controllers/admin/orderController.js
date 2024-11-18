@@ -55,13 +55,13 @@ const viewOrder = async (req, res) => {
 
 
   const updateOrderStatus = async (req, res) => {
-    const { orderId, itemId } = req.params; // Use both order ID and item ID from request parameters
+    const { orderId, itemId } = req.params;
     const { status } = req.body;
   
     try {
       const order = await Order.findOneAndUpdate(
-        { _id: orderId, "items._id": itemId }, // Match the specific item within the order
-        { $set: { "items.$.status": status } }, // Update only the matched item
+        { _id: orderId, "items._id": itemId }, 
+        { $set: { "items.$.status": status } },
         { new: true }
       );
   

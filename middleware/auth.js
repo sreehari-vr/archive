@@ -21,9 +21,9 @@ const userAuth = async (req,res,next) => {
 
 const adminAuth = (req, res, next) => {
     if (req.session && req.session.admin) {
-        return next(); // Allow access if the admin session exists
+        return next(); 
     }
-    res.redirect('/admin/login'); // Redirect to login if not authenticated
+    res.redirect('/admin/login');
 };
 
 

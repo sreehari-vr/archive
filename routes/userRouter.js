@@ -4,6 +4,8 @@ const passport = require("passport")
 const userController = require("../controllers/user/userController")
 const cartController = require("../controllers/user/cartController")
 const orderController = require("../controllers/user/orderController")
+const wishlistController = require("../controllers/user/wishlistController")
+
 const { adminAuth, userAuth } = require("../middleware/auth");
 const { find } = require("../models/productSchema");
 const user = require('../models/userSchema')
@@ -43,22 +45,27 @@ router.post('/editAddress/:id', userAuth, userController.editAddress)
 
 router.get('/deleteAddress/:id', userAuth, userController.deleteAddress)
 
-router.get('/cart',userAuth,cartController.cartLoad)
-router.post('/cart/:id',userAuth,cartController.cartAdd)
-router.get('/cart/remove/:id',userAuth,cartController.removeFromCart)
+router.get('/cart', userAuth, cartController.cartLoad)
+router.post('/cart/:id', userAuth, cartController.cartAdd)
+router.get('/cart/remove/:id', userAuth, cartController.removeFromCart)
 
-router.get('/checkout',userAuth,userController.loadCheckout)
+router.get('/checkout', userAuth, userController.loadCheckout)
 
 
-router.post('/placeOrder',userAuth,orderController.placeOrder)                  
-router.get('/orderConfirmation/:id',userAuth,orderController.orderConfirmation)
-                             
+router.post('/placeOrder', userAuth, orderController.placeOrder)
+router.get('/orderConfirmation/:id', userAuth, orderController.orderConfirmation)
 
-router.get('/orderCancel/:orderId/:itemId',userAuth,orderController.orderCancel)
+
+router.get('/orderCancel/:orderId/:itemId', userAuth, orderController.orderCancel)
 
 router.get('/forgotPass', userController.loadForgotPassword)
 router.post('/forgotPass', userController.verifyForgotPass)
 router.post('/verifyForgotPassOtp', userController.verifyForgotPassOtp)
 router.post('/newPassword', userController.newPassword)
+
+router.get('/wishlist', userAuth, wishlistController.loadWishlist)
+router.post('/wishlist/:id', userAuth, wishlistController.addWishlist)
+router.get('/wishlist/remove/:id', userAuth, wishlistController.removeWishlist)
+
 
 module.exports = router

@@ -1,6 +1,19 @@
 <%- include('../../views/partials/user/header') %>
 
-
+<style>
+    .zoom-container {
+        position: relative;
+        width: 550px; 
+        height: 550px;
+        overflow: hidden; 
+        border: 1px solid #ccc;
+        border-radius: 8px;
+    }
+    #zoomable-image {
+        transition: transform 0.3s ease; 
+    }
+    
+</style>
 
 <div class="breadcrumbs">
     <div class="container">
@@ -15,15 +28,13 @@
 <div class="colorlib-product">
     <div class="container">
         <div class="row row-pb-lg product-detail-wrap">
-            <!-- Product Image and Zoom -->
             <div class="col-sm-8">
                 <div class="zoom-container" onmousemove="zoomIn(event)" onmouseleave="resetZoom()">
                     <img id="zoomable-image" alt="zoomable-image" class="rounded-lg"
-                        height="400" width="400"
+                        height="550" width="550"
                         src="<%= product.productImage && product.productImage.length ? '/' + product.productImage[0].replace(/\\/g, '/') : 'images/no_productImage.png' %>" />
                 </div>
 
-                <!-- Thumbnails -->
                 <div class="slider-nav-thumbnails mt-3 d-flex">
                     <% product.productImage.forEach((image, index) => { %>
                         <img alt="Thumbnail <%= index %>" class="thumbnail rounded-lg me-2"
@@ -33,7 +44,6 @@
                 </div>
             </div>
 
-            <!-- Product Details -->
             <div class="col-sm-4">
                 <div class="product-desc">
                     <h3><%= product.productName %></h3>
@@ -72,13 +82,22 @@
                             <% } else { %>
                                 <h2 style="color: red;">Out of Stock</h2>
                             <% } %>
+                            
+                        </div>
+                        <div>
+                            <form action="/wishlist/<%=product._id%>" method="post">
+                                <button type="submit" class="btn btn-primary btn-addtocart">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
+                                        <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/>
+                                      </svg> Add to Wishlist
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Related Products -->
         <div class="row">
             <div class="col-sm-12">
                 <h2 class="text-center mb-4">Related Products</h2>
@@ -113,7 +132,7 @@
 </div>
 
 <script>
-    // Main Image and Thumbnail Switching
+
     function updateMainImage(selectedThumbnail, imageSrc) {
         document.getElementById('zoomable-image').src = '/' + imageSrc;
 
@@ -123,7 +142,6 @@
         selectedThumbnail.classList.add('active');
     }
 
-    // Zoom Functionality
     const zoomFactor = 1.8;
 
     function zoomIn(event) {
@@ -144,7 +162,6 @@
         zoomableImage.style.transform = 'scale(1)';
     }
 
-    // Quantity Adjustments
     document.addEventListener("DOMContentLoaded", function () {
         const quantityInput = document.getElementById("quantity");
         const btnMinus = document.querySelector(".quantity-left-minus");

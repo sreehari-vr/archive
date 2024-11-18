@@ -19,9 +19,6 @@ const loadHomepage = async (req, res) => {
       category: { $in: categories.map((category) => category._id) }
     });
     productData = productData.sort((a, b) => b.createdAt - a.createdAt);
-
-    // console.log("Fetched Products:", productData); // Log product data
-    // console.log("categories:", categories);
     if (User) {
       const userData = await user.findOne({ _id: User._id });
       return res.render("home", { product: productData, userData });
@@ -68,7 +65,6 @@ const loadSignup = async (req, res) => {
 
 const loadLogin = async (req, res) => {
   try {
-    // return res.render("login");
     if (!req.session.user) {
       return res.render("login");
     } else {
@@ -182,7 +178,7 @@ const verifyOtp = async (req, res) => {
 
 const resendOtp = async (req, res) => {
   try {
-    const { email } = req?.session?.userData; // Retrieve email from session
+    const { email } = req?.session?.userData;
     if (!email) {
       return res.status(400).json({
         success: false,
@@ -200,7 +196,7 @@ const resendOtp = async (req, res) => {
       });
     }
 
-    req.session.userOtp = newOtp; // Update session with the new OTP
+    req.session.userOtp = newOtp;
     res.json({ success: true, message: "OTP resent successfully" });
     console.log("OTP Resent", newOtp);
   } catch (error) {
@@ -383,15 +379,13 @@ const changePassword = async (req, res) => {
       return res.status(401).json({ success: false, message: "User not logged in" });
     }
 
-    const User = await user.findById(userId); // Fetch user from the database
+    const User = await user.findById(userId); 
 
-    // Check if the current password matches
     const isMatch = await bcrypt.compare(currentPassword, User.password);
     if (!isMatch) {
       return res.status(400).json({ success: false, message: "Current password is incorrect" });
     }
 
-    // Validate new password requirements (e.g., length and complexity)
     if (newPassword !== confirmPassword) {
       return res.status(400).json({ success: false, message: "New passwords do not match" });
     }
@@ -400,7 +394,6 @@ const changePassword = async (req, res) => {
       return res.status(400).json({ success: false, message: "New password must be different from the current password" });
     }
 
-    // Hash and save the new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     User.password = hashedPassword;
     await User.save();
@@ -567,7 +560,6 @@ const loadShop = async (req, res) => {
     const { sort, filter } = req.query;
     const categories = await category.find({ isActive: true });
 
-    // Default to 'all' filter if no filter is provided
     let filterCategory = filter || 'all';
 
     let productData = await Product.find({
@@ -576,17 +568,14 @@ const loadShop = async (req, res) => {
       category: { $in: categories.map((category) => category._id) }
     });
 
-    // Filter by selected category
     if (filterCategory !== 'all' && filterCategory !== 'available') {
       productData = productData.filter(product => product.category.toString() === filterCategory);
     }
 
-    // Filter out out-of-stock products if "available" is selected
     if (filterCategory === 'available') {
       productData = productData.filter(product => product.quantity > 0);
     }
 
-    // Sort products based on selected sort option
     switch (sort) {
       case 'price-asc':
         productData = productData.sort((a, b) => a.salePrice - b.salePrice);
@@ -697,6 +686,8 @@ const newPassword = async (req, res) => {
 
 
 
+
+
 module.exports = {
   loadHomepage,
   loadSignup,
@@ -725,5 +716,5 @@ module.exports = {
   verifyForgotPass,
   loadForgotPassword,
   verifyForgotPassOtp,
-  newPassword
+  newPassword,
 };
