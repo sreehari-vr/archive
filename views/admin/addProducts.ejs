@@ -68,20 +68,7 @@
                   <div id="regularPrice-error" class="error-message"></div>
                 </div>
               </div>
-              <div class="col-lg-4">
-                <div class="mb-4">
-                  <label class="form-label">Sale price</label>
-                  <input
-                    placeholder="INR"
-                    name="salePrice"
-                    type="text"
-                    class="form-control border"
-                    id="salePrice"
-                  />
-                
-                <div id="salePrice-error" class="error-message"></div>
-            </div>
-              </div>
+              
               <div class="col-lg-4">
                 <div class="mb-4">
                   <label class="form-label">Quantity</label>
@@ -93,6 +80,20 @@
                     id="quantity"
                   />
                   <div id="quantity-error" class="error-message"></div>
+                </div>
+              </div>
+
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Offer</label>
+                  <input
+                    placeholder=""
+                    name="offer"
+                    type="number"
+                    class="form-control border"
+                    id="offer"
+                  />
+                  <div id="offer-error" class="error-message"></div>
                 </div>
               </div>
             </div>
@@ -119,24 +120,6 @@
                 </div>
               </div>
             </div>
-
-            <!-- <div class="card mb-4">
-                            <div class="card-body">
-                                <div class="row gx-2">
-                                    <div class="col-sm-6 mb-3">
-                                        <label class="form-label">Status</label>
-                                        <select class="form-select border" style="width: 150px;" name="category">
-                                            
-                                                <option value="">
-                                                    
-                                                </option>
-                                                
-                                        </select>
-                                        <div id="category-error" class="error-message"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
 
             <div class="card mb-2">
               <div class="card-header">
@@ -303,17 +286,6 @@
         isValid = false;
       }
 
-    let salePrice = document.getElementById("salePrice").value.trim();
-    if (salePrice > regularPrice) {
-      document.getElementById("salePrice-error").innerText =
-        "sale price cannot be greater than regular price ";
-      isValid = false;
-    }else if (salePrice === "" || isNaN(salePrice) || Number(salePrice) < 0) {
-        document.getElementById("salePrice-error").innerText =
-          "Enter a valid Price";
-        isValid = false;
-      }
-
     const quantity = document.getElementById("quantity").value.trim();
     if (quantity === "" || isNaN(quantity) || Number(quantity) < 0) {
       document.getElementById("quantity-error").innerText =
@@ -433,9 +405,10 @@
       "regularPrice",
       document.getElementById("regularPrice").value
     );
-    formData.append("salePrice", document.getElementById("salePrice").value);
     formData.append("category", document.getElementById("category").value);
     formData.append("quantity", document.getElementById("quantity").value);
+    formData.append("offer", document.getElementById("offer").value);
+
 
     const croppedImage2 = document.getElementById("croppedImg2").src;
     const croppedImage3 = document.getElementById("croppedImg3").src;

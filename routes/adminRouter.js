@@ -19,11 +19,11 @@ router.get("/category", adminAuth, categoryController.categoryInfo);
 router.post("/category", adminAuth, categoryController.categoryInfo);
 router.get("/addCategory", adminAuth, categoryController.addCategory);
 router.post("/addCategory", adminAuth, categoryController.check);
-router.get("/updateCategory",adminAuth,categoryController.renderUpdateCategoryForm);
+router.get("/updateCategory", adminAuth, categoryController.renderUpdateCategoryForm);
 router.post("/updateCategory", adminAuth, categoryController.updateCategory);
 router.get("/unlist", adminAuth, categoryController.unlistCategory);
 router.get("/list", adminAuth, categoryController.listCategory);
-router.get("/softDeleteCategory",adminAuth,categoryController.softDeleteCategory);
+router.get("/softDeleteCategory", adminAuth, categoryController.softDeleteCategory);
 //products
 router.get("/products", adminAuth, productController.productInfo);
 router.get("/addProduct", adminAuth, productController.getAddProduct);
@@ -67,5 +67,8 @@ router.get(
 
 router.post("/orders/:orderId/:itemId", adminAuth,
   orderController.updateOrderStatus);
+
+
+
 
 module.exports = router;

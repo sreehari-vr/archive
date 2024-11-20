@@ -1,4 +1,5 @@
 const Category = require("../../models/categorySchema");
+const Product = require("../../models/productSchema");
 
 const categoryInfo = async (req, res) => {
   try {
@@ -39,20 +40,21 @@ const addCategory = async (req, res) => {
 };
 
 const check = async (req, res) => {
-  const { name, description } = req.body;
+  const {name, description, offer } = req.body;
   try {
     if (!name) {
       return res
         .status(400)
         .json({ success: false, error: "Category name is required" });
     }
+
     const existingCategory = await Category.findOne({ name });
     if (existingCategory) {
       return res
         .status(400)
         .json({ success: false, error: "Category already exists" });
     }
-    const newCategory = new Category({ name, description });
+    const newCategory = new Category({ name, description, offer });
     await newCategory.save();
     return res
       .status(200)
@@ -66,32 +68,56 @@ const check = async (req, res) => {
 };
 
 const updateCategory = async (req, res) => {
-  const { id, name, description } = req.body;
+  const { id, name, description, offer } = req.body;
+
   try {
     const existCategory = await Category.findOne({ name });
-    if (existCategory) {
-      return res
-        .status(400)
-        .json({ success: false, error: "category is already there" });
+    if (existCategory && existCategory._id.toString() !== id) {
+      return res.status(400).json({
+        success: false,
+        error: "Category with this name already exists.",
+      });
     }
 
     const updatedCategory = await Category.updateOne(
       { _id: id },
-      { $set: { name, description } }
+      { $set: { name, description, offer } }
     );
 
     if (!updatedCategory) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Category not found" });
+      return res.status(404).json({
+        success: false,
+        error: "Category not found",
+      });
     }
-    return res
-      .status(200)
-      .json({ success: true, error: "Category updated successfully" });
+
+   const products = await Product.find({category:id})
+
+   for (const product of products) {
+    const productOffer = product.productOffer || 0;
+    const applicableOffer = Math.max(productOffer, offer || 0);
+
+    const salePrice =
+    product.regularPrice - (product.regularPrice * applicableOffer) / 100;
+
+    product.salePrice = salePrice;
+    await product.save();
+  }
+   
+
+    return res.status(200).json({
+      success: true,
+      message: "Category updated successfully",
+    });
   } catch (error) {
-    return res.status(500).json({ error: "internal server error" });
+    console.error("Error updating category:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
   }
 };
+
 
 const renderUpdateCategoryForm = async (req, res) => {
   const id = req.query.id;

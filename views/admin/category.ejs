@@ -30,6 +30,7 @@
                         <th scope="col"><b>No.</b></th>
                         <th scope="col"><b>Name</b></th>
                         <th scope="col"><b>Description</b></th>
+                        <th scope="col"><b>Offer</b></th>
                         <th scope="col"><b>Status</b></th>
                         <th scope="col"><b>Action</b></th>
                       </tr>
@@ -40,6 +41,7 @@
                                 <td><%= i + 1 %></td>
                                 <td><%= data[i].name %></td>
                                 <td><%= data[i].description %></td>
+                                <td><%= data[i].offer %></td>
                                 <td>
                                 <% if(data[i].isActive === true) { %>
                                     <h4 style="color: rgb(0, 255, 47);">Active</h4>

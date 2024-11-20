@@ -16,6 +16,7 @@
 <div class="container mt-5">
     <h2>Add Category</h2>
     <form id="addCategoryForm" action="/admin/addCategory" method="post" onsubmit="addCategory(event)">
+        
       <div class="form-group">
           <label for="name">Category Name:</label>
           <input type="text" id="name" name="name" class="form-control">
@@ -27,6 +28,12 @@
           <textarea id="description" name="description" class="form-control"></textarea>
           <span id="description-error" class="error-message"></span>
       </div>
+
+      <div class="form-group">
+        <label for="offer">Offer:</label>
+        <input type="number" id="offer" name="offer" class="form-control">
+        <span id="offer-error" class="error-message"></span>
+    </div>
   
       <button type="submit" class="btn btn-primary">Add Category</button>
   </form>
@@ -81,13 +88,15 @@
 
       const name = document.getElementById('name').value.trim();
       const description = document.getElementById('description').value.trim();
+      const offer = document.getElementById('offer').value.trim();
 
       $.ajax({
           method: 'POST',
           url: '/admin/addCategory',
           data: { 
               name, 
-              description 
+              description,
+              offer 
           },
           success: function (response) {
               if (response.success) {

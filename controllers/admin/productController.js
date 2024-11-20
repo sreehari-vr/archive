@@ -56,6 +56,9 @@ const productInfo = async (req, res) => {
     }
     limit = 6;
     const skip = (page - 1) * limit;
+
+    
+
     const productData = await Product.find({
       deletedAt: null,
       category: { $ne: null },
@@ -65,6 +68,7 @@ const productInfo = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
+      
     const categories = await Category.find({ deletedAt: null });
     const totalProducts = await Product.countDocuments();
     const totalPages = Math.ceil(totalProducts / limit);
@@ -93,16 +97,15 @@ const getAddProduct = async (req, res) => {
 const addProducts = async (req, res) => {
   try {
     const {
-      id,
       productName,
       description,
       category,
       regularPrice,
-      salePrice,
       quantity,
+      offer
     } = req.body;
 
-    const existProduct = await Product.findOne({ productName, _id: { $ne: id } });
+    const existProduct = await Product.findOne({ productName });
     if (existProduct) {
       return res.status(400).json({ success: false, error: 'Product name already exists' });
     }
@@ -122,7 +125,14 @@ if (req.files && req.files.length > 0) {
   }
 }
 
+const categoryDetails = await Category.findById(category);
+    if (!categoryDetails) {
+      return res.status(404).json({ success: false, error: "Category not found" });
+    }
+    const categoryOffer = categoryDetails.offer || 0;
+    const applicableOffer = Math.max(Number(offer), Number(categoryOffer));
 
+    const salePrice = regularPrice - (regularPrice * applicableOffer) / 100;
    
     const newProduct = new Product({
       productName,
@@ -132,11 +142,11 @@ if (req.files && req.files.length > 0) {
       salePrice,
       quantity,
       productImage: images,
-      createdAt:new Date()
+      createdAt:new Date(),
+      offer
     });
 
     await newProduct.save();
-    console.log(newProduct.productImage);
     return res.status(200).json({success:true,message:"Product added"})
   } catch (error) {
     console.error(error);
@@ -153,11 +163,20 @@ const updateProduct = async (req, res) => {
       productName,
       description,
       regularPrice,
-      salePrice,
       quantity,
-      category
+      category,
+      offer
     } = req.body;
 
+    const categoryDetails = await Category.findById(category);
+    if (!categoryDetails) {
+      return res.status(404).json({ success: false, error: "Category not found" });
+    }
+
+    const categoryOffer = categoryDetails.offer || 0;
+    const applicableOffer = Math.max(Number(offer), Number(categoryOffer));
+
+    const salePrice = regularPrice - (regularPrice * applicableOffer) / 100;
     const existProduct = await Product.findOne({ productName, _id: { $ne: id } });
     if (existProduct) {
       return res.status(400).json({ success: false, error: 'Product name already exists' });
@@ -169,7 +188,8 @@ const updateProduct = async (req, res) => {
       regularPrice,
       salePrice,
       quantity,
-      category
+      category,
+      offer
     };
 
     const images = [];
@@ -257,7 +277,6 @@ const softDeleteProduct = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
 
 
 

@@ -22,6 +22,10 @@ const categorySchema = new mongoose.Schema({
     deletedAt:{
       type:Date,
       default: null
+    },
+    offer:{
+      type:Number,
+      default:0
     }
   });
 

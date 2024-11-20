@@ -53,20 +53,22 @@
                                     <div id="regularPrice-error" class="error-message"></div>
                                 </div>
                             </div>
-                            <div class="col-lg-4">
-                                <div class="mb-4">
-                                    <label class="form-label">Sale price</label>
-                                    <input placeholder="INR" name="salePrice" type="text" class="form-control border"
-                                        id="salePrice" value="<%= data.salePrice %>" required>
-                                    <div id="salePrice-error" class="error-message"></div>
-                                </div>
-                            </div>
+                            
                             <div class="col-lg-4">
                                 <div class="mb-4">
                                     <label class="form-label">Quantity</label>
                                     <input placeholder="" name="quantity" type="text" id="quantity"
                                         class="form-control border" value="<%= data.quantity %>" required>
                                     <div id="quantity-error" class="error-message"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4">
+                                <div class="mb-4">
+                                    <label class="form-label">Offer</label>
+                                    <input placeholder="" name="offer" type="number" id="offer"
+                                        class="form-control border" value="<%= data.offer %>" required>
+                                    <div id="offer-error" class="error-message"></div>
                                 </div>
                             </div>
                         </div>
@@ -198,16 +200,7 @@
             isValid = false;
           }
     
-        let salePrice = document.getElementById("salePrice").value.trim();
-        if (salePrice > regularPrice) {
-          document.getElementById("salePrice-error").innerText =
-            "sale price cannot be greater than regular price ";
-          isValid = false;
-        }else if (salePrice === "" || isNaN(salePrice) || Number(salePrice) < 0) {
-            document.getElementById("salePrice-error").innerText =
-              "Enter a valid Price";
-            isValid = false;
-          }
+        
     
         const quantity = document.getElementById("quantity").value.trim();
         if (quantity === "" || isNaN(quantity) || Number(quantity) < 0) {
@@ -215,6 +208,14 @@
             "Enter a valid Quantity";
           isValid = false;
         }
+
+        const offer = document.getElementById("offer").value.trim();
+        if (offer === "" || isNaN(offer) || Number(offer) < 0) {
+          document.getElementById("offer-error").innerText =
+            "Enter a valid Offer";
+          isValid = false;
+        }
+
         return isValid
       }
 
@@ -326,9 +327,9 @@ function initializeCropper(inputId, imgViewId, cropContainerId) {
         formData.append('productName', document.getElementById('product_name').value);
         formData.append('description', document.getElementById('descriptionid').value);
         formData.append('regularPrice', document.getElementById('regularPrice').value);
-        formData.append('salePrice', document.getElementById('salePrice').value);
         formData.append('quantity', document.getElementById('quantity').value);
         formData.append('category', document.getElementById('category').value);
+        formData.append('offer', document.getElementById('offer').value);
 
 
         const croppedImage1 = document.getElementById('croppedImg1').src;
