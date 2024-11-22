@@ -64,6 +64,9 @@
                         <div class="col-sm-12 text-center">
                             <% if (product.quantity > 0) { %>
                                 <form action="/cart/<%= product._id %>" method="POST" class="d-inline">
+                                    <input type="hidden" id="subTotal" name="subTotal" value="<%= product.salePrice%>">
+                                    <input type="hidden" id="grandTotal" name="grandTotal" value="<%= product.salePrice%>">
+
                                     <h4 style="color: coral;">Stock Left: <%= product.quantity %></h4>
                                     <div class="input-group mb-4">
                                         <button type="button" class="quantity-left-minus btn" data-type="minus">

@@ -48,11 +48,14 @@ router.get('/deleteAddress/:id', userAuth, userController.deleteAddress)
 router.get('/cart', userAuth, cartController.cartLoad)
 router.post('/cart/:id', userAuth, cartController.cartAdd)
 router.get('/cart/remove/:id', userAuth, cartController.removeFromCart)
+router.post('/couponApply', userAuth, cartController.applyCoupon)
 
-router.get('/checkout', userAuth, userController.loadCheckout)
+
+router.post('/checkout', userAuth, userController.loadCheckout)
 
 
 router.post('/placeOrder', userAuth, orderController.placeOrder)
+
 router.get('/orderConfirmation/:id', userAuth, orderController.orderConfirmation)
 
 

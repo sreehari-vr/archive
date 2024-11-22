@@ -6,6 +6,8 @@ const customerController = require("../controllers/admin/customerController");
 const categoryController = require("../controllers/admin/categoryController");
 const productController = require("../controllers/admin/productController");
 const orderController = require("../controllers/admin/orderController");
+const couponController = require("../controllers/admin/couponController");
+
 
 router.get("/login", adminController.loadAdminLogin);
 router.post("/login", adminController.login);
@@ -69,6 +71,13 @@ router.post("/orders/:orderId/:itemId", adminAuth,
   orderController.updateOrderStatus);
 
 
-
+router.get('/coupon',adminAuth,couponController.loadCoupon)
+router.get('/addCoupon',adminAuth,couponController.loadAddCoupon)
+router.post('/addCoupon',adminAuth,couponController.addCoupon)
+router.get('/inactivateCoupon',adminAuth,couponController.inactivateCoupon)
+router.get('/activateCoupon',adminAuth,couponController.activateCoupon)
+router.get('/softDeleteCoupon',adminAuth,couponController.softDeleteCoupon)
+router.get('/updateCoupon',adminAuth,couponController.loadUpdateCoupon)
+router.post('/updateCoupon',adminAuth,couponController.updateCoupon)
 
 module.exports = router;

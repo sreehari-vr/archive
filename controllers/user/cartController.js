@@ -1,27 +1,31 @@
 const user = require("../../models/userSchema");
 const product = require("../../models/productSchema");
-const Address = require("../../models/addressSchema")
+const Coupon = require("../../models/couponSchema")
 const Cart = require("../../models/cartSchema")
 
 
-const cartLoad = async (req,res) => {
+const cartLoad = async (req, res) => {
     const userId = req.session.user;
     try {
-        const cart = await Cart.findOne({userId}).populate('items.productId')
-        res.render('cart',{cart});
+        const cart = await Cart.findOne({ userId }).populate('items.productId')
+        const coupon = await Coupon.find({ isActive: true, deletedAt: null });
+
+        res.render('cart', { cart, coupon });
     } catch (error) {
-    console.log("page not loading:", error);
-    res.status(500).send("Server error");
+        console.log("page not loading:", error);
+        res.status(500).send("Server error");
     }
 }
 
-const cartAdd = async (req,res) => {
+const cartAdd = async (req, res) => {
     const userId = req.session.user;
     const productId = req.params.id;
-    const { quantity } = req.body;
+    const { quantity, subTotal, grandTotal } = req.body;
     try {
-        let cart = await Cart.findOne({userId});
+        let cart = await Cart.findOne({ userId });
         const quantityToAdd = parseInt(quantity, 10);
+        const subTotalToAdd = parseInt(subTotal, 10);
+        const grandTotalToAdd = parseInt(grandTotal, 10);
         if (cart) {
             const productIndex = cart.items.findIndex(item => item.productId.toString() === productId);
 
@@ -30,10 +34,14 @@ const cartAdd = async (req,res) => {
             } else {
                 cart.items.push({ productId, quantity: quantityToAdd });
             }
+            cart.subTotal = subTotalToAdd
+            cart.grandTotal = grandTotalToAdd
         } else {
             cart = new Cart({
                 userId,
-                items: [{ productId, quantity: quantityToAdd }]
+                items: [{ productId, quantity: quantityToAdd }],
+                subTotal: subTotalToAdd,
+                grandTotal: grandTotalToAdd
             });
         }
         await cart.save()
@@ -44,13 +52,15 @@ const cartAdd = async (req,res) => {
     }
 }
 
-const removeFromCart = async (req,res) => {
+const removeFromCart = async (req, res) => {
     const userId = req.session.user;
     const productId = req.params.id;
     try {
-        const userCart = await Cart.findOne({userId});
-        const removingProduct = userCart.items.find(id=>id.productId.toString()===productId) 
-        await Cart.updateOne({userId},{$pull:{items:{_id:removingProduct}}});
+        const userCart = await Cart.findOne({ userId });
+        const removingProduct = userCart.items.find(id => id.productId.toString() === productId)
+        await Cart.updateOne({ userId }, { $pull: { items: { _id: removingProduct } } });
+        res.json({ success: true, message: "Product removed successfully" });
+
         res.redirect('/cart')
 
     } catch (error) {
@@ -59,10 +69,48 @@ const removeFromCart = async (req,res) => {
     }
 }
 
+const applyCoupon = async (req, res) => {
+    try {
+        const { couponCode, subtotal } = req.body;
+        const coupon = await Coupon.findOne({ code: couponCode, isActive: true });
+
+        if (!coupon) {
+            console.error(`Coupon not found: ${couponCode}`);
+            return res.status(400).json({ success: false, message: 'Invalid or expired coupon.' });
+        }
+        if (subtotal < coupon.minPurchase) {
+            console.error(`Subtotal ${subtotal} less than minimum ${coupon.minPurchase}`);
+            return res.status(400).json({ success: false, message: 'Minimum purchase requirement not met.' });
+        }
 
 
-module.exports=({
+        if (coupon.expiryDate < new Date()) {
+            return res.status(400).json({ success: false, message: 'Coupon has expired.' });
+        }
+
+        const discountAmount = coupon.discount;
+        const newGrandTotal = subtotal - discountAmount;
+
+        const finalGrandTotal = newGrandTotal > 0 ? newGrandTotal : 0;
+
+
+        res.json({
+            success: true,
+            discountAmount,
+            newSubtotal: subtotal,
+            newGrandTotal: finalGrandTotal,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server error.' });
+    }
+}
+
+
+
+module.exports = ({
     cartLoad,
     cartAdd,
-    removeFromCart
+    removeFromCart,
+    applyCoupon
 })

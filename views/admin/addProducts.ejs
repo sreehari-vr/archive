@@ -261,39 +261,46 @@
   function formValidate() {
     document.querySelectorAll('.error-message').forEach(el => el.innerText = '');
     let isValid = true;
-    let numVal = /^[0-9]{10}$/;
-
+  
     let name = document.getElementById("product_name").value.trim();
-
     if (name === "") {
-      document.getElementById("productName-error").innerText =
-        "Product name is required";
+      document.getElementById("productName-error").innerText = "Product name is required";
       isValid = false;
     }
-
+  
     let description = document.getElementById("descriptionid").value.trim();
     if (description === "") {
-      document.getElementById("description-error").innerText =
-        "Description is required";
+      document.getElementById("description-error").innerText = "Description is required";
       isValid = false;
     }
-
+  
     let regularPrice = document.getElementById("regularPrice").value.trim();
-
     if (regularPrice === "" || isNaN(regularPrice) || Number(regularPrice) < 0) {
-        document.getElementById("regularPrice-error").innerText =
-          "Enter a valid Price";
-        isValid = false;
-      }
-
+      document.getElementById("regularPrice-error").innerText = "Enter a valid Price";
+      isValid = false;
+    }
+  
     const quantity = document.getElementById("quantity").value.trim();
     if (quantity === "" || isNaN(quantity) || Number(quantity) < 0) {
-      document.getElementById("quantity-error").innerText =
-        "Enter a valid Quantity";
+      document.getElementById("quantity-error").innerText = "Enter a valid Quantity";
       isValid = false;
     }
-    return isValid
+  
+    const imageInputs = [1, 2, 3, 4].map(num => document.getElementById(`input${num}`).files[0]);
+    const hasImage = imageInputs.some(file => file || window[`croppedFile${imageInputs.indexOf(file) + 1}`]);
+  
+    if (!hasImage) {
+      Swal.fire({
+        icon: "error",
+        title: "Image Required",
+        text: "Please upload at least one image.",
+      });
+      isValid = false;
+    }
+  
+    return isValid;
   }
+  
 
   let cropper;
 

@@ -16,9 +16,7 @@ const placeOrder = async(req,res) => {
           return res.status(400).send("Your cart is empty.");
         }
     
-        const totalAmount = cart.items.reduce((total, item) =>
-          total + item.productId.salePrice * item.quantity, 0
-        );
+        const totalAmount = cart.grandTotal
     
         const newOrder = new Order({
           userId,

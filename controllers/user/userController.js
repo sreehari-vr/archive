@@ -534,26 +534,54 @@ const deleteAddress = async (req,res) => {
   }
 }
 
-const loadCheckout = async (req,res) => {
+const loadCheckout = async (req, res) => {
   const id = req.session.user;
+  const { subtotal, discount, grandTotal, quantities } = req.body;
+
   try {
-    const cart = await Cart.findOne({userId:id}).populate('items.productId')
-    const data = await  user.findById(id)
-    const userAddress = await Address.findOne({userId:id})
+    const cart = await Cart.findOne({ userId: id }).populate('items.productId');
+    const data = await user.findById(id);
+    const userAddress = await Address.findOne({ userId: id });
     const addressCount = userAddress ? userAddress.address.length : 0;
     const maxCount = 3;
-    console.log(cart)
-    res.render('checkOut',{
+
+    const subTotalToAdd = parseFloat(subtotal);
+    const grandTotalToAdd = parseFloat(grandTotal);
+    const discountToAdd = parseFloat(discount);
+
+
+    cart.subTotal = subTotalToAdd;
+    cart.grandTotal = grandTotalToAdd;
+
+    const updatedQuantities = JSON.parse(quantities); 
+
+    for (const item of updatedQuantities) {
+      const cartItem = cart.items.find(
+        (cartItem) => cartItem.productId._id.toString() === item.productId
+      );
+      if (cartItem) {
+        cartItem.quantity = item.quantity; 
+      }
+    }
+    cart.discount = discountToAdd
+
+    await cart.save();
+
+    console.log('Updated Cart:', cart);
+
+    res.render('checkOut', {
       data,
       address: userAddress ? userAddress.address : [],
       maxCount,
       addressCount,
-      cart
-    })
+      cart,
+    });
   } catch (error) {
-    console.error(error)
+    console.error('Error in loadCheckout:', error);
+    res.status(500).send('An error occurred while loading the checkout page.');
   }
-}
+};
+
 
 const loadShop = async (req, res) => {
   try {

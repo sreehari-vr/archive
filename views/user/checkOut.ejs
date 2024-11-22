@@ -122,15 +122,15 @@
                 <div class="cart-detail mb-4">
                     <h2>Cart Total</h2>
                     <ul class="list-unstyled">
-                        <li><span>Subtotal</span> <span><h2>₹<%= cart.items.reduce((total, item) => total + (item.productId.salePrice * item.quantity), 0).toFixed(2) %></h2></span></li>
+                        <li><span>Subtotal</span> <span><h2>₹<%= cart.subTotal %></h2></span></li>
                             <% cart.items.forEach(item=> { %>
 
                                 <li><span><%=item.quantity%> x <%=item.productId.productName%> </span> <span><h2>₹<%=(item.quantity * item.productId.salePrice).toFixed(2) %></h2></span> </li>
                                 
                             <% } ) %>
                             
-                        <li><span>Shipping</span> <span><h2>₹0.00</h2></span></li>
-                        <li><span>Order Total</span> <span><h2>₹<%= cart.items.reduce((total, item) => total + (item.productId.salePrice * item.quantity), 0).toFixed(2) %></h2></span></li>
+                        <li><span>Discount</span> <span><h2>₹<%= cart.discount %></h2></span></li>
+                        <li><span>Order Total</span> <span><h2>₹<%= cart.grandTotal %></h2></span></li>
                     </ul>
                 </div>
             </div>
