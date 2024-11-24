@@ -536,7 +536,7 @@ const deleteAddress = async (req,res) => {
 
 const loadCheckout = async (req, res) => {
   const id = req.session.user;
-  const { subtotal, discount, grandTotal, quantities } = req.body;
+  const { subtotal, discount, grandTotal, quantities, couponCode } = req.body;
 
   try {
     const cart = await Cart.findOne({ userId: id }).populate('items.productId');
@@ -575,6 +575,7 @@ const loadCheckout = async (req, res) => {
       maxCount,
       addressCount,
       cart,
+      couponCode
     });
   } catch (error) {
     console.error('Error in loadCheckout:', error);

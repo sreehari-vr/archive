@@ -171,20 +171,19 @@
 													<form id="checkoutForm" action="/checkout" method="POST">
 														<div class="d-flex">
 															<div>
-																<a href="/shop"
-																	class="btn btn-outline-secondary">Continue Shopping</a>
+																<a href="/shop" class="btn btn-outline-secondary">Continue Shopping</a>
 															</div>
 															<div>
 																<input type="hidden" name="subtotal" id="subtotalInput">
 																<input type="hidden" name="discount" id="discountInput">
 																<input type="hidden" name="grandTotal" id="grandTotalInput">
 																<input type="hidden" name="quantities" id="quantitiesInput">
-																<input type="hidden" name="discount" id="discount">
-																<input type="submit" value="Proceed to Checkout"
-																	class="btn btn-primary">
+																<input type="hidden" name="couponCode" id="couponCodeInputHidden">
+																<input type="submit" value="Proceed to Checkout" class="btn btn-primary">
 															</div>
 														</div>
 													</form>
+													
 												</div>
 
 
@@ -404,8 +403,13 @@
 			document.getElementById("discountInput").value = discount;
 			document.getElementById("grandTotalInput").value = grandTotal;
 			document.getElementById("quantitiesInput").value = JSON.stringify(quantities);
+	
+			// Pass the coupon code
+			const couponCode = document.querySelector("#couponCodeInput")?.value.trim() || "";
+			document.getElementById("couponCodeInputHidden").value = couponCode;
 		});
 	});
+	
 	
 	
 </script>

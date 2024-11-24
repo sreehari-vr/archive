@@ -3,46 +3,77 @@ const product = require("../../models/productSchema");
 const Address = require("../../models/addressSchema");
 const Cart = require("../../models/cartSchema");
 const Order = require("../../models/orderSchema");
+const Coupon = require('../../models/couponSchema')
 
-const placeOrder = async(req,res) => {
-    try {
-        const userId = req.session.user;
-        const { selectedAddress, paymentMethod } = req.body;
-        const userAddresses = await Address.findOne({userId});
+const placeOrder = async (req, res) => {
+  try {
+      const userId = req.session.user;
+      const { selectedAddress, paymentMethod, couponCode } = req.body;
 
-        const address = userAddresses.address.find(addr=>addr._id.toString()===selectedAddress)
-        const cart = await Cart.findOne({ userId }).populate("items.productId");
-        if (!cart || cart.items.length === 0) {
+      const userAddresses = await Address.findOne({ userId });
+      const address = userAddresses.address.find(addr => addr._id.toString() === selectedAddress);
+      if (!address) {
+          return res.status(400).send("Invalid address selected.");
+      }
+
+      const cart = await Cart.findOne({ userId }).populate("items.productId");
+      if (!cart || cart.items.length === 0) {
           return res.status(400).send("Your cart is empty.");
-        }
-    
-        const totalAmount = cart.grandTotal
-    
-        const newOrder = new Order({
+      }
+
+      const totalAmount = cart.grandTotal;
+
+      let coupon = null;
+      let userCouponUsage = null;
+
+      if (couponCode) {
+          coupon = await Coupon.findOne({ code: couponCode, isActive: true });
+          const userRecord = await user.findOne({ _id: userId });
+
+          if (coupon) {
+              userCouponUsage = userRecord.usedCoupons.find(uc => String(uc.couponId) === String(coupon._id));
+              if (userCouponUsage) {
+                  userCouponUsage.useCount += 1; 
+              } else {
+                  userRecord.usedCoupons.push({
+                      couponId: coupon._id,
+                      useCount: 1, 
+                  });
+              }
+
+              coupon.usedCount += 1;
+
+              await userRecord.save(); 
+              await coupon.save(); 
+          }
+      }
+      const paymentStatus = paymentMethod === "razorpay" ? "Paid" : "Pending";
+
+      const newOrder = new Order({
           userId,
           items: cart.items.map(item => ({
-            productId: item.productId._id,
-            quantity: item.quantity,
-            price: item.productId.salePrice,
-            status: "Pending",
+              productId: item.productId._id,
+              quantity: item.quantity,
+              price: item.productId.salePrice,
           })),
           totalAmount,
           address: {
-            addressType:address.addressType,
-            name:address.name,
-            city:address.city,
-            landMark:address.landMark,
-            state:address.state,
-            pincode:address.pincode,
-            phone:address.phone,
-            altPhone:address.altPhone
+              addressType: address.addressType,
+              name: address.name,
+              city: address.city,
+              landMark: address.landMark,
+              state: address.state,
+              pincode: address.pincode,
+              phone: address.phone,
+              altPhone: address.altPhone,
           },
-          paymentMethod
-        });
-    
-        await newOrder.save();
-    
-        for (const item of cart.items) {
+          paymentMethod,
+          paymentStatus
+      });
+
+      await newOrder.save();
+
+      for (const item of cart.items) {
           const Product = await product.findById(item.productId._id);
           if (Product) {
               Product.quantity = Math.max(0, Product.quantity - item.quantity);
@@ -50,15 +81,22 @@ const placeOrder = async(req,res) => {
           }
       }
 
-        await Cart.findOneAndUpdate({ userId }, { items: [] });
+      await Cart.findOneAndUpdate({ userId }, { items: [] });
+      
 
-    
-        res.redirect(`/orderConfirmation/${newOrder._id}`);
-      } catch (error) {
-        console.error("Error placing order:", error);
-        res.status(500).send("Error placing order");
-      }
-}
+      if (paymentMethod === "razorpay") {
+        return res.json({ success: true, orderId: newOrder._id });
+    } else if (paymentMethod === "cod") {
+        return res.redirect(`/orderConfirmation/${newOrder._id}`);
+    }
+    } catch (error) {
+      console.error("Error placing order:", error);
+      res.status(500).send("Error placing order.");
+  }
+};
+
+
+
 
 
 const orderConfirmation = async (req, res) => {

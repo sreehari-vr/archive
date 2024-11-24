@@ -8,10 +8,12 @@ const couponSchema = new Schema({
   maxDiscount: { type: Number, default: null }, 
   expiryDate: { type: Date, required: true }, 
   minPurchase: { type: Number, default: 0 }, 
-  usageLimit: { type: Number, default: null }, 
+  usageLimit: { type: Number, default: 0 }, 
   perUserLimit: { type: Number, default: 0 }, 
   isActive: { type: Boolean, default: true },
-  deletedAt: { type: Date, default: null }
+  deletedAt: { type: Date, default: null },
+  usedCount: { type: Number, default: 0 }, 
+
 })
 
 const Coupon = mongoose.model('Coupon',couponSchema);

@@ -70,41 +70,52 @@ const removeFromCart = async (req, res) => {
 }
 
 const applyCoupon = async (req, res) => {
+    const userId = req.session.user;
     try {
         const { couponCode, subtotal } = req.body;
-        const coupon = await Coupon.findOne({ code: couponCode, isActive: true });
 
+        const coupon = await Coupon.findOne({ code: couponCode, isActive: true });
         if (!coupon) {
-            console.error(`Coupon not found: ${couponCode}`);
             return res.status(400).json({ success: false, message: 'Invalid or expired coupon.' });
         }
-        if (subtotal < coupon.minPurchase) {
-            console.error(`Subtotal ${subtotal} less than minimum ${coupon.minPurchase}`);
-            return res.status(400).json({ success: false, message: 'Minimum purchase requirement not met.' });
+
+        const userRecord = await user.findOne({ _id: userId }).populate('usedCoupons.couponId');
+        const userCouponUsage = userRecord.usedCoupons.find(uc => String(uc.couponId._id) === String(coupon._id));
+        const userUseCount = userCouponUsage ? userCouponUsage.useCount : 0;
+
+        if (userUseCount >= coupon.perUserLimit) {
+            return res.status(400).json({ success: false, message: 'Coupon usage limit exceeded for this user.' });
         }
 
+        if (coupon.usageLimit !== 0 && coupon.usedCount >= coupon.usageLimit) {
+            return res.status(400).json({ success: false, message: 'Coupon usage limit exceeded globally.' });
+        }
+
+        if (subtotal < coupon.minPurchase) {
+            return res.status(400).json({ success: false, message: 'Minimum purchase requirement not met.' });
+        }
 
         if (coupon.expiryDate < new Date()) {
             return res.status(400).json({ success: false, message: 'Coupon has expired.' });
         }
 
-        const discountAmount = coupon.discount;
+        const discountAmount = Math.min(coupon.discount, coupon.maxDiscount || coupon.discount);
         const newGrandTotal = subtotal - discountAmount;
-
         const finalGrandTotal = newGrandTotal > 0 ? newGrandTotal : 0;
-
 
         res.json({
             success: true,
             discountAmount,
             newSubtotal: subtotal,
             newGrandTotal: finalGrandTotal,
+            couponCode,
         });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Server error.' });
     }
-}
+};
+
 
 
 

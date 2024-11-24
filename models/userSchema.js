@@ -28,7 +28,19 @@ const userSchema = new Schema({
     },isAdmin:{
         type:Boolean,
         default:false
-    }
+    },
+    usedCoupons: [
+        {
+          couponId: {
+            type: Schema.Types.ObjectId,
+            ref: "Coupon",
+          },
+          useCount: {
+            type: Number,
+            default: 0,
+          },
+        },
+      ]
 })
 
 const user = mongoose.model("user",userSchema);

@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router()
 const passport = require("passport")
+
 const userController = require("../controllers/user/userController")
 const cartController = require("../controllers/user/cartController")
 const orderController = require("../controllers/user/orderController")
@@ -69,6 +70,7 @@ router.post('/newPassword', userController.newPassword)
 router.get('/wishlist', userAuth, wishlistController.loadWishlist)
 router.post('/wishlist/:id', userAuth, wishlistController.addWishlist)
 router.get('/wishlist/remove/:id', userAuth, wishlistController.removeWishlist)
+
 
 
 module.exports = router

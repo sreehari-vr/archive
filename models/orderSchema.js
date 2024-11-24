@@ -22,11 +22,6 @@ const orderSchema = new Schema({
         type: Number,
         required: true
       },
-      status: {
-        type: String,
-        enum:['Pending','Shipped','Cancelled','Returned'],
-        default: "pending"
-      },
     }
   ],
   totalAmount: {
@@ -67,7 +62,6 @@ const orderSchema = new Schema({
       required: false,
     }
   },
-  
   orderDate: {
     type: Date,
     default: Date.now
@@ -77,7 +71,16 @@ const orderSchema = new Schema({
     enum: ["cod", "razorpay", "wallet"],
     default: 'cod',
     required: true,
-
+  },
+  orderStatus: {
+    type: String,
+        enum:['Pending','Delivered','Shipped','Cancelled','Returned','Refunded'],
+        default: "Pending"
+  },
+  paymentStatus: {
+    type: String,
+    enum:['Pending','Failed','Refund','Paid'],
+    default: "Pending"
   }
 });
 
