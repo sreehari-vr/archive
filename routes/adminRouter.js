@@ -67,17 +67,23 @@ router.get(
   orderController.
     viewOrder);
 
-router.post("/orders/:orderId/:itemId", adminAuth,
+router.post("/orders/:orderId/update-order-status", adminAuth,
   orderController.updateOrderStatus);
 
+router.post("/orders/:orderId/update-payment-status", adminAuth,
+    orderController.updatePaymentStatus);
+  
 
-router.get('/coupon',adminAuth,couponController.loadCoupon)
-router.get('/addCoupon',adminAuth,couponController.loadAddCoupon)
-router.post('/addCoupon',adminAuth,couponController.addCoupon)
-router.get('/inactivateCoupon',adminAuth,couponController.inactivateCoupon)
-router.get('/activateCoupon',adminAuth,couponController.activateCoupon)
-router.get('/softDeleteCoupon',adminAuth,couponController.softDeleteCoupon)
-router.get('/updateCoupon',adminAuth,couponController.loadUpdateCoupon)
-router.post('/updateCoupon',adminAuth,couponController.updateCoupon)
+router.get('/coupon', adminAuth, couponController.loadCoupon)
+router.get('/addCoupon', adminAuth, couponController.loadAddCoupon)
+router.post('/addCoupon', adminAuth, couponController.addCoupon)
+router.get('/inactivateCoupon', adminAuth, couponController.inactivateCoupon)
+router.get('/activateCoupon', adminAuth, couponController.activateCoupon)
+router.get('/softDeleteCoupon', adminAuth, couponController.softDeleteCoupon)
+router.get('/updateCoupon', adminAuth, couponController.loadUpdateCoupon)
+router.post('/updateCoupon', adminAuth, couponController.updateCoupon)
+
+router.get('/report',adminAuth,adminController.getSalesReport )
+
 
 module.exports = router;

@@ -55,23 +55,44 @@ const viewOrder = async (req, res) => {
 
 
   const updateOrderStatus = async (req, res) => {
-    const { orderId, itemId } = req.params;
+    const { orderId } = req.params;
     const { status } = req.body;
   
     try {
-      const order = await Order.findOneAndUpdate(
-        { _id: orderId, "items._id": itemId }, 
-        { $set: { "items.$.status": status } },
+      const order = await Order.findByIdAndUpdate(
+        orderId,
+        { orderStatus: status },
         { new: true }
       );
   
-      if (!order) return res.status(404).json({ error: "Order or item not found" });
-      res.json({ success: true, message: "Item status updated"});
+      if (!order) return res.status(404).json({ error: "Order not found" });
+      return res.json({ success: true, message: "Order status updated", order });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: "Internal server error" });
+      return res.status(500).json({ error: "Internal server error" });
     }
   };
+
+  
+  const updatePaymentStatus = async (req, res) => {
+    const { orderId } = req.params;
+    const { status } = req.body;
+  
+    try {
+      const order = await Order.findByIdAndUpdate(
+        orderId,
+        { paymentStatus: status },
+        { new: true }
+      );
+  
+      if (!order) return res.status(404).json({ error: "Order not found" });
+      return res.json({ success: true, message: "Payment status updated", order });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  };
+  
   
   
   
@@ -79,5 +100,6 @@ const viewOrder = async (req, res) => {
 module.exports = {
     listOrders,
     viewOrder,
-    updateOrderStatus
+    updateOrderStatus,
+    updatePaymentStatus
 }

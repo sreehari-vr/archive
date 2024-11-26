@@ -403,16 +403,32 @@
                                     <tr>
                                       <td><%= order._id %></td>
                                       <td><%= item.productId.productName %></td>
-                                      <td style="color:darkmagenta;"><%= item.status %></td>
-                                      <td><%= item.price * item.quantity %></td>
+                                      <td style="color:darkmagenta;"><%= order.orderStatus %></td>
+                                      <td>₹
+                                        <%= order.totalAmount %></td>
                                         <td>
-                                          <button 
-                                            class="btn cancel-btn" 
+                                          <% if (order.orderStatus === "Cancelled" || order.orderStatus === "Returned") { %>
+                                            <a href="/orderDetailUser/<%=order._id%>">View details</a>
+                                          <% } else if (order.orderStatus === "Delivered") { %>
+                                            <button 
+                                            class="btn return-btn" 
                                             data-order-id="<%= order._id %>" 
                                             data-item-id="<%= item._id %>">
-                                            Cancel
+                                            Return
                                           </button>
-                                        
+                                            <a href="/orderDetailUser/<%=order._id%>">View details</a>
+                                          <% } else { %>
+                                            <button 
+                                              class="btn cancel-btn" 
+                                              data-order-id="<%= order._id %>" 
+                                              data-item-id="<%= item._id %>">
+                                              Cancel
+                                            </button>
+                                            <a href="/orderDetailUser/<%=order._id%>">View details</a>
+                                          <% } %>
+                                          
+                                          
+                                          
                                       </td>
                                     </tr>
                                   <% }) %>
@@ -439,9 +455,9 @@
                             <form>
                               <div class="form-group">
                                 <label for="walletAmount" class="h4">Amount</label>
-                                <div class="h3"></div>
+                                <div class="h3">₹
+                                  <%=wallet.balance%></div>
                               </div>
-                              <button type="button" class="btn btn-success" onclick="">Add Money</button>
                             </form>
                           </div>
                         </div>
@@ -466,11 +482,13 @@
                               </tr>
                             </thead>
                             <tbody>
-                              <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                              </tr>
+                              <% for (let i = 0; i < wallet.transactionHistory.length; i++) { %>
+                                <tr>
+                                  <td><%= new Date(wallet.transactionHistory[i].date).toLocaleDateString() %></td>
+                                  <td><%= wallet.transactionHistory[i].type %></td>
+                                  <td>₹<%= wallet.transactionHistory[i].amount %></td>
+                                </tr>
+                              <% } %>
                             </tbody>
                           </table>
                         </div>
@@ -570,7 +588,7 @@
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
+        confirmButtonText: 'Yes'
       }).then((result) => {
         if (result.isConfirmed) {
           // Redirect to the delete route if confirmed
@@ -598,7 +616,31 @@
         showCancelButton: true,
         confirmButtonColor: '#d33',
         cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, cancel it!'
+        confirmButtonText: 'Yes'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = cancelUrl;
+        }
+      });
+    });
+  });
+
+
+  document.querySelectorAll('.return-btn').forEach(button => {
+    button.addEventListener('click', function () {
+      const orderId = this.dataset.orderId; // Get order ID from data attribute
+      const itemId = this.dataset.itemId; // Get item ID from data attribute
+      const cancelUrl = `/orderReturn/${orderId}/${itemId}`; // Construct cancel URL
+
+      // SweetAlert confirmation dialog
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to return this order? This action cannot be undone.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes'
       }).then((result) => {
         if (result.isConfirmed) {
           window.location.href = cancelUrl;

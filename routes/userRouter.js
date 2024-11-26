@@ -61,6 +61,7 @@ router.get('/orderConfirmation/:id', userAuth, orderController.orderConfirmation
 
 
 router.get('/orderCancel/:orderId/:itemId', userAuth, orderController.orderCancel)
+router.get('/orderReturn/:orderId/:itemId', userAuth, orderController.orderReturn)
 
 router.get('/forgotPass', userController.loadForgotPassword)
 router.post('/forgotPass', userController.verifyForgotPass)
@@ -70,6 +71,7 @@ router.post('/newPassword', userController.newPassword)
 router.get('/wishlist', userAuth, wishlistController.loadWishlist)
 router.post('/wishlist/:id', userAuth, wishlistController.addWishlist)
 router.get('/wishlist/remove/:id', userAuth, wishlistController.removeWishlist)
+router.get('/orderDetailUser/:orderId', userAuth, orderController.orderDetailUser)
 
 
 

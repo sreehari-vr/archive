@@ -1,4 +1,9 @@
 const User = require("../../models/userSchema");
+const Order = require("../../models/orderSchema");
+const Cart = require("../../models/cartSchema");
+const Product = require("../../models/productSchema");
+const Category = require("../../models/categorySchema");
+
 const bcrypt = require("bcrypt");
 
 
@@ -60,4 +65,49 @@ const logout = async (req, res) => {
   }
 };
 
-module.exports = { loadAdminLogin, login, loadAdminDash, logout };
+
+const getSalesReport = async (req,res) => {
+  try{
+    const cart = await Cart.find()
+    const order = await Order.find()
+    const product = await Product.find()
+
+    const totalOrders = order.length
+    const totalAmount = order.reduce((acc,curr)=>{
+      acc = acc+curr.totalAmount
+      return acc
+  },0)
+
+    const totalCouponOffers = cart.reduce((acc,curr)=>{
+      acc = acc + curr.discount
+      return acc
+    },0)
+
+    const totalOffers = product.reduce((sum, curr) => {
+      return sum + (curr.regularPrice - curr.salePrice);
+    }, 0);
+
+    const totalDelivered = order.filter((o) => o.orderStatus === "Delivered").length;
+
+     const totalShipped = order.filter((o) => o.orderStatus === "Shipped").length;
+
+     const totalReturned = order.filter((o) => o.orderStatus === "Returned").length;
+
+     const totalCancelled = order.filter((o) => o.orderStatus === "cancelled").length;
+
+
+    res.render('report',{
+      totalAmount,
+      totalOrders,
+      totalCouponOffers,
+      totalOffers,
+      totalDelivered,
+      totalShipped,
+      totalReturned,
+      totalCancelled
+    })
+  }catch(error){
+    console.error(error)
+  }
+}
+module.exports = { loadAdminLogin, login, loadAdminDash, logout, getSalesReport };

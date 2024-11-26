@@ -1,0 +1,97 @@
+<%- include('../../views/partials/admin/header.ejs') %>
+
+<body class="bg-gray-50 p-6">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Order Dashboard</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            <!-- Total Orders -->
+            <div class="bg-green-500 rounded-lg p-4 text-white shadow-lg">
+                <h2 class="text-xl mb-2">Total Orders</h2>
+                <input type="text" value="<%=totalOrders%>" class="w-full bg-white rounded px-3 py-2 text-gray-800" readonly>
+            </div>
+
+            <!-- Total Amount -->
+            <div class="bg-teal-500 rounded-lg p-4 text-white shadow-lg">
+                <h2 class="text-xl mb-2">Total Amount</h2>
+                <input type="text" value="Rs. <%=totalAmount%>" class="w-full bg-white rounded px-3 py-2 text-gray-800" readonly>
+            </div>
+
+            <!-- Total Coupon Discount -->
+            <div class="bg-yellow-400 rounded-lg p-4 text-white shadow-lg">
+                <h2 class="text-xl mb-2">Total Coupon Discount</h2>
+                <input type="text" value="<%=totalCouponOffers%>" class="w-full bg-white rounded px-3 py-2 text-gray-800" readonly>
+            </div>
+
+            <!-- Total Cancelled Orders -->
+            <div class="bg-red-500 rounded-lg p-4 text-white shadow-lg">
+                <h2 class="text-xl mb-2">Total Cancelled Orders</h2>
+                <input type="text" value="<%=totalCancelled%>" class="w-full bg-white rounded px-3 py-2 text-gray-800" readonly>
+            </div>
+
+            <!-- Total Returned Orders -->
+            <div class="bg-green-500 rounded-lg p-4 text-white shadow-lg">
+                <h2 class="text-xl mb-2">Total Returned Orders</h2>
+                <input type="text" value="<%=totalReturned%>" class="w-full bg-white rounded px-3 py-2 text-gray-800" readonly>
+            </div>
+
+            <!-- Total Shipped Orders -->
+            <div class="bg-gray-600 rounded-lg p-4 text-white shadow-lg">
+                <h2 class="text-xl mb-2">Total Shipped Orders</h2>
+                <input type="text" value="<%=totalShipped%>" class="w-full bg-white rounded px-3 py-2 text-gray-800" readonly>
+            </div>
+
+            <!-- Total Product Offer -->
+            <div class="bg-blue-500 rounded-lg p-4 text-white shadow-lg">
+                <h2 class="text-xl mb-2">Total Product Offer</h2>
+                <input type="text" value="<%=totalOffers%>" class="w-full bg-white rounded px-3 py-2 text-gray-800" readonly>
+            </div>
+
+            <!-- Total Category Offer -->
+            <div class="bg-gray-800 rounded-lg p-4 text-white shadow-lg">
+                <h2 class="text-xl mb-2">Total Category Offer</h2>
+                <input type="text" value="<%=totalOffers%>" class="w-full bg-white rounded px-3 py-2 text-gray-800" readonly>
+            </div>
+
+            <!-- Total Delivered Orders -->
+            <div class="bg-green-500 rounded-lg p-4 text-white shadow-lg">
+                <h2 class="text-xl mb-2">Total Delivered Orders</h2>
+                <input type="text" value="<%=totalDelivered%>" class="w-full bg-white rounded px-3 py-2 text-gray-800" readonly>
+            </div>
+        </div>
+
+        <!-- Report Filter Section -->
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Select Report Filter:</label>
+            <select class="w-full md:w-64 px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option>Yearly</option>
+                <option>Monthly</option>
+                <option>Weekly</option>
+                <option>Daily</option>
+            </select>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex flex-wrap gap-4">
+            <button class="btn btn-warning">
+                Submit
+            </button>
+            <button class="btn btn-warning">
+
+                Download PDF
+            </button>
+            <button class="btn btn-warning">
+
+                Download Excel
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Add any interactive functionality here
+        document.querySelector('select').addEventListener('change', function() {
+            console.log('Filter changed:', this.value);
+        });
+    </script>
+</body>
+</html>

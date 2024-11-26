@@ -1,0 +1,122 @@
+<%- include("../../views/partials/user/header") %>
+
+<title>Order Details - Archive</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    :root {
+        --primary-color: #98C8BE;
+        --secondary-color: #666666;
+        --background-color: #f8f9fa;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .order-status {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+
+    .section-title {
+        color: var(--secondary-color);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 1rem;
+    }
+
+    .btn-outline-secondary {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+</style>
+</head>
+
+<body class="bg-light">
+
+    <!-- Order Details -->
+    <div class="col-md-9 mt-5" style="margin: auto;">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="section-title mb-4">Order Details</h5>
+
+                <!-- Order Summary -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Order ID:</strong> <%= order._id %></p>
+                        <p class="mb-1"><strong>Order Date:</strong> <%= new Date(order.orderDate).toLocaleDateString() %></p>
+                        <p class="mb-1"><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+                        <p class="mb-3"><strong>Payment Status:</strong> <%= order.paymentStatus %></p>
+                        <span class="order-status"><%= order.orderStatus %></span>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <h3 class="mb-1"><strong>Total Amount:</strong> ₹<%= order.totalAmount %></h3>
+                    </div>
+                </div>
+
+                <!-- Product Details -->
+                <h6 class="section-title mb-3">Product Information</h6>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% order.items.forEach(item => { %>
+                                <tr>
+                                    <td><%= item.productId.productName %></td> <!-- Assuming product name is in the referenced model -->
+                                    <td>₹<%= item.price %></td>
+                                    <td><%= item.quantity %></td>
+                                    <td>₹<%= item.price * item.quantity %></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Shipping Address -->
+                <h6 class="section-title mb-3">Shipping Address</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Name:</strong> <%= order.address.name %></p>
+                        <p class="mb-1"><strong>Address Type:</strong> <%= order.address.addressType %></p>
+                        <p class="mb-1"><strong>City:</strong> <%= order.address.city %></p>
+                        <p class="mb-1"><strong>Landmark:</strong> <%= order.address.landMark %></p>
+                        <p class="mb-1"><strong>State:</strong> <%= order.address.state %></p>
+                        <p class="mb-1"><strong>Pincode:</strong> <%= order.address.pincode %></p>
+                        <p class="mb-1"><strong>Phone:</strong> <%= order.address.phone %></p>
+                        <% if (order.address.altPhone) { %>
+                            <p class="mb-1"><strong>Alternate Phone:</strong> <%= order.address.altPhone %></p>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <!-- <div class="mt-4">
+                    <button class="btn btn-outline-secondary me-2">Track Order</button>
+                    <button class="btn btn-outline-secondary">Download Invoice</button>
+                </div> -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+<%- include("../../views/partials/user/footer") %>
+
+</html>

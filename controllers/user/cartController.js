@@ -83,6 +83,7 @@ const applyCoupon = async (req, res) => {
         const userCouponUsage = userRecord.usedCoupons.find(uc => String(uc.couponId._id) === String(coupon._id));
         const userUseCount = userCouponUsage ? userCouponUsage.useCount : 0;
 
+        
         if (userUseCount >= coupon.perUserLimit) {
             return res.status(400).json({ success: false, message: 'Coupon usage limit exceeded for this user.' });
         }
