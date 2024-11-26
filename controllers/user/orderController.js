@@ -50,20 +50,21 @@ const placeOrder = async (req, res) => {
       }
 
       const wallet = await Wallet.findOne({ userId });
-    if (paymentMethod === "wallet") {
-      if (!wallet || wallet.balance < totalAmount) {
-        return res.status(400).send("Insufficient wallet balance.");
-      }
-      wallet.balance -= totalAmount;
-      wallet.transactionHistory.push({
-        type: "Debit",
-        amount: totalAmount,
-        description: `Purchase for order`,
-      });
-      await wallet.save();
+      if (paymentMethod === "wallet") {
+        if (!wallet || wallet.balance < totalAmount) {
+            return res.status(400).send("Insufficient wallet balance.");
+        }
+        wallet.balance -= totalAmount;
+        wallet.transactionHistory.push({
+            type: "Debit",
+            amount: totalAmount,
+            description: `Purchase for order`,
+        });
+        await wallet.save();
     }
+    
 
-      const paymentStatus = paymentMethod === "wallet" || "razorpay" ? "Paid" : "Pending";
+    const paymentStatus = paymentMethod === "wallet" || paymentMethod === "razorpay" ? "Paid" : "Pending";
 
       const newOrder = new Order({
           userId,

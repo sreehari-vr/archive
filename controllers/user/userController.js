@@ -278,7 +278,7 @@ const renderUserProfile = async (req,res) => {
       addressCount,
       maxCount,
       orders,
-      wallet
+      wallet: wallet || { balance: 0, transactionHistory: []},
     })
     
   } catch (error) {

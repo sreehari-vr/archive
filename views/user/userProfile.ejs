@@ -455,8 +455,7 @@
                             <form>
                               <div class="form-group">
                                 <label for="walletAmount" class="h4">Amount</label>
-                                <div class="h3">₹
-                                  <%=wallet.balance%></div>
+                                  <div class="h3">₹ <%= wallet && wallet.balance ? wallet.balance : 0 %></div>
                               </div>
                             </form>
                           </div>
@@ -482,13 +481,20 @@
                               </tr>
                             </thead>
                             <tbody>
-                              <% for (let i = 0; i < wallet.transactionHistory.length; i++) { %>
+                              <% if (wallet && wallet.transactionHistory && wallet.transactionHistory.length > 0) { %>
+                                <% for (let i = 0; i < wallet.transactionHistory.length; i++) { %>
+                                  <tr>
+                                    <td><%= new Date(wallet.transactionHistory[i].date).toLocaleDateString() %></td>
+                                    <td><%= wallet.transactionHistory[i].type %></td>
+                                    <td>₹<%= wallet.transactionHistory[i].amount %></td>
+                                  </tr>
+                                <% } %>
+                              <% } else { %>
                                 <tr>
-                                  <td><%= new Date(wallet.transactionHistory[i].date).toLocaleDateString() %></td>
-                                  <td><%= wallet.transactionHistory[i].type %></td>
-                                  <td>₹<%= wallet.transactionHistory[i].amount %></td>
+                                  <td colspan="3" class="text-center">No transactions found</td>
                                 </tr>
                               <% } %>
+                              
                             </tbody>
                           </table>
                         </div>

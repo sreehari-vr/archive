@@ -84,6 +84,7 @@ router.get('/updateCoupon', adminAuth, couponController.loadUpdateCoupon)
 router.post('/updateCoupon', adminAuth, couponController.updateCoupon)
 
 router.get('/report',adminAuth,adminController.getSalesReport )
-
+router.get('/report/pdf',adminAuth,adminController.downloadPdfReport);
+router.get('/report/excel',adminAuth,adminController.downloadExcelReport);
 
 module.exports = router;
