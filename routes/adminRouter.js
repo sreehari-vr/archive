@@ -8,10 +8,9 @@ const productController = require("../controllers/admin/productController");
 const orderController = require("../controllers/admin/orderController");
 const couponController = require("../controllers/admin/couponController");
 
-
 router.get("/login", adminController.loadAdminLogin);
 router.post("/login", adminController.login);
-router.get('/logout', adminController.logout)
+router.get("/logout", adminController.logout);
 router.get("/adminDash", adminAuth, adminController.loadAdminDash);
 router.get("/users", adminAuth, customerController.customerInfo);
 router.get("/blockCustomer", adminAuth, customerController.blockCustomer);
@@ -21,15 +20,24 @@ router.get("/category", adminAuth, categoryController.categoryInfo);
 router.post("/category", adminAuth, categoryController.categoryInfo);
 router.get("/addCategory", adminAuth, categoryController.addCategory);
 router.post("/addCategory", adminAuth, categoryController.check);
-router.get("/updateCategory", adminAuth, categoryController.renderUpdateCategoryForm);
+router.get(
+  "/updateCategory",
+  adminAuth,
+  categoryController.renderUpdateCategoryForm
+);
 router.post("/updateCategory", adminAuth, categoryController.updateCategory);
 router.get("/unlist", adminAuth, categoryController.unlistCategory);
 router.get("/list", adminAuth, categoryController.listCategory);
-router.get("/softDeleteCategory", adminAuth, categoryController.softDeleteCategory);
+router.get(
+  "/softDeleteCategory",
+  adminAuth,
+  categoryController.softDeleteCategory
+);
 //products
 router.get("/products", adminAuth, productController.productInfo);
 router.get("/addProduct", adminAuth, productController.getAddProduct);
-router.post("/addProduct",
+router.post(
+  "/addProduct",
   adminAuth,
   productController.upload.array("images", 4),
   productController.addProducts
@@ -55,36 +63,33 @@ router.get(
   productController.renderUpdateProductForm
 );
 
-router.get(
-  "/orders",
+router.get("/orders", adminAuth, orderController.listOrders);
+
+router.get("/orders/:id", adminAuth, orderController.viewOrder);
+
+router.post(
+  "/orders/:orderId/update-order-status",
   adminAuth,
-  orderController.listOrders
+  orderController.updateOrderStatus
 );
 
-router.get(
-  "/orders/:id",
+router.post(
+  "/orders/:orderId/update-payment-status",
   adminAuth,
-  orderController.
-    viewOrder);
+  orderController.updatePaymentStatus
+);
 
-router.post("/orders/:orderId/update-order-status", adminAuth,
-  orderController.updateOrderStatus);
+router.get("/coupon", adminAuth, couponController.loadCoupon);
+router.get("/addCoupon", adminAuth, couponController.loadAddCoupon);
+router.post("/addCoupon", adminAuth, couponController.addCoupon);
+router.get("/inactivateCoupon", adminAuth, couponController.inactivateCoupon);
+router.get("/activateCoupon", adminAuth, couponController.activateCoupon);
+router.get("/softDeleteCoupon", adminAuth, couponController.softDeleteCoupon);
+router.get("/updateCoupon", adminAuth, couponController.loadUpdateCoupon);
+router.post("/updateCoupon", adminAuth, couponController.updateCoupon);
 
-router.post("/orders/:orderId/update-payment-status", adminAuth,
-    orderController.updatePaymentStatus);
-  
-
-router.get('/coupon', adminAuth, couponController.loadCoupon)
-router.get('/addCoupon', adminAuth, couponController.loadAddCoupon)
-router.post('/addCoupon', adminAuth, couponController.addCoupon)
-router.get('/inactivateCoupon', adminAuth, couponController.inactivateCoupon)
-router.get('/activateCoupon', adminAuth, couponController.activateCoupon)
-router.get('/softDeleteCoupon', adminAuth, couponController.softDeleteCoupon)
-router.get('/updateCoupon', adminAuth, couponController.loadUpdateCoupon)
-router.post('/updateCoupon', adminAuth, couponController.updateCoupon)
-
-router.get('/report',adminAuth,adminController.getSalesReport )
-router.get('/report/pdf',adminAuth,adminController.downloadPdfReport);
-router.get('/report/excel',adminAuth,adminController.downloadExcelReport);
+router.get("/report", adminAuth, adminController.getSalesReport);
+router.get("/report/pdf", adminAuth, adminController.downloadPdfReport);
+router.get("/report/excel", adminAuth, adminController.downloadExcelReport);
 
 module.exports = router;

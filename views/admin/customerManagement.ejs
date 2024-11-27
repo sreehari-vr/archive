@@ -1,121 +1,128 @@
 <%-include('../../views/partials/admin/header.ejs')%>
 
-<div class="content-header row">
-    <div class="d-flex justify-content-between align-items-center">
-        <h2 class="content-title card-title">Customers</h2>
-       
-    </div>
-</div>         
-        </div>
-        
-            <header class="card-header text-center mb-20">
-                <form action="/admin/users/" method="get" class="d-inline">
-                    <div class="input-group input-group-sm border border-1 border-grey rounded-pill" style="width: 500px; margin-left: 230px;">
-                        <input type="text" class="form-control border-0 rounded-pill" placeholder="Search customers..." name="search">
-                        <button class="btn  border-0" type="submit">Search</button>
-                    </div>
-                </form>
-            </header>
-            <div class="right mt-5">
-                <table class="table table-striped">
-                    <thead>
-                      <tr>
-                        <th scope="col"><b>No.</b></th>
-                        <th scope="col"><b>Name</b></th>
-                        <th scope="col"><b>Email</b></th>
-                        <th scope="col"><b>Phone No</b></th>
-                        <th scope="col"><b>Action</b></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                        <% for(let i = 0; i < data.length; i++) { %>
-                            <tr>
-                                <td><%= i + 1 %></td>
-                                <td><%= data[i].name %></td>
-                                <td><%= data[i].email %></td>
-                                <td><%= data[i].phone %></td>
-                                <td>
-                                    <% if(data[i].isBlocked === false) { %>
-                                        <button 
-                                            class="btn btn-danger" 
-                                            style="width: 80px;" 
-                                            onclick="confirmAction('<%= data[i]._id %>', 'block')">
-                                            Block
-                                        </button>
-                                    <% } else { %>
-                                        <button 
-                                            class="btn btn-success" 
-                                            style="width: 80px;" 
-                                            onclick="confirmAction('<%= data[i]._id %>', 'unblock')">
-                                            Unblock
-                                        </button>
-                                    <% } %>
-                                </td>
-                                
-                            </tr>
-                            <% } %>
-                            
-                        
-                        
-                    </tbody>
-                  </table>
-        </div>
-        <div class="container mt-3">
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
-                    <% for(let i=1; i<=totalPages; i++) { %>
-                        <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
-                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
-                        </li>
-                    <% } %>
-                </ul>
-            </nav>
-        </div>
-        
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <div class="content-header row">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="content-title card-title">Customers</h2>
 
-        <script>
-            function confirmAction(userId, action) {
-                const actionText = action === 'block' ? 'Block' : 'Unblock';
-                const actionUrl = action === 'block' ? `/admin/blockCustomer?id=${userId}` : `/admin/unblockCustomer?id=${userId}`;
-        
-                Swal.fire({
-                    title: `Are you sure you want to ${actionText} this user?`,
-                    text: `This action will ${actionText.toLowerCase()} the user.`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: `Yes, ${actionText} it!`
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        fetch(actionUrl)
-                            .then(response => {
-                                if (response.ok) {
-                                    Swal.fire(
-                                        'Success!',
-                                        `User has been ${actionText.toLowerCase()}ed.`,
-                                        'success'
-                                    ).then(() => {
-                                        window.location.reload();
-                                    });
-                                } else {
-                                    Swal.fire(
-                                        'Error!',
-                                        `Failed to ${actionText.toLowerCase()} user.`,
-                                        'error'
-                                    );
-                                }
-                            })
-                            .catch(() => {
+        </div>
+    </div>
+    </div>
+
+    <header class="card-header text-center mb-20">
+        <form action="/admin/users/" method="get" class="d-inline">
+            <div class="input-group input-group-sm border border-1 border-grey rounded-pill"
+                style="width: 500px; margin-left: 230px;">
+                <input type="text" class="form-control border-0 rounded-pill" placeholder="Search customers..."
+                    name="search">
+                <button class="btn  border-0" type="submit">Search</button>
+            </div>
+        </form>
+    </header>
+    <div class="right mt-5">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col"><b>No.</b></th>
+                    <th scope="col"><b>Name</b></th>
+                    <th scope="col"><b>Email</b></th>
+                    <th scope="col"><b>Phone No</b></th>
+                    <th scope="col"><b>Action</b></th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for(let i=0; i < data.length; i++) { %>
+                    <tr>
+                        <td>
+                            <%= i + 1 %>
+                        </td>
+                        <td>
+                            <%= data[i].name %>
+                        </td>
+                        <td>
+                            <%= data[i].email %>
+                        </td>
+                        <td>
+                            <%= data[i].phone %>
+                        </td>
+                        <td>
+                            <% if(data[i].isBlocked===false) { %>
+                                <button class="btn btn-danger" style="width: 80px;"
+                                    onclick="confirmAction('<%= data[i]._id %>', 'block')">
+                                    Block
+                                </button>
+                                <% } else { %>
+                                    <button class="btn btn-success" style="width: 80px;"
+                                        onclick="confirmAction('<%= data[i]._id %>', 'unblock')">
+                                        Unblock
+                                    </button>
+                                    <% } %>
+                        </td>
+
+                    </tr>
+                    <% } %>
+
+
+
+            </tbody>
+        </table>
+    </div>
+    <div class="container mt-3">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
+                <% for(let i=1; i<=totalPages; i++) { %>
+                    <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %>">
+                            <%= i %>
+                        </a>
+                    </li>
+                    <% } %>
+            </ul>
+        </nav>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        function confirmAction(userId, action) {
+            const actionText = action === 'block' ? 'Block' : 'Unblock';
+            const actionUrl = action === 'block' ? `/admin/blockCustomer?id=${userId}` : `/admin/unblockCustomer?id=${userId}`;
+
+            Swal.fire({
+                title: `Are you sure you want to ${actionText} this user?`,
+                text: `This action will ${actionText.toLowerCase()} the user.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: `Yes, ${actionText} it!`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(actionUrl)
+                        .then(response => {
+                            if (response.ok) {
+                                Swal.fire(
+                                    'Success!',
+                                    `User has been ${actionText.toLowerCase()}ed.`,
+                                    'success'
+                                ).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
                                 Swal.fire(
                                     'Error!',
-                                    'Something went wrong. Please try again later.',
+                                    `Failed to ${actionText.toLowerCase()} user.`,
                                     'error'
                                 );
-                            });
-                    }
-                });
-            }
-        </script>
-        
+                            }
+                        })
+                        .catch(() => {
+                            Swal.fire(
+                                'Error!',
+                                'Something went wrong. Please try again later.',
+                                'error'
+                            );
+                        });
+                }
+            });
+        }
+    </script>

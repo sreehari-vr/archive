@@ -1,189 +1,191 @@
 <%- include('../../views/partials/admin/header.ejs') %>
-<style>
-    .error-message {
-      color: red;
-    }
-  
-    .thumbnails-container {
-      display: flex;
-      overflow-x: auto;
-    }
-  
-    .thumbnail {
-      margin-right: 10px;
-    }
-  </style>
-<div class="container mt-5">
-    <h2>Update Coupons</h2>
-    <form id="updateCategoryForm" action="/admin/updateCoupon" method="post" onsubmit="updateCoupon(event)">
-        <input type="hidden" id="id" name="id" value="<%=coupon._id%>">
-      <div class="form-group">
-          <label for="code">Code:</label>
-          <input type="text" id="code" name="code" class="form-control" value="<%=coupon.code%>">
-          <span id="code-error" class="error-message"></span>
-      </div>
-  
-      <div class="form-group">
-          <label for="description">Coupon Description:</label>
-          <textarea id="description" name="description" class="form-control"><%=coupon.description%></textarea>
-          <span id="description-error" class="error-message"></span>
-      </div>
+    <style>
+        .error-message {
+            color: red;
+        }
 
-      <div class="form-group">
-        <label for="discount">Discount:</label>
-        <input type="number" id="discount" name="discount" class="form-control" value="<%=coupon.discount%>">
-        <span id="discount-error" class="error-message"></span>
+        .thumbnails-container {
+            display: flex;
+            overflow-x: auto;
+        }
+
+        .thumbnail {
+            margin-right: 10px;
+        }
+    </style>
+    <div class="container mt-5">
+        <h2>Update Coupons</h2>
+        <form id="updateCategoryForm" action="/admin/updateCoupon" method="post" onsubmit="updateCoupon(event)">
+            <input type="hidden" id="id" name="id" value="<%=coupon._id%>">
+            <div class="form-group">
+                <label for="code">Code:</label>
+                <input type="text" id="code" name="code" class="form-control" value="<%=coupon.code%>">
+                <span id="code-error" class="error-message"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Coupon Description:</label>
+                <textarea id="description" name="description" class="form-control"><%=coupon.description%></textarea>
+                <span id="description-error" class="error-message"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="discount">Discount:</label>
+                <input type="number" id="discount" name="discount" class="form-control" value="<%=coupon.discount%>">
+                <span id="discount-error" class="error-message"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="expDate">Expiring Date:</label>
+                <input type="date" id="expDate" name="expDate" class="form-control" value="<%=coupon.expiryDate%>">
+                <span id="expDate-error" class="error-message"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="minPurchase">Minimum Purchase:</label>
+                <input type="number" id="minPurchase" name="minPurchase" class="form-control"
+                    value="<%=coupon.minPurchase%>">
+                <span id="minPurchase-error" class="error-message"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="usageLimit">Usage limit :</label>
+                <input type="number" id="usageLimit" name="usageLimit" class="form-control"
+                    value="<%=coupon.usageLimit%>">
+                <span id="usageLimit-error" class="error-message"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="perUserLimit">Per user limit :</label>
+                <input type="number" id="pageUserLimit" name="perUserLimit" class="form-control"
+                    value="<%=coupon.perUserLimit%>">
+                <span id="perUserLimit-error" class="error-message"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Update Coupon</button>
+        </form>
+
     </div>
 
-    <div class="form-group">
-        <label for="expDate">Expiring Date:</label>
-        <input type="date" id="expDate" name="expDate" class="form-control" value="<%=coupon.expiryDate%>">
-        <span id="expDate-error" class="error-message"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="minPurchase">Minimum Purchase:</label>
-        <input type="number" id="minPurchase" name="minPurchase" class="form-control" value="<%=coupon.minPurchase%>">
-        <span id="minPurchase-error" class="error-message"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="usageLimit">Usage limit :</label>
-        <input type="number" id="usageLimit" name="usageLimit" class="form-control" value="<%=coupon.usageLimit%>">
-        <span id="usageLimit-error" class="error-message"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="perUserLimit">Per user limit :</label>
-        <input type="number" id="pageUserLimit" name="perUserLimit" class="form-control" value="<%=coupon.perUserLimit%>">
-        <span id="perUserLimit-error" class="error-message"></span>
-    </div>
-  
-      <button type="submit" class="btn btn-primary">Update Coupon</button>
-  </form>
-  
-</div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
 
-<script>
-    function formValidate() {
-        document.querySelectorAll('.error-message').forEach(el => el.innerText = '');
-        let isValid = true;
-  
-        const code = document.getElementById("code").value.trim();
-        const description = document.getElementById("description").value.trim();
-        const discount = document.getElementById("discount").value.trim();
-        const expDate = document.getElementById("expDate").value.trim();
-        const minPurchase = document.getElementById("minPurchase").value.trim();
-        const usageLimit = document.getElementById("usageLimit").value.trim();
-        const perUserLimit = document.getElementById("pageUserLimit").value.trim();
-  
-        const codePattern = /^[A-Za-z0-9]{3,15}$/;
-  
-        if (!code) {
-            document.getElementById("code-error").innerText = "Coupon code is required.";
-            isValid = false;
-        } else if (!codePattern.test(code)) {
-            document.getElementById("code-error").innerText = "Coupon code must be 3-15 alphanumeric characters.";
-            isValid = false;
+    <script>
+        function formValidate() {
+            document.querySelectorAll('.error-message').forEach(el => el.innerText = '');
+            let isValid = true;
+
+            const code = document.getElementById("code").value.trim();
+            const description = document.getElementById("description").value.trim();
+            const discount = Number(document.getElementById("discount").value.trim());
+            const expDate = document.getElementById("expDate").value.trim();
+            const minPurchase = Number(document.getElementById("minPurchase").value.trim());
+            const usageLimit = Number(document.getElementById("usageLimit").value.trim());
+            const perUserLimit = Number(document.getElementById("pageUserLimit").value.trim());
+
+            const codePattern = /^[A-Za-z0-9]{3,15}$/;
+
+            if (!code) {
+                document.getElementById("code-error").innerText = "Coupon code is required.";
+                isValid = false;
+            } else if (!codePattern.test(code)) {
+                document.getElementById("code-error").innerText = "Coupon code must be 3-15 alphanumeric characters.";
+                isValid = false;
+            }
+
+            if (!description) {
+                document.getElementById("description-error").innerText = "Description is required.";
+                isValid = false;
+            } else if (description.length < 10) {
+                document.getElementById("description-error").innerText = "Description must be at least 10 characters.";
+                isValid = false;
+            }
+
+            if (!discount || isNaN(discount) || discount <= 0 || discount > minPurchase) {
+                document.getElementById("discount-error").innerText = "Enter a valid discount amount.";
+                isValid = false;
+            }
+
+            if (!expDate) {
+                document.getElementById("expDate-error").innerText = "Expiry date is required.";
+                isValid = false;
+            } else if (new Date(expDate) < new Date()) {
+                document.getElementById("expDate-error").innerText = "Expiry date must be in the future.";
+                isValid = false;
+            }
+
+            if (!minPurchase || isNaN(minPurchase) || minPurchase < 0) {
+                document.getElementById("minPurchase-error").innerText = "Enter a valid minimum purchase amount.";
+                isValid = false;
+            }
+
+            if (usageLimit && (isNaN(usageLimit) || usageLimit < 1)) {
+                document.getElementById("usageLimit-error").innerText = "Enter a valid usage limit.";
+                isValid = false;
+            }
+
+            if (perUserLimit && (isNaN(perUserLimit) || perUserLimit < 1)) {
+                document.getElementById("perUserLimit-error").innerText = "Enter a valid per-user limit.";
+                isValid = false;
+            }
+
+            return isValid;
         }
-  
-        if (!description) {
-            document.getElementById("description-error").innerText = "Description is required.";
-            isValid = false;
-        } else if (description.length < 10) {
-            document.getElementById("description-error").innerText = "Description must be at least 10 characters.";
-            isValid = false;
-        }
-  
-        if (!discount || isNaN(discount) || discount <= 0 || discount > minPurchase) {
-            document.getElementById("discount-error").innerText = "Enter a valid discount amount.";
-            isValid = false;
-        }
-  
-        if (!expDate) {
-            document.getElementById("expDate-error").innerText = "Expiry date is required.";
-            isValid = false;
-        } else if (new Date(expDate) < new Date()) {
-            document.getElementById("expDate-error").innerText = "Expiry date must be in the future.";
-            isValid = false;
-        }
-  
-        if (!minPurchase || isNaN(minPurchase) || minPurchase < 0) {
-            document.getElementById("minPurchase-error").innerText = "Enter a valid minimum purchase amount.";
-            isValid = false;
-        }
-  
-        if (usageLimit && (isNaN(usageLimit) || usageLimit < 1)) {
-            document.getElementById("usageLimit-error").innerText = "Enter a valid usage limit.";
-            isValid = false;
-        }
-  
-        if (perUserLimit && (isNaN(perUserLimit) || perUserLimit < 1)) {
-            document.getElementById("perUserLimit-error").innerText = "Enter a valid per-user limit.";
-            isValid = false;
-        }
-  
-        return isValid;
-    }
-  
-    function updateCoupon(event) {
-        event.preventDefault();
-  
-        if (!formValidate()) {
-            return;
-        }
-        const id = document.getElementById('id').value.trim();
-        const code = document.getElementById('code').value.trim();
-        const description = document.getElementById('description').value.trim();
-        const discount = document.getElementById('discount').value.trim();
-        const expDate = document.getElementById('expDate').value.trim();
-        const minPurchase = document.getElementById('minPurchase').value.trim();
-        const usageLimit = document.getElementById('usageLimit').value.trim();
-        const perUserLimit = document.getElementById('pageUserLimit').value.trim();
-  
-        $.ajax({
-            method: 'POST',
-            url: '/admin/updateCoupon',
-            data: { 
-                id,
-                code,
-                description,
-                discount,
-                expDate,
-                minPurchase,
-                usageLimit,
-                perUserLimit
-            },
-            success: function (response) {
-                if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: 'Coupon added successfully.',
-                    }).then(() => {
-                        window.location.reload();
-                    });
-                } else {
+
+        function updateCoupon(event) {
+            event.preventDefault();
+
+            if (!formValidate()) {
+                return;
+            }
+            const id = document.getElementById('id').value.trim();
+            const code = document.getElementById('code').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const discount = document.getElementById('discount').value.trim();
+            const expDate = document.getElementById('expDate').value.trim();
+            const minPurchase = document.getElementById('minPurchase').value.trim();
+            const usageLimit = document.getElementById('usageLimit').value.trim();
+            const perUserLimit = document.getElementById('pageUserLimit').value.trim();
+
+            $.ajax({
+                method: 'POST',
+                url: '/admin/updateCoupon',
+                data: {
+                    id,
+                    code,
+                    description,
+                    discount,
+                    expDate,
+                    minPurchase,
+                    usageLimit,
+                    perUserLimit
+                },
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: 'Coupon added successfully.',
+                        }).then(() => {
+                            window.location.href = "/admin/coupon";
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.error || 'Coupon could not be added.',
+                        });
+                    }
+                },
+                error: function (xhr) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: response.error || 'Coupon could not be added.',
+                        text: xhr.responseJSON?.error || 'Something went wrong.',
                     });
-                }
-            },
-            error: function (xhr) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: xhr.responseJSON?.error || 'Something went wrong.',
-                });
-            },
-        });
-    }
-  </script>
-  
+                },
+            });
+        }
+    </script>

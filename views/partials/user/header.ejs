@@ -51,12 +51,14 @@
 								<img src="../../uploads/logo3.png" alt="Login Illustration" class="login-illustration" style="height: 90px;">
 							</div>
 						<div class="col-sm-5 col-md-3">
-			            <form action="#" class="search-wrap">
-			               <div class="form-group">
-			                  <input type="search" class="form-control search" placeholder="Search">
-			                  <button class="btn btn-primary submit-search text-center" type="submit"><i class="icon-search"></i></button>
-			               </div>
-			            </form>
+							<form action="javascript:void(0)" class="search-wrap" id="searchForm">
+								<div class="form-group">
+								  <input type="search" id="searchInput" class="form-control search" placeholder="Search" autocomplete="off">
+								  <button class="btn btn-primary submit-search text-center" type="submit"><i class="icon-search"></i></button>
+								</div>
+							  </form>
+							  <div id="searchResults" class="search-results"></div>
+							  
 			         </div>
 		         </div>
 					<div class="row">

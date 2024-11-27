@@ -1,180 +1,203 @@
 <%- include("../../views/partials/admin/header") %>
-<head>
+
+  <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
-</head>
-<div class="content-header">
+  </head>
+  <div class="content-header">
     <div>
-        <h2 class="content-title card-title">Products</h2>
+      <h2 class="content-title card-title">Products</h2>
     </div>
-</div>
-<header class="card-header text-center mb-20 d-flex gap-5">
+  </div>
+  <header class="card-header text-center mb-20 d-flex gap-5">
     <form action="/admin/products" method="get" class="d-inline">
-        <div class="input-group input-group-sm border border-1 border-grey rounded-pill" style="width: 500px; margin-left: 230px;">
-            <input type="text" class="form-control border-0 rounded-pill" placeholder="Search products or brands" name="search">
-            <button class="btn  border-0" type="submit">Search</button>
-        </div>
+      <div class="input-group input-group-sm border border-1 border-grey rounded-pill"
+        style="width: 500px; margin-left: 230px;">
+        <input type="text" class="form-control border-0 rounded-pill" placeholder="Search products or brands"
+          name="search">
+        <button class="btn  border-0" type="submit">Search</button>
+      </div>
     </form>
     <form action="/admin/addProduct" method="get" class="d-inline ml-5">
-        <button class="btn btn-success border-0" type="submit">Add new</button>
+      <button class="btn btn-success border-0" type="submit">Add new</button>
     </form>
-</header>
-<div class="right mt-5">
+  </header>
+  <div class="right mt-5">
     <table class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="col"><b>No.</b></th>
-                <th scope="col" style="width: 200px;"><b>Product name</b></th>
-                <th scope="col" style="width: 300px;"><b>Description</b></th>
-                <th scope="col"><b>Offer</b></th>
-                <th scope="col"><b>Category</b></th>
-                <th scope="col"><b>Regular Price</b></th>
-                <th scope="col"><b>Sale Price</b></th>
-                <th scope="col"><b>Quantity</b></th>
-                <th scope="col"><b>Image</b></th>
-                <th scope="col"><b>Status</b></th>
-                <th scope="col"><b>Action</b></th>
-            </tr>
-        </thead>
-        <tbody>
-            
-            <% for(let i = 0; i < data.length; i++) { %>
-                            <tr style="height: 150px;">
-                                <td><%= i + 1 %></td>
-                                <td><%= data[i].productName %></td>
-                                <td><%= data[i].description %></td>
-                                <td><%= data[i].offer %>%</td>
-                                <td>
-                                  <% if (data[i].category) { %>
-                                    <%= data[i].category.name %>
-                                  <% } else { %>
-                                    <span>No Category</span>
-                                  <% } %>
-                                </td>
-                                <td><%= data[i].regularPrice %></td>
-                                <td><%= data[i].salePrice %></td>
-                                <td><%= data[i].quantity %></td>
-                                <td>
-                                    <% if (data[i].productImage && data[i].productImage.length > 0) { %>
-                                        <% const imagePath = data[i].productImage[0].replace(/\\/g, '/'); %>
-                                        <img src="/<%= imagePath %>" alt="<%= data[i].productName %>" style="width: 100px; height: auto;" />
-                                    <% } else { %>
-                                        <span>No Image</span>
-                                    <% } %>
-                                </td>
-                                
-                                                        
-                                    <td>
-                                        <% if(data[i].isActive === true) { %>
-                                            <h5 style="color: rgb(0, 255, 47);">Active</h5>
-                                            <% } else { %>
-                                            <h5 style="color: rgb(255, 0, 0);">Inactive</h5>
-                                            <% } %>      
-                                    </td>   
+      <thead>
+        <tr>
+          <th scope="col"><b>No.</b></th>
+          <th scope="col" style="width: 200px;"><b>Product name</b></th>
+          <th scope="col" style="width: 300px;"><b>Description</b></th>
+          <th scope="col"><b>Offer</b></th>
+          <th scope="col"><b>Category</b></th>
+          <th scope="col"><b>Regular Price</b></th>
+          <th scope="col"><b>Sale Price</b></th>
+          <th scope="col"><b>Quantity</b></th>
+          <th scope="col"><b>Image</b></th>
+          <th scope="col"><b>Status</b></th>
+          <th scope="col"><b>Action</b></th>
+        </tr>
+      </thead>
+      <tbody>
 
-                                    
-                                
-                                    <td>
-                                            <% if (data[i].isActive === true) { %>
-                                              <button class="btn btn-warning unlist-btn" style="width: 80px;" data-href="/admin/unlistProduct?id=<%= data[i]._id %>">
-                                                Unlist
-                                              </button>
-                                            <% } else { %>
-                                              <button class="btn btn-success list-btn" style="width: 80px;" data-href="/admin/listProduct?id=<%= data[i]._id %>">
-                                                List
-                                              </button>
-                                            <% } %>                                            
-                                          
-                                          
-                                    <button class="btn btn-success" style="width: 80px;">
-                                        <a href="/admin/updateProduct?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Update</a>
-                                    </button>
-                                    <button class="btn btn-danger delete-btn" style="width: 80px;" data-href="/admin/softDeleteProduct?id=<%= data[i]._id %>">
-                                        Delete
-                                      </button>
-                                </td>
-                            </tr>
-                            <% } %>
-        </tbody>
+        <% for(let i=0; i < data.length; i++) { %>
+          <tr style="height: 150px;">
+            <td>
+              <%= i + 1 %>
+            </td>
+            <td>
+              <%= data[i].productName %>
+            </td>
+            <td>
+              <%= data[i].description %>
+            </td>
+            <td>
+              <%= data[i].offer %>%
+            </td>
+            <td>
+              <% if (data[i].category) { %>
+                <%= data[i].category.name %>
+                  <% } else { %>
+                    <span>No Category</span>
+                    <% } %>
+            </td>
+            <td>
+              <%= data[i].regularPrice %>
+            </td>
+            <td>
+              <%= data[i].salePrice %>
+            </td>
+            <td>
+              <%= data[i].quantity %>
+            </td>
+            <td>
+              <% if (data[i].productImage && data[i].productImage.length> 0) { %>
+                <% const imagePath=data[i].productImage[0].replace(/\\/g, '/' ); %>
+                  <img src="/<%= imagePath %>" alt="<%= data[i].productName %>" style="width: 100px; height: auto;" />
+                  <% } else { %>
+                    <span>No Image</span>
+                    <% } %>
+            </td>
+
+
+            <td>
+              <% if(data[i].isActive===true) { %>
+                <h5 style="color: rgb(0, 255, 47);">Active</h5>
+                <% } else { %>
+                  <h5 style="color: rgb(255, 0, 0);">Inactive</h5>
+                  <% } %>
+            </td>
+
+
+
+            <td>
+              <% if (data[i].isActive===true) { %>
+                <button class="btn btn-warning unlist-btn" style="width: 80px;"
+                  data-href="/admin/unlistProduct?id=<%= data[i]._id %>">
+                  Unlist
+                </button>
+                <% } else { %>
+                  <button class="btn btn-success list-btn" style="width: 80px;"
+                    data-href="/admin/listProduct?id=<%= data[i]._id %>">
+                    List
+                  </button>
+                  <% } %>
+
+
+                    <button class="btn btn-success" style="width: 80px;">
+                      <a href="/admin/updateProduct?id=<%= data[i]._id %>" class="text-white"
+                        style="text-decoration: none;">Update</a>
+                    </button>
+                    <button class="btn btn-danger delete-btn" style="width: 80px;"
+                      data-href="/admin/softDeleteProduct?id=<%= data[i]._id %>">
+                      Delete
+                    </button>
+            </td>
+          </tr>
+          <% } %>
+      </tbody>
 
     </table>
-</div>
-</div>
-</div>
+  </div>
+  </div>
+  </div>
 
-<div class="container mt-3">
+  <div class="container mt-3">
     <nav aria-label="Page navigation">
-        <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
-            <% for(let i=1; i<=totalPages; i++) { %>
-                <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
-                    <a class="page-link" href="?page=<%= i %>"><%= i %></a>
-                </li>
-            <% } %>
-        </ul>
+      <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
+        <% for(let i=1; i<=totalPages; i++) { %>
+          <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+            <a class="page-link" href="?page=<%= i %>">
+              <%= i %>
+            </a>
+          </li>
+          <% } %>
+      </ul>
     </nav>
-</div>
+  </div>
 
 
 
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
-<script>
-  $(document).ready(function () {
-    $(".unlist-btn").click(function (event) {
-      event.preventDefault();
-      const url = $(this).data("href");
-      Swal.fire({
-        title: "Are you sure?",
-        text: "Do you want to unlist this product?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: "Yes, unlist!"
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = url;
-        }
+  <script>
+    $(document).ready(function () {
+      $(".unlist-btn").click(function (event) {
+        event.preventDefault();
+        const url = $(this).data("href");
+        Swal.fire({
+          title: "Are you sure?",
+          text: "Do you want to unlist this product?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Yes, unlist!"
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = url;
+          }
+        });
+      });
+
+      $(".list-btn").click(function (event) {
+        event.preventDefault();
+        const url = $(this).data("href");
+        Swal.fire({
+          title: "Are you sure?",
+          text: "Do you want to list this product?",
+          icon: "info",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes, list!"
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = url;
+          }
+        });
+      });
+
+      $(".delete-btn").click(function (event) {
+        event.preventDefault();
+        const url = $(this).data("href");
+        Swal.fire({
+          title: "Are you sure?",
+          text: "Do you want to delete this product?",
+          icon: "error",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Yes, delete!"
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = url;
+          }
+        });
       });
     });
-
-    $(".list-btn").click(function (event) {
-      event.preventDefault();
-      const url = $(this).data("href");
-      Swal.fire({
-        title: "Are you sure?",
-        text: "Do you want to list this product?",
-        icon: "info",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, list!"
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = url;
-        }
-      });
-    });
-
-    $(".delete-btn").click(function (event) {
-      event.preventDefault();
-      const url = $(this).data("href");
-      Swal.fire({
-        title: "Are you sure?",
-        text: "Do you want to delete this product?",
-        icon: "error",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: "Yes, delete!"
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = url;
-        }
-      });
-    });
-  });
-</script>
+  </script>

@@ -44,7 +44,7 @@
             <td>
               <% order.items.forEach(item=> { %>
                 <div class="mb-2">
-                   <%= item.productId.productName %> (Qty: <%= item.quantity %>, ₹<%= item.price %>)<br>
+                  <%= item.productId.productName %> (Qty: <%= item.quantity %>, ₹<%= item.price %>)<br>
                 </div>
                 <% }); %>
             </td>
@@ -59,7 +59,7 @@
             </td>
             <td>
               <%= order.orderStatus %>
-                        
+
             </td>
             <td>
               <a href="/admin/orders/<%= order._id %>">View Order</a>
@@ -85,6 +85,4 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>

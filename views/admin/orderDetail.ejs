@@ -1,122 +1,151 @@
 <%- include("../../views/partials/admin/header") %>
 
-<body>
+  <body>
 
-  <div style="margin: 100px;">
-    <h1>Order Details</h1>
+    <div style="margin: 100px;">
+      <h1>Order Details</h1>
 
-    <p><strong>Order ID:</strong> <%= order._id %></p>
-    <p><strong>User:</strong> <%= order.userId ? order.userId.name : "Unknown User" %></p>
-    <p><strong>Total Amount:</strong> ₹<%= order.totalAmount %></p>
-    <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
-    <p><strong>Order Date:</strong> <%= order.orderDate.toDateString() %></p>
-    <p><strong>Order Status:</strong></p>
-    <select name="orderStatus" class="status-select" data-type="order" data-order-id="<%= order._id %>">
-      <option disabled selected>Update Order Status</option>
-      <option value="Pending" <%= order.orderStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
-      <option value="Shipped" <%= order.orderStatus === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-      <option value="Cancelled" <%= order.orderStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-      <option value="Returned" <%= order.orderStatus === 'Returned' ? 'selected' : '' %>>Returned</option>
-      <option value="Delivered" <%= order.orderStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-      <option value="Refunded" <%= order.orderStatus === 'Refunded' ? 'selected' : '' %>>Refunded</option>
-    </select>
-    
-    <p><strong>Payment Status:</strong></p>
-    <select name="paymentStatus" class="status-select" data-type="payment" data-order-id="<%= order._id %>">
-      <option disabled selected>Update Payment Status</option>
-      <option value="Pending" <%= order.paymentStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
-      <option value="Failed" <%= order.paymentStatus === 'Failed' ? 'selected' : '' %>>Failed</option>
-      <option value="Refund" <%= order.paymentStatus === 'Refund' ? 'selected' : '' %>>Refund</option>
-      <option value="Paid" <%= order.paymentStatus === 'Paid' ? 'selected' : '' %>>Paid</option>
-    </select>
-    
-    
-  
-    <h2>Shipping Address</h2>
-    <p><strong>Name:</strong> <%= order.address.name %></p>
-    <p><strong>Address Type:</strong> <%= order.address.addressType %></p>
-    <p><strong>City:</strong> <%= order.address.city %></p>
-    <p><strong>State:</strong> <%= order.address.state %></p>
-    <p><strong>Landmark:</strong> <%= order.address.landMark %></p>
-    <p><strong>Pincode:</strong> <%= order.address.pincode %></p>
-    <p><strong>Phone:</strong> <%= order.address.phone %></p>
-    <% if (order.address.altPhone) { %>
-      <p><strong>Alternate Phone:</strong> <%= order.address.altPhone %></p>
-    <% } %>
-  
-    <h2>Items</h2>
-    <table border="1" style="padding: 5px;">
-      <thead >
-        <tr>
-          <th style="padding: 5px;">Product</th>
-          <th style="padding: 5px;">Quantity</th>
-          <th style="padding: 5px;">Price</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% order.items.forEach(item => { %>
-          <tr>
-            <td style="padding: 5px;"><%= item.productId ? item.productId.productName : "Product Not Found" %></td>
-            <td style="padding: 5px;"><%= item.quantity %></td>
-            <td style="padding: 5px;">₹<%= item.price * item.quantity %></td>
-          </tr>
-        <% }); %>
-      </tbody>
-    </table>
-  
-    <a href="/admin/orders">Back to Orders</a>
-  </div>
-  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+      <p><strong>Order ID:</strong>
+        <%= order._id %>
+      </p>
+      <p><strong>User:</strong>
+        <%= order.userId ? order.userId.name : "Unknown User" %>
+      </p>
+      <p><strong>Total Amount:</strong> ₹<%= order.totalAmount %>
+      </p>
+      <p><strong>Payment Method:</strong>
+        <%= order.paymentMethod %>
+      </p>
+      <p><strong>Order Date:</strong>
+        <%= order.orderDate.toDateString() %>
+      </p>
+      <p><strong>Order Status:</strong></p>
+      <select name="orderStatus" class="status-select" data-type="order" data-order-id="<%= order._id %>">
+        <option disabled selected>Update Order Status</option>
+        <option value="Pending" <%=order.orderStatus==='Pending' ? 'selected' : '' %>>Pending</option>
+        <option value="Shipped" <%=order.orderStatus==='Shipped' ? 'selected' : '' %>>Shipped</option>
+        <option value="Cancelled" <%=order.orderStatus==='Cancelled' ? 'selected' : '' %>>Cancelled</option>
+        <option value="Returned" <%=order.orderStatus==='Returned' ? 'selected' : '' %>>Returned</option>
+        <option value="Delivered" <%=order.orderStatus==='Delivered' ? 'selected' : '' %>>Delivered</option>
+        <option value="Refunded" <%=order.orderStatus==='Refunded' ? 'selected' : '' %>>Refunded</option>
+      </select>
 
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+      <p><strong>Payment Status:</strong></p>
+      <select name="paymentStatus" class="status-select" data-type="payment" data-order-id="<%= order._id %>">
+        <option disabled selected>Update Payment Status</option>
+        <option value="Pending" <%=order.paymentStatus==='Pending' ? 'selected' : '' %>>Pending</option>
+        <option value="Failed" <%=order.paymentStatus==='Failed' ? 'selected' : '' %>>Failed</option>
+        <option value="Refund" <%=order.paymentStatus==='Refund' ? 'selected' : '' %>>Refund</option>
+        <option value="Paid" <%=order.paymentStatus==='Paid' ? 'selected' : '' %>>Paid</option>
+      </select>
 
-  <script>
-    $(document).ready(function () {
-      $(".status-select").change(function (e) {
-        e.preventDefault();
-    
-        const status = $(this).val();
-        const orderId = $(this).data("order-id");
-        const type = $(this).data("type");
-        const endpoint = type === "order" 
-          ? `/admin/orders/${orderId}/update-order-status` 
-          : `/admin/orders/${orderId}/update-payment-status`;
-    
-        Swal.fire({
-          title: "Are you sure?",
-          text: `Change ${type} status to "${status}"?`,
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor: "#d33",
-          confirmButtonText: "Yes!",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            $.ajax({
-              url: endpoint,
-              method: "POST",
-              data: { status },
-              success: (response) => {
-                Swal.fire("Updated!", response.message, "success").then(() => {
-                  location.reload(); 
-                });
-              },
-              error: (err) => {
-                Swal.fire("Error!", err.responseJSON?.error || "An error occurred", "error");
-              },
-            });
-          } else {
-            $(this).val($(this).data("original-status")); 
-          }
+
+
+      <h2>Shipping Address</h2>
+      <p><strong>Name:</strong>
+        <%= order.address.name %>
+      </p>
+      <p><strong>Address Type:</strong>
+        <%= order.address.addressType %>
+      </p>
+      <p><strong>City:</strong>
+        <%= order.address.city %>
+      </p>
+      <p><strong>State:</strong>
+        <%= order.address.state %>
+      </p>
+      <p><strong>Landmark:</strong>
+        <%= order.address.landMark %>
+      </p>
+      <p><strong>Pincode:</strong>
+        <%= order.address.pincode %>
+      </p>
+      <p><strong>Phone:</strong>
+        <%= order.address.phone %>
+      </p>
+      <% if (order.address.altPhone) { %>
+        <p><strong>Alternate Phone:</strong>
+          <%= order.address.altPhone %>
+        </p>
+        <% } %>
+
+          <h2>Items</h2>
+          <table border="1" style="padding: 5px;">
+            <thead>
+              <tr>
+                <th style="padding: 5px;">Product</th>
+                <th style="padding: 5px;">Quantity</th>
+                <th style="padding: 5px;">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% order.items.forEach(item=> { %>
+                <tr>
+                  <td style="padding: 5px;">
+                    <%= item.productId ? item.productId.productName : "Product Not Found" %>
+                  </td>
+                  <td style="padding: 5px;">
+                    <%= item.quantity %>
+                  </td>
+                  <td style="padding: 5px;">₹<%= item.price * item.quantity %>
+                  </td>
+                </tr>
+                <% }); %>
+            </tbody>
+          </table>
+
+          <a href="/admin/orders">Back to Orders</a>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+      $(document).ready(function () {
+        $(".status-select").change(function (e) {
+          e.preventDefault();
+
+          const status = $(this).val();
+          const orderId = $(this).data("order-id");
+          const type = $(this).data("type");
+          const endpoint = type === "order"
+            ? `/admin/orders/${orderId}/update-order-status`
+            : `/admin/orders/${orderId}/update-payment-status`;
+
+          Swal.fire({
+            title: "Are you sure?",
+            text: `Change ${type} status to "${status}"?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes!",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              $.ajax({
+                url: endpoint,
+                method: "POST",
+                data: { status },
+                success: (response) => {
+                  Swal.fire("Updated!", response.message, "success").then(() => {
+                    location.reload();
+                  });
+                },
+                error: (err) => {
+                  Swal.fire("Error!", err.responseJSON?.error || "An error occurred", "error");
+                },
+              });
+            } else {
+              $(this).val($(this).data("original-status"));
+            }
+          });
+        });
+
+        $(".status-select").focus(function () {
+          $(this).data("original-status", $(this).val());
         });
       });
-    
-      $(".status-select").focus(function () {
-        $(this).data("original-status", $(this).val());
-      });
-    });
-    
-  </script>
 
-</body>
+    </script>
 
+  </body>

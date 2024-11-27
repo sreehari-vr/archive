@@ -7,10 +7,9 @@ const sharp = require("sharp");
 const multer = require("multer");
 const category = require("../../models/categorySchema");
 
-
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); 
+    cb(null, "uploads/");
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
@@ -33,10 +32,10 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 10 * 1024 * 1024, 
-    fieldSize: 10 * 1024 * 1024, 
-    fields: 20, 
-    files: 10, 
+    fileSize: 10 * 1024 * 1024,
+    fieldSize: 10 * 1024 * 1024,
+    fields: 20,
+    files: 10,
   },
   fileFilter: fileFilter,
 });
@@ -55,18 +54,16 @@ const productInfo = async (req, res) => {
     limit = 6;
     const skip = (page - 1) * limit;
 
-    
-
     const productData = await Product.find({
       deletedAt: null,
       category: { $ne: null },
       $or: [{ productName: { $regex: ".*" + search + ".*", $options: "i" } }],
-      
-    }).populate('category')
+    })
+      .populate("category")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-      
+
     const categories = await Category.find({ deletedAt: null });
     const totalProducts = await Product.countDocuments();
     const totalPages = Math.ceil(totalProducts / limit);
@@ -100,38 +97,44 @@ const addProducts = async (req, res) => {
       category,
       regularPrice,
       quantity,
-      offer
+      offer,
     } = req.body;
 
     const existProduct = await Product.findOne({ productName });
     if (existProduct) {
-      return res.status(400).json({ success: false, error: 'Product name already exists' });
+      return res
+        .status(400)
+        .json({ success: false, error: "Product name already exists" });
     }
     const images = [];
-if (req.files && req.files.length > 0) {
-  for (let i = 0; i < req.files.length; i++) {
-    const originalImagePath = req.files[i].path;
-    const resizedImagePath = path.join(
-      'uploads',
-      `${path.parse(req.files[i].filename).name}-resized${path.extname(req.files[i].filename)}`
-    );    
-    await sharp(originalImagePath)
-      .resize({ height: 440, width: 440 })
-      .toFile(resizedImagePath);
+    if (req.files && req.files.length > 0) {
+      for (let i = 0; i < req.files.length; i++) {
+        const originalImagePath = req.files[i].path;
+        const resizedImagePath = path.join(
+          "uploads",
+          `${path.parse(req.files[i].filename).name}-resized${path.extname(
+            req.files[i].filename
+          )}`
+        );
+        await sharp(originalImagePath)
+          .resize({ height: 440, width: 440 })
+          .toFile(resizedImagePath);
 
-    images.push(resizedImagePath);
-  }
-}
+        images.push(resizedImagePath);
+      }
+    }
 
-const categoryDetails = await Category.findById(category);
+    const categoryDetails = await Category.findById(category);
     if (!categoryDetails) {
-      return res.status(404).json({ success: false, error: "Category not found" });
+      return res
+        .status(404)
+        .json({ success: false, error: "Category not found" });
     }
     const categoryOffer = categoryDetails.offer || 0;
     const applicableOffer = Math.max(Number(offer), Number(categoryOffer));
 
     const salePrice = regularPrice - (regularPrice * applicableOffer) / 100;
-   
+
     const newProduct = new Product({
       productName,
       description,
@@ -140,19 +143,17 @@ const categoryDetails = await Category.findById(category);
       salePrice,
       quantity,
       productImage: images,
-      createdAt:new Date(),
-      offer
+      createdAt: new Date(),
+      offer,
     });
 
     await newProduct.save();
-    return res.status(200).json({success:true,message:"Product added"})
+    return res.status(200).json({ success: true, message: "Product added" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });
   }
 };
-
-
 
 const updateProduct = async (req, res) => {
   try {
@@ -163,21 +164,28 @@ const updateProduct = async (req, res) => {
       regularPrice,
       quantity,
       category,
-      offer
+      offer,
     } = req.body;
 
     const categoryDetails = await Category.findById(category);
     if (!categoryDetails) {
-      return res.status(404).json({ success: false, error: "Category not found" });
+      return res
+        .status(404)
+        .json({ success: false, error: "Category not found" });
     }
 
     const categoryOffer = categoryDetails.offer || 0;
     const applicableOffer = Math.max(Number(offer), Number(categoryOffer));
 
     const salePrice = regularPrice - (regularPrice * applicableOffer) / 100;
-    const existProduct = await Product.findOne({ productName, _id: { $ne: id } });
+    const existProduct = await Product.findOne({
+      productName,
+      _id: { $ne: id },
+    });
     if (existProduct) {
-      return res.status(400).json({ success: false, error: 'Product name already exists' });
+      return res
+        .status(400)
+        .json({ success: false, error: "Product name already exists" });
     }
 
     const updatedProduct = {
@@ -187,7 +195,7 @@ const updateProduct = async (req, res) => {
       salePrice,
       quantity,
       category,
-      offer
+      offer,
     };
 
     const images = [];
@@ -195,28 +203,35 @@ const updateProduct = async (req, res) => {
       for (let i = 0; i < req.files.length; i++) {
         const originalImagePath = req.files[i].path;
         const resizedImagePath = path.join(
-          'uploads',
-          `${path.parse(req.files[i].filename).name}-resized${path.extname(req.files[i].filename)}`
+          "uploads",
+          `${path.parse(req.files[i].filename).name}-resized${path.extname(
+            req.files[i].filename
+          )}`
         );
 
-        
         await sharp(originalImagePath)
           .resize({ height: 440, width: 440 })
           .toFile(resizedImagePath);
 
         images.push(`uploads/${path.basename(resizedImagePath)}`);
-
       }
 
-      await Product.findByIdAndUpdate(id, {
-        $set: updatedProduct,
-        $push: { productImage: { $each: images } },
-      }, { new: true });
-    } else {  
-      await Product.findByIdAndUpdate(id, { $set: updatedProduct }, { new: true });
+      await Product.findByIdAndUpdate(
+        id,
+        {
+          $set: updatedProduct,
+          $push: { productImage: { $each: images } },
+        },
+        { new: true }
+      );
+    } else {
+      await Product.findByIdAndUpdate(
+        id,
+        { $set: updatedProduct },
+        { new: true }
+      );
     }
     console.log(images);
-
 
     res.status(200).json({ success: true, message: "product updated" });
   } catch (error) {
@@ -225,11 +240,10 @@ const updateProduct = async (req, res) => {
   }
 };
 
-
 const renderUpdateProductForm = async (req, res) => {
   const id = req.query.id;
   try {
-    const productData = await Product.findById(id).populate('category');
+    const productData = await Product.findById(id).populate("category");
     console.log("Fetched Product Data for Rendering:", productData);
 
     if (!productData) {
@@ -275,11 +289,6 @@ const softDeleteProduct = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
-
-
-
-
 
 module.exports = {
   productInfo,

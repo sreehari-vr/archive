@@ -1,129 +1,128 @@
 <%- include('../../views/partials/admin/header.ejs') %>
-<style>
+  <style>
     .error-message {
       color: red;
     }
-  
+
     .thumbnails-container {
       display: flex;
       overflow-x: auto;
     }
-  
+
     .thumbnail {
       margin-right: 10px;
     }
   </style>
-  
-<div class="container mt-5">
+
+  <div class="container mt-5">
     <h2>Update Category</h2>
     <form action="/admin/updateCategory" method="post" onsubmit="editCategory(event)">
-        <input type="hidden" name="id" value="<%= data._id %>">
+      <input type="hidden" name="id" value="<%= data._id %>">
 
-        <div class="form-group">
-            <label for="name">Category Name:</label>
-            <input type="text" id="name" name="name" class="form-control" value="<%= data.name %>">
-            <div id="name-error" class="error-message"></div>
+      <div class="form-group">
+        <label for="name">Category Name:</label>
+        <input type="text" id="name" name="name" class="form-control" value="<%= data.name %>">
+        <div id="name-error" class="error-message"></div>
 
-        </div>
-
-        <div class="form-group">
-            <label for="description">Category Description:</label>
-            <textarea id="description" name="description" class="form-control" ><%= data.description %></textarea>
-            <div id="description-error" class="error-message"></div>
-
-        </div>
-
-        <div class="form-group">
-          <label for="offer">Offer:</label>
-          <input type="number" id="offer" name="offer" class="form-control" value="<%= data.offer %>">
-          <span id="offer-error" class="error-message"></span>
       </div>
 
-        <button type="submit" class="btn btn-primary">Update</button>
+      <div class="form-group">
+        <label for="description">Category Description:</label>
+        <textarea id="description" name="description" class="form-control"><%= data.description %></textarea>
+        <div id="description-error" class="error-message"></div>
+
+      </div>
+
+      <div class="form-group">
+        <label for="offer">Offer:</label>
+        <input type="number" id="offer" name="offer" class="form-control" value="<%= data.offer %>">
+        <span id="offer-error" class="error-message"></span>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Update</button>
     </form>
-</div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script>
+  <script>
 
-  function formValidate() {
-    document.querySelectorAll(".error-message").forEach((el) => (el.innerText = ""));
-    let isValid = true;
-  
-    const name = document.getElementById("name").value.trim();
-    const description = document.getElementById("description").value.trim();
-    const offer = document.getElementById("offer").value.trim();
-  
-    if (name === "") {
-      document.getElementById("name-error").innerText = "Category name is required.";
-      isValid = false;
-    }
-  
-    if (description === "") {
-      document.getElementById("description-error").innerText = "Description is required.";
-      isValid = false;
-    }
-  
-    if (offer === "") {
-      document.getElementById("offer-error").innerText = "Offer is required.";
-      isValid = false;
-    } else if (isNaN(offer) || offer < 0 || offer > 100) {
-      document.getElementById("offer-error").innerText = "Offer must be a percentage between 0 and 100.";
-      isValid = false;
-    }
-  
-    return isValid;
-  }
-  
+    function formValidate() {
+      document.querySelectorAll(".error-message").forEach((el) => (el.innerText = ""));
+      let isValid = true;
 
-  function editCategory(event) {
-    event.preventDefault();
-  
-    if (!formValidate()) {
-      return;
+      const name = document.getElementById("name").value.trim();
+      const description = document.getElementById("description").value.trim();
+      const offer = document.getElementById("offer").value.trim();
+
+      if (name === "") {
+        document.getElementById("name-error").innerText = "Category name is required.";
+        isValid = false;
+      }
+
+      if (description === "") {
+        document.getElementById("description-error").innerText = "Description is required.";
+        isValid = false;
+      }
+
+      if (offer === "") {
+        document.getElementById("offer-error").innerText = "Offer is required.";
+        isValid = false;
+      } else if (isNaN(offer) || offer < 0 || offer > 100) {
+        document.getElementById("offer-error").innerText = "Offer must be a percentage between 0 and 100.";
+        isValid = false;
+      }
+
+      return isValid;
     }
-  
-    const id = document.querySelector('input[name="id"]').value;
-    const name = document.getElementById("name").value.trim();
-    const description = document.getElementById("description").value.trim();
-    const offer = document.getElementById("offer").value.trim();
-  
-    $.ajax({
-      method: "post",
-      url: "/admin/updateCategory",
-      data: {
-        id,
-        name,
-        description,
-        offer,
-      },
-      success: function (response) {
-        console.log(response);
-        if (response.success) {
-          Swal.fire({
-            icon: "success",
-            title: "Successfully updated",
-            text: response.message || "Category updated",
-          }).then(() => {
-            window.location.href = "/admin/category";
-          });
-        } else {
+
+
+    function editCategory(event) {
+      event.preventDefault();
+
+      if (!formValidate()) {
+        return;
+      }
+
+      const id = document.querySelector('input[name="id"]').value;
+      const name = document.getElementById("name").value.trim();
+      const description = document.getElementById("description").value.trim();
+      const offer = document.getElementById("offer").value.trim();
+
+      $.ajax({
+        method: "post",
+        url: "/admin/updateCategory",
+        data: {
+          id,
+          name,
+          description,
+          offer,
+        },
+        success: function (response) {
+          console.log(response);
+          if (response.success) {
+            Swal.fire({
+              icon: "success",
+              title: "Successfully updated",
+              text: response.message || "Category updated",
+            }).then(() => {
+              window.location.href = "/admin/category";
+            });
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "Not updated",
+              text: response.error || "Category not updated",
+            });
+          }
+        },
+        error: function () {
           Swal.fire({
             icon: "error",
-            title: "Not updated",
-            text: response.error || "Category not updated",
+            title: "Error occurred",
+            text: "Something went wrong",
           });
-        }
-      },
-      error: function () {
-        Swal.fire({
-          icon: "error",
-          title: "Error occurred",
-          text: "Something went wrong",
-        });
-      },
-    });
-  }
+        },
+      });
+    }
   </script>
-

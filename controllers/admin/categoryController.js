@@ -40,7 +40,7 @@ const addCategory = async (req, res) => {
 };
 
 const check = async (req, res) => {
-  const {name, description, offer } = req.body;
+  const { name, description, offer } = req.body;
   try {
     if (!name) {
       return res
@@ -91,19 +91,18 @@ const updateCategory = async (req, res) => {
       });
     }
 
-   const products = await Product.find({category:id})
+    const products = await Product.find({ category: id });
 
-   for (const product of products) {
-    const productOffer = product.productOffer || 0;
-    const applicableOffer = Math.max(productOffer, offer || 0);
+    for (const product of products) {
+      const productOffer = product.productOffer || 0;
+      const applicableOffer = Math.max(productOffer, offer || 0);
 
-    const salePrice =
-    product.regularPrice - (product.regularPrice * applicableOffer) / 100;
+      const salePrice =
+        product.regularPrice - (product.regularPrice * applicableOffer) / 100;
 
-    product.salePrice = salePrice;
-    await product.save();
-  }
-   
+      product.salePrice = salePrice;
+      await product.save();
+    }
 
     return res.status(200).json({
       success: true,
@@ -117,7 +116,6 @@ const updateCategory = async (req, res) => {
     });
   }
 };
-
 
 const renderUpdateCategoryForm = async (req, res) => {
   const id = req.query.id;

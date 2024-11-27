@@ -1,82 +1,79 @@
 <%- include("../../views/partials/user/header") %>
 
 
-<section class="content-main mt-80 mb-80">
-   <div class="card mx-auto card-login col-4">
-       <div class="card-body">
-           <h4 class="card-title mb-4">Enter New Email</h4>
-           <form method="post" action="/update-email" id="emailForm">
-               <div class="mb-3">
-                   <input class="form-control" name="newEmail" placeholder="New Email" type="text" id="email">
-                   <div class="error-message" id="email-error"></div>
-               </div>
-               <div class="mb-4">
-                   <button type="submit" class="btn btn-primary w-100">Submit</button>
-               </div>
-           </form>
-       </div>
-   </div>
-</section>
+    <section class="content-main mt-80 mb-80">
+        <div class="card mx-auto card-login col-4">
+            <div class="card-body">
+                <h4 class="card-title mb-4">Enter New Email</h4>
+                <form method="post" action="/update-email" id="emailForm">
+                    <div class="mb-3">
+                        <input class="form-control" name="newEmail" placeholder="New Email" type="text" id="email">
+                        <div class="error-message" id="email-error"></div>
+                    </div>
+                    <div class="mb-4">
+                        <button type="submit" class="btn btn-primary w-100">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script>
-    document.getElementById('emailForm').addEventListener('submit', async function (e) {
-        e.preventDefault();
-        
-        const emailInput = document.getElementById('email');
-        const emailError = document.getElementById('email-error');
-        const emailValue = emailInput.value.trim();
-        
-        emailError.textContent = "";
+    <script>
+        document.getElementById('emailForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
 
-        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-        if (!emailValue.match(emailPattern)) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Invalid Email',
-                text: 'Please enter a valid email address.',
-            });
-            return;
-        }
+            const emailInput = document.getElementById('email');
+            const emailError = document.getElementById('email-error');
+            const emailValue = emailInput.value.trim();
 
-        try {
-            const response = await fetch('/update-email', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ newEmail: emailValue }),
-            });
+            emailError.textContent = "";
 
-            const result = await response.json();
-            console.log(result); 
-
-            if (response.ok && result.success) {
+            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+            if (!emailValue.match(emailPattern)) {
                 Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: result.message,
-                }).then(() => {
-                    window.location.href = '/userProfile';
+                    icon: 'error',
+                    title: 'Invalid Email',
+                    text: 'Please enter a valid email address.',
                 });
-            } else {
+                return;
+            }
+
+            try {
+                const response = await fetch('/update-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ newEmail: emailValue }),
+                });
+
+                const result = await response.json();
+                console.log(result);
+
+                if (response.ok && result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: result.message,
+                    }).then(() => {
+                        window.location.href = '/userProfile';
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: result.message || 'An error occurred.',
+                    });
+                }
+            } catch (error) {
+                console.error("Error:", error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: result.message || 'An error occurred.',
+                    text: 'An unexpected error occurred. Please try again.',
                 });
             }
-        } catch (error) {
-            console.error("Error:", error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'An unexpected error occurred. Please try again.',
-            });
-        }
-    });
-</script>
+        });
+    </script>
 
-<%- include("../../views/partials/user/footer") %>
-
-
-
+    <%- include("../../views/partials/user/footer") %>

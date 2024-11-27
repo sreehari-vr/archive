@@ -217,13 +217,13 @@
       background: #6bb87d;
     }
 
-    .edt-btn{
+    .edt-btn {
       color: #88c8bc;
     }
-    
-   .dlt-btn{
+
+    .dlt-btn {
       color: #d12727;
-    } 
+    }
   </style>
 
 
@@ -268,12 +268,7 @@
                         <i class="fi-rs-shopping-cart-check mr-10"></i>Wallet History
                       </a>
                     </li>
-                    <li class="nav-item">
-                      <a class="nav-link" id="track-orders-tab" data-bs-toggle="tab" href="#referal" role="tab"
-                        aria-controls="track-orders" aria-selected="false">
-                        <i class="fi-rs-shopping-cart-check mr-10"></i>Referals
-                      </a>
-                    </li>
+                    
                     <li class="nav-item">
                       <a class="nav-link" href="/logout">
                         <i class="fi-rs-sign-out mr-10"></i>Logout
@@ -302,7 +297,7 @@
                           <strong>Email: <%= data.email%></strong>
                         </p>
 
-                        <%if(data.phone != null){%>
+                        <%if(data.phone !=null){%>
                           <a href="/changeEmail" class="btn btn-sm btn-success ml-2">Change Email</a>
                           <a href="/changePassword" class="btn btn-sm btn-success">Change Password</a>
                           <%}%>
@@ -315,25 +310,34 @@
 
                   <div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="address-tab">
                     <div class="row">
-                      <% if (address && address.length > 0) { %>
-                        <% address.forEach((addr, index) => { %>
+                      <% if (address && address.length> 0) { %>
+                        <% address.forEach((addr, index)=> { %>
                           <div class="col-lg-12 m-3">
                             <div class="card mb-3 mb-lg-0">
                               <div class="card-header">
-                                <h5 class="mb-0">Address <%= index + 1 %></h5> 
+                                <h5 class="mb-0">Address <%= index + 1 %>
+                                </h5>
                               </div>
-                  
+
                               <div class="card-body">
                                 <ul>
                                   <li>
-                                    <p>Type: <%= addr.addressType %></p>
-                                    <p>Name: <%= addr.name %></p>
-                                    <p>City: <%= addr.city %></p>
-                                    <p>Land mark: <%= addr.landMark %></p>
-                                    <p>State: <%= addr.state %></p>
-                                    <p>Pincode: <%= addr.pincode %></p>
-                                    <p>Phone: <%= addr.phone %></p>
-                                    <p>Alternate phone: <%= addr.altPhone %></p>
+                                    <p>Type: <%= addr.addressType %>
+                                    </p>
+                                    <p>Name: <%= addr.name %>
+                                    </p>
+                                    <p>City: <%= addr.city %>
+                                    </p>
+                                    <p>Land mark: <%= addr.landMark %>
+                                    </p>
+                                    <p>State: <%= addr.state %>
+                                    </p>
+                                    <p>Pincode: <%= addr.pincode %>
+                                    </p>
+                                    <p>Phone: <%= addr.phone %>
+                                    </p>
+                                    <p>Alternate phone: <%= addr.altPhone %>
+                                    </p>
 
 
                                   </li>
@@ -341,27 +345,28 @@
                                 <div class="d-flex justify-content-between">
                                   <a href="/editAddress/<%= addr._id %>" class="btn-small edt-btn">Edit</a>
                                   <div class="d-flex justify-content-between">
-                                    <a href="/deleteAddress/<%= addr._id %>" class="btn-small dlt-btn" id="delete-<%= addr._id %>">Delete</a>
+                                    <a href="/deleteAddress/<%= addr._id %>" class="btn-small dlt-btn"
+                                      id="delete-<%= addr._id %>">Delete</a>
                                   </div>
-                                                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        <% }) %>
-                      <% } else { %>
-                        <p class="col-lg-12">No addresses available.</p>
-                      <% } %>
+                          <% }) %>
+                            <% } else { %>
+                              <p class="col-lg-12">No addresses available.</p>
+                              <% } %>
                     </div>
-                  
+
                     <% if (address && address.length < maxCount) { %>
                       <div class="mt-3">
                         <a href="/addAddress">
                           <button class="btn btn-primary w-70">Add address</button>
                         </a>
                       </div>
-                    <% } %>
+                      <% } %>
                   </div>
-                  
+
 
 
                   <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
@@ -371,7 +376,7 @@
                       </div>
                       <div class="card-body">
                         <div class="table-responsive">
-                          <table class="table" >
+                          <table class="table">
                             <thead>
                               <tr>
                                 <th>Order Id</th>
@@ -384,45 +389,48 @@
                             <tbody>
                               <tr>
 
-                                <% orders.forEach(order => { %>
-                                  
-                                  <% order.items.forEach(item => { %>
-                                    <tr>
-                                      <td><%= order._id %></td>
-                                      <td><%= item.productId.productName %></td>
-                                      <td style="color:darkmagenta;"><%= order.orderStatus %></td>
-                                      <td>₹
-                                        <%= order.totalAmount %></td>
-                                        <td>
-                                          <% if (order.orderStatus === "Cancelled" || order.orderStatus === "Returned") { %>
-                                            <a href="/orderDetailUser/<%=order._id%>">View details</a>
-                                          <% } else if (order.orderStatus === "Delivered") { %>
-                                            <button 
-                                            class="btn return-btn" 
-                                            data-order-id="<%= order._id %>" 
-                                            data-item-id="<%= item._id %>">
-                                            Return
-                                          </button>
-                                            <a href="/orderDetailUser/<%=order._id%>">View details</a>
-                                          <% } else { %>
-                                            <button 
-                                              class="btn cancel-btn" 
-                                              data-order-id="<%= order._id %>" 
-                                              data-item-id="<%= item._id %>">
-                                              Cancel
-                                            </button>
-                                            <a href="/orderDetailUser/<%=order._id%>">View details</a>
-                                          <% } %>
-                                          
-                                          
-                                          
-                                      </td>
-                                    </tr>
-                                  <% }) %>
-                                <% }) %>
-                                
+                                <% orders.forEach(order=> { %>
 
+                                  <% order.items.forEach(item=> { %>
+                              <tr>
+                                <td>
+                                  <%= order._id %>
+                                </td>
+                                <td>
+                                  <%= item.productId.productName %>
+                                </td>
+                                <td style="color:darkmagenta;">
+                                  <%= order.orderStatus %>
+                                </td>
+                                <td>₹
+                                  <%= order.totalAmount %>
+                                </td>
+                                <td>
+                                  <% if (order.orderStatus==="Cancelled" || order.orderStatus==="Returned" ) { %>
+                                    <a href="/orderDetailUser/<%=order._id%>">View details</a>
+                                    <% } else if (order.orderStatus==="Delivered" ) { %>
+                                      <button class="btn return-btn" data-order-id="<%= order._id %>"
+                                        data-item-id="<%= item._id %>">
+                                        Return
+                                      </button>
+                                      <a href="/orderDetailUser/<%=order._id%>">View details</a>
+                                      <% } else { %>
+                                        <button class="btn cancel-btn" data-order-id="<%= order._id %>"
+                                          data-item-id="<%= item._id %>">
+                                          Cancel
+                                        </button>
+                                        <a href="/orderDetailUser/<%=order._id%>">View details</a>
+                                        <% } %>
+
+
+
+                                </td>
                               </tr>
+                              <% }) %>
+                                <% }) %>
+
+
+                                  </tr>
                             </tbody>
                           </table>
                         </div>
@@ -442,7 +450,8 @@
                             <form>
                               <div class="form-group">
                                 <label for="walletAmount" class="h4">Amount</label>
-                                  <div class="h3">₹ <%= wallet && wallet.balance ? wallet.balance : 0 %></div>
+                                <div class="h3">₹ <%= wallet && wallet.balance ? wallet.balance : 0 %>
+                                </div>
                               </div>
                             </form>
                           </div>
@@ -468,37 +477,28 @@
                               </tr>
                             </thead>
                             <tbody>
-                              <% if (wallet && wallet.transactionHistory && wallet.transactionHistory.length > 0) { %>
-                                <% for (let i = 0; i < wallet.transactionHistory.length; i++) { %>
+                              <% if (wallet && wallet.transactionHistory && wallet.transactionHistory.length> 0) { %>
+                                <% for (let i=0; i < wallet.transactionHistory.length; i++) { %>
                                   <tr>
-                                    <td><%= new Date(wallet.transactionHistory[i].date).toLocaleDateString() %></td>
-                                    <td><%= wallet.transactionHistory[i].type %></td>
-                                    <td>₹<%= wallet.transactionHistory[i].amount %></td>
+                                    <td>
+                                      <%= new Date(wallet.transactionHistory[i].date).toLocaleDateString() %>
+                                    </td>
+                                    <td>
+                                      <%= wallet.transactionHistory[i].type %>
+                                    </td>
+                                    <td>₹<%= wallet.transactionHistory[i].amount %>
+                                    </td>
                                   </tr>
-                                <% } %>
-                              <% } else { %>
-                                <tr>
-                                  <td colspan="3" class="text-center">No transactions found</td>
-                                </tr>
-                              <% } %>
-                              
+                                  <% } %>
+                                    <% } else { %>
+                                      <tr>
+                                        <td colspan="3" class="text-center">No transactions found</td>
+                                      </tr>
+                                      <% } %>
+
                             </tbody>
                           </table>
                         </div>
-                      </div>
-                    </div>
-                  </div>
-
-
-                  <div class="tab-pane fade" id="referal" role="tabpanel" aria-labelledby="track-orders-tab">
-                    <div class="card">
-                      <div class="card-header">
-                        <h5 class="mb-0">Referal</h5>
-                      </div>
-                      <div class="card-body">
-                        <h6 class="mb-3">Refer your friends and earn money!</h6>
-                        <p>Share this link: <strong>></strong></p>
-                        <p>Earned: ₹</p>
                       </div>
                     </div>
                   </div>
@@ -555,79 +555,79 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-  const deleteButtons = document.querySelectorAll('.dlt-btn');
+    <script>
+      const deleteButtons = document.querySelectorAll('.dlt-btn');
 
-  deleteButtons.forEach(button => {
-    button.addEventListener('click', function (event) {
-      event.preventDefault(); 
-      const deleteUrl = this.href; 
+      deleteButtons.forEach(button => {
+        button.addEventListener('click', function (event) {
+          event.preventDefault();
+          const deleteUrl = this.href;
 
-      Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you want to delete this address? This action cannot be undone.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = deleteUrl;
-        }
+          Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to delete this address? This action cannot be undone.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = deleteUrl;
+            }
+          });
+        });
       });
-    });
-  });
-</script>
+    </script>
 
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-  document.querySelectorAll('.cancel-btn').forEach(button => {
-    button.addEventListener('click', function () {
-      const orderId = this.dataset.orderId; 
-      const itemId = this.dataset.itemId; 
-      const cancelUrl = `/orderCancel/${orderId}/${itemId}`;
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+      document.querySelectorAll('.cancel-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const orderId = this.dataset.orderId;
+          const itemId = this.dataset.itemId;
+          const cancelUrl = `/orderCancel/${orderId}/${itemId}`;
 
-      Swal.fire({
-        title: 'Are you sure?',
-        text: 'Do you want to cancel this order? This action cannot be undone.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = cancelUrl;
-        }
+          Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you want to cancel this order? This action cannot be undone.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = cancelUrl;
+            }
+          });
+        });
       });
-    });
-  });
 
 
-  document.querySelectorAll('.return-btn').forEach(button => {
-    button.addEventListener('click', function () {
-      const orderId = this.dataset.orderId; 
-      const itemId = this.dataset.itemId; 
-      const cancelUrl = `/orderReturn/${orderId}/${itemId}`; 
+      document.querySelectorAll('.return-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const orderId = this.dataset.orderId;
+          const itemId = this.dataset.itemId;
+          const cancelUrl = `/orderReturn/${orderId}/${itemId}`;
 
-      Swal.fire({
-        title: 'Are you sure?',
-        text: 'Do you want to return this order? This action cannot be undone.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = cancelUrl;
-        }
+          Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you want to return this order? This action cannot be undone.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = cancelUrl;
+            }
+          });
+        });
       });
-    });
-  });
-</script>
+    </script>
 
   </main>
   <%- include("../../views/partials/user/footer") %>

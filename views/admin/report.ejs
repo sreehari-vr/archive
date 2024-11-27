@@ -1,139 +1,158 @@
 <%- include('../../views/partials/admin/header.ejs') %>
-<style>
-    p {
-        color: black !important;
-    }
-    .metric-card {
-        height: 100%;
-    }
-</style>
-<body class="bg-light p-4">
-    <div class="container">
-        <h1 class="display-4 mb-4">Sales Report</h1>
+    <style>
+        p {
+            color: black !important;
+        }
 
-        <form method="GET" action="/admin/report" class="mb-4">
-            <div class="form-group">
-                <label class="form-label fw-bold">Filter Sales Report:</label>
-                <select name="filter" onchange="this.form.submit()" class="form-select mb-3" style="max-width: 300px;">
-                    <option value="Daily" <%= filter === 'Daily' ? 'selected' : '' %>>Daily</option>
-                    <option value="Weekly" <%= filter === 'Weekly' ? 'selected' : '' %>>Weekly</option>
-                    <option value="Yearly" <%= filter === 'Yearly' ? 'selected' : '' %>>Yearly</option>
-                    <option value="Custom" <%= filter === 'Custom' ? 'selected' : '' %>>Custom Date Range</option>
-                </select>
-            </div>
+        .metric-card {
+            height: 100%;
+        }
+    </style>
 
-            <div id="custom-date-range" class="<%= filter === 'Custom' ? '' : 'd-none' %> mb-3">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label for="startDate" class="form-label">Start Date:</label>
-                        <input type="date" id="startDate" name="startDate" value="<%= startDate %>" class="form-control" style="max-width: 300px;">
+    <body class="bg-light p-4">
+        <div class="container">
+            <h1 class="display-4 mb-4">Sales Report</h1>
+
+            <form method="GET" action="/admin/report" class="mb-4">
+                <div class="form-group">
+                    <label class="form-label fw-bold">Filter Sales Report:</label>
+                    <select name="filter" onchange="this.form.submit()" class="form-select mb-3"
+                        style="max-width: 300px;">
+                        <option value="Daily" <%=filter==='Daily' ? 'selected' : '' %>>Daily</option>
+                        <option value="Weekly" <%=filter==='Weekly' ? 'selected' : '' %>>Weekly</option>
+                        <option value="Yearly" <%=filter==='Yearly' ? 'selected' : '' %>>Yearly</option>
+                        <option value="Custom" <%=filter==='Custom' ? 'selected' : '' %>>Custom Date Range</option>
+                    </select>
+                </div>
+
+                <div id="custom-date-range" class="<%= filter === 'Custom' ? '' : 'd-none' %> mb-3">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="startDate" class="form-label">Start Date:</label>
+                            <input type="date" id="startDate" name="startDate" value="<%= startDate %>"
+                                class="form-control" style="max-width: 300px;">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="endDate" class="form-label">End Date:</label>
+                            <input type="date" id="endDate" name="endDate" value="<%= endDate %>" class="form-control"
+                                style="max-width: 300px;">
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label for="endDate" class="form-label">End Date:</label>
-                        <input type="date" id="endDate" name="endDate" value="<%= endDate %>" class="form-control" style="max-width: 300px;">
+                    <button type="submit" class="btn btn-primary mt-3">Apply</button>
+                </div>
+
+                <div class="btn-group mb-4">
+                    <a href="/admin/report/pdf?filter=<%= filter %>&startDate=<%= startDate %>&endDate=<%= endDate %>"
+                        class="btn btn-danger">
+                        Download PDF
+                    </a>
+                    <a href="/admin/report/excel?filter=<%= filter %>&startDate=<%= startDate %>&endDate=<%= endDate %>"
+                        class="btn btn-success">
+                        Download Excel
+                    </a>
+                </div>
+            </form>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="card bg- text-white metric-card">
+                        <div class="card-body">
+                            <h2 class="card-title h5">Total Orders</h2>
+                            <p class="card-text display-6">
+                                <%= totalOrders %>
+                            </p>
+                        </div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary mt-3">Apply</button>
-            </div>
 
-            <div class="btn-group mb-4">
-                <a href="/admin/report/pdf?filter=<%= filter %>&startDate=<%= startDate %>&endDate=<%= endDate %>" 
-                   class="btn btn-danger">
-                    Download PDF
-                </a>
-                <a href="/admin/report/excel?filter=<%= filter %>&startDate=<%= startDate %>&endDate=<%= endDate %>" 
-                   class="btn btn-success">
-                    Download Excel
-                </a>
-            </div>
-        </form>
-
-        <div class="row g-4">
-            <div class="col-md-6 col-lg-4">
-                <div class="card bg- text-white metric-card">
-                    <div class="card-body">
-                        <h2 class="card-title h5">Total Orders</h2>
-                        <p class="card-text display-6"><%= totalOrders %></p>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card bg- text-white metric-card">
+                        <div class="card-body">
+                            <h2 class="card-title h5">Total Amount</h2>
+                            <p class="card-text display-6">Rs. <%= totalAmount.toFixed(2) %>
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-md-6 col-lg-4">
-                <div class="card bg- text-white metric-card">
-                    <div class="card-body">
-                        <h2 class="card-title h5">Total Amount</h2>
-                        <p class="card-text display-6">Rs. <%= totalAmount.toFixed(2) %></p>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card bg- text-white metric-card">
+                        <div class="card-body">
+                            <h2 class="card-title h5">Total Discounts</h2>
+                            <p class="card-text display-6">Rs. <%= totalOffers.toFixed(2) %>
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-md-6 col-lg-4">
-                <div class="card bg- text-white metric-card">
-                    <div class="card-body">
-                        <h2 class="card-title h5">Total Discounts</h2>
-                        <p class="card-text display-6">Rs. <%= totalOffers.toFixed(2) %></p>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card bg- text-white metric-card">
+                        <div class="card-body">
+                            <h2 class="card-title h5">Total Coupon Deduction</h2>
+                            <p class="card-text display-6">Rs. <%= totalCouponOffers.toFixed(2) %>
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-md-6 col-lg-4">
-                <div class="card bg- text-white metric-card">
-                    <div class="card-body">
-                        <h2 class="card-title h5">Total Coupon Deduction</h2>
-                        <p class="card-text display-6">Rs. <%= totalCouponOffers.toFixed(2) %></p>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card bg- text-white metric-card">
+                        <div class="card-body">
+                            <h2 class="card-title h5">Total Delivered</h2>
+                            <p class="card-text display-6">
+                                <%= totalDelivered %>
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-md-6 col-lg-4">
-                <div class="card bg- text-white metric-card">
-                    <div class="card-body">
-                        <h2 class="card-title h5">Total Delivered</h2>
-                        <p class="card-text display-6"><%= totalDelivered %></p>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card bg- text-white metric-card">
+                        <div class="card-body">
+                            <h2 class="card-title h5">Total Cancelled</h2>
+                            <p class="card-text display-6">
+                                <%= totalCancelled %>
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-md-6 col-lg-4">
-                <div class="card bg- text-white metric-card">
-                    <div class="card-body">
-                        <h2 class="card-title h5">Total Cancelled</h2>
-                        <p class="card-text display-6"><%= totalCancelled %></p>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card bg- text-white metric-card">
+                        <div class="card-body">
+                            <h2 class="card-title h5">Total Shipped</h2>
+                            <p class="card-text display-6">
+                                <%= totalShipped %>
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-md-6 col-lg-4">
-                <div class="card bg- text-white metric-card">
-                    <div class="card-body">
-                        <h2 class="card-title h5">Total Shipped</h2>
-                        <p class="card-text display-6"><%= totalShipped %></p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-lg-4">
-                <div class="card bg- text-white metric-card">
-                    <div class="card-body">
-                        <h2 class="card-title h5">Total Returned</h2>
-                        <p class="card-text display-6"><%= totalReturned %></p>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card bg- text-white metric-card">
+                        <div class="card-body">
+                            <h2 class="card-title h5">Total Returned</h2>
+                            <p class="card-text display-6">
+                                <%= totalReturned %>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script>
-        const filterSelect = document.querySelector('select[name="filter"]');
-        const customDateRange = document.getElementById('custom-date-range');
+        <script>
+            const filterSelect = document.querySelector('select[name="filter"]');
+            const customDateRange = document.getElementById('custom-date-range');
 
-        filterSelect.addEventListener('change', () => {
-            if (filterSelect.value === 'Custom') {
-                customDateRange.classList.remove('d-none');
-            } else {
-                customDateRange.classList.add('d-none');
-            }
-        });
-    </script>
-</body>
-</html>
+            filterSelect.addEventListener('change', () => {
+                if (filterSelect.value === 'Custom') {
+                    customDateRange.classList.remove('d-none');
+                } else {
+                    customDateRange.classList.add('d-none');
+                }
+            });
+        </script>
+    </body>
+
+    </html>

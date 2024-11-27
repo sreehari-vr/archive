@@ -1,123 +1,122 @@
 <%- include('../../views/partials/admin/header.ejs') %>
-<style>
-    .error-message {
-      color: red;
-    }
-  
-    .thumbnails-container {
-      display: flex;
-      overflow-x: auto;
-    }
-  
-    .thumbnail {
-      margin-right: 10px;
-    }
-  </style>
-<div class="container mt-5">
-    <h2>Add Category</h2>
-    <form id="addCategoryForm" action="/admin/addCategory" method="post" onsubmit="addCategory(event)">
-        
-      <div class="form-group">
-          <label for="name">Category Name:</label>
-          <input type="text" id="name" name="name" class="form-control">
-          <span id="name-error" class="error-message"></span>
-      </div>
-  
-      <div class="form-group">
-          <label for="description">Category Description:</label>
-          <textarea id="description" name="description" class="form-control"></textarea>
-          <span id="description-error" class="error-message"></span>
-      </div>
+    <style>
+        .error-message {
+            color: red;
+        }
 
-      <div class="form-group">
-        <label for="offer">Offer:</label>
-        <input type="number" id="offer" name="offer" class="form-control">
-        <span id="offer-error" class="error-message"></span>
+        .thumbnails-container {
+            display: flex;
+            overflow-x: auto;
+        }
+
+        .thumbnail {
+            margin-right: 10px;
+        }
+    </style>
+    <div class="container mt-5">
+        <h2>Add Category</h2>
+        <form id="addCategoryForm" action="/admin/addCategory" method="post" onsubmit="addCategory(event)">
+
+            <div class="form-group">
+                <label for="name">Category Name:</label>
+                <input type="text" id="name" name="name" class="form-control">
+                <span id="name-error" class="error-message"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Category Description:</label>
+                <textarea id="description" name="description" class="form-control"></textarea>
+                <span id="description-error" class="error-message"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="offer">Offer:</label>
+                <input type="number" id="offer" name="offer" class="form-control">
+                <span id="offer-error" class="error-message"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Add Category</button>
+        </form>
+
     </div>
-  
-      <button type="submit" class="btn btn-primary">Add Category</button>
-  </form>
-  
-</div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
 
-<script>
-  function formValidate() {
-      document.querySelectorAll('.error-message').forEach(el => el.innerText = '');
-      let isValid = true;
+    <script>
+        function formValidate() {
+            document.querySelectorAll('.error-message').forEach(el => el.innerText = '');
+            let isValid = true;
 
-      const namePattern = /^[a-z\s]+$/i;
+            const namePattern = /^[a-z\s]+$/i;
 
-      const name = document.getElementById("name").value.trim();
-      const description = document.getElementById("description").value.trim();
+            const name = document.getElementById("name").value.trim();
+            const description = document.getElementById("description").value.trim();
 
-      if (!name) {
-          document.getElementById("name-error").innerText = "Category name is required.";
-          isValid = false;
-      } else if (!namePattern.test(name)) {
-          document.getElementById("name-error").innerText = "Category name can only contain letters and spaces.";
-          isValid = false;
-      }
+            if (!name) {
+                document.getElementById("name-error").innerText = "Category name is required.";
+                isValid = false;
+            } else if (!namePattern.test(name)) {
+                document.getElementById("name-error").innerText = "Category name can only contain letters and spaces.";
+                isValid = false;
+            }
 
-      if (!description) {
-          document.getElementById("description-error").innerText = "Description is required.";
-          isValid = false;
-      } else if (description.length < 10) {
-          document.getElementById("description-error").innerText = "Description must be at least 10 characters.";
-          isValid = false;
-      }
+            if (!description) {
+                document.getElementById("description-error").innerText = "Description is required.";
+                isValid = false;
+            } else if (description.length < 10) {
+                document.getElementById("description-error").innerText = "Description must be at least 10 characters.";
+                isValid = false;
+            }
 
-      return isValid;
-  }
+            return isValid;
+        }
 
-  function addCategory(event) {
-      event.preventDefault();
-      
-      if (!formValidate()) {
-          return;
-      }
+        function addCategory(event) {
+            event.preventDefault();
 
-      const name = document.getElementById('name').value.trim();
-      const description = document.getElementById('description').value.trim();
-      const offer = document.getElementById('offer').value.trim();
+            if (!formValidate()) {
+                return;
+            }
 
-      $.ajax({
-          method: 'POST',
-          url: '/admin/addCategory',
-          data: { 
-              name, 
-              description,
-              offer 
-          },
-          success: function (response) {
-              if (response.success) {
-                  Swal.fire({
-                      icon: 'success',
-                      title: 'Success',
-                      text: 'Category added successfully.',
-                  }).then(() => {
-                      window.location.href = '/admin/category';
-                  });
-              } else {
-                  Swal.fire({
-                      icon: 'error',
-                      title: 'Error',
-                      text: response.error || 'Category could not be added.',
-                  });
-              }
-          },
-          error: function (xhr) {
-              Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: xhr.responseJSON?.error || 'Something went wrong.',
-              });
-          },
-      });
-  }
-</script>
+            const name = document.getElementById('name').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const offer = document.getElementById('offer').value.trim();
 
+            $.ajax({
+                method: 'POST',
+                url: '/admin/addCategory',
+                data: {
+                    name,
+                    description,
+                    offer
+                },
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: 'Category added successfully.',
+                        }).then(() => {
+                            window.location.href = '/admin/category';
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.error || 'Category could not be added.',
+                        });
+                    }
+                },
+                error: function (xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: xhr.responseJSON?.error || 'Something went wrong.',
+                    });
+                },
+            });
+        }
+    </script>

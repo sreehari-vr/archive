@@ -4,9 +4,9 @@ const { Schema } = mongoose;
 const walletSchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
-    ref: "user", 
+    ref: "user",
     required: true,
-    unique: true, 
+    unique: true,
   },
   balance: {
     type: Number,
@@ -17,7 +17,7 @@ const walletSchema = new Schema({
     {
       type: {
         type: String,
-        enum: ["Credit", "Debit"], 
+        enum: ["Credit", "Debit"],
         required: true,
       },
       amount: {
@@ -26,15 +26,14 @@ const walletSchema = new Schema({
       },
       date: {
         type: Date,
-        default: Date.now, 
+        default: Date.now,
         description: {
           type: String,
-          default: "", 
+          default: "",
         },
       },
     },
   ],
-
 });
 
 const Wallet = mongoose.model("Wallet", walletSchema);

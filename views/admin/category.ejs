@@ -1,123 +1,138 @@
 <%-include('../../views/partials/admin/header.ejs')%>
-<head>
-    <style>
-        
-    </style>
-</head>
-<div class="content-header row">
-    <div class="d-flex justify-content-between align-items-center">
-        <h2 class="content-title card-title">Categories</h2>
-       
+
+    <head>
+        <style>
+
+        </style>
+    </head>
+    <div class="content-header row">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="content-title card-title">Categories</h2>
+
+        </div>
     </div>
-</div>         
-        </div>
-        
-            <header class="card-header text-center mb-20 d-flex gap-5">
-                <form action="/admin/category" method="get" class="d-inline" onsubmit=" editCategory(e)">
-                    <div class="input-group input-group-sm border border-1 border-grey rounded-pill" style="width: 500px; margin-left: 230px;">
-                        <input type="text" class="form-control border-0 rounded-pill" placeholder="Search customers..." name="search">
-                        <button class="btn  border-0" type="submit">Search </button>
-                    </div>
-                </form>
-                <form action="/admin/addCategory" method="get" class="d-inline ml-5">
-                    <button class="btn btn-success border-0" type="submit">Add new</button>
-                </form>
-            </header>
-            <div class="right m-5">
-                <table class="table table-striped">
-                    <thead>
-                      <tr>
-                        <th scope="col"><b>No.</b></th>
-                        <th scope="col"><b>Name</b></th>
-                        <th scope="col"><b>Description</b></th>
-                        <th scope="col"><b>Offer</b></th>
-                        <th scope="col"><b>Status</b></th>
-                        <th scope="col"><b>Action</b></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                        <% for(let i = 0; i < data.length; i++) { %>
-                            <tr>
-                                <td><%= i + 1 %></td>
-                                <td><%= data[i].name %></td>
-                                <td><%= data[i].description %></td>
-                                <td><%= data[i].offer %></td>
-                                <td>
-                                <% if(data[i].isActive === true) { %>
-                                    <h4 style="color: rgb(0, 255, 47);">Active</h4>
-                                    <% } else { %>
+    </div>
+
+    <header class="card-header text-center mb-20 d-flex gap-5">
+        <form action="/admin/category" method="get" class="d-inline" onsubmit=" editCategory(e)">
+            <div class="input-group input-group-sm border border-1 border-grey rounded-pill"
+                style="width: 500px; margin-left: 230px;">
+                <input type="text" class="form-control border-0 rounded-pill" placeholder="Search customers..."
+                    name="search">
+                <button class="btn  border-0" type="submit">Search </button>
+            </div>
+        </form>
+        <form action="/admin/addCategory" method="get" class="d-inline ml-5">
+            <button class="btn btn-success border-0" type="submit">Add new</button>
+        </form>
+    </header>
+    <div class="right m-5">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col"><b>No.</b></th>
+                    <th scope="col"><b>Name</b></th>
+                    <th scope="col"><b>Description</b></th>
+                    <th scope="col"><b>Offer</b></th>
+                    <th scope="col"><b>Status</b></th>
+                    <th scope="col"><b>Action</b></th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for(let i=0; i < data.length; i++) { %>
+                    <tr>
+                        <td>
+                            <%= i + 1 %>
+                        </td>
+                        <td>
+                            <%= data[i].name %>
+                        </td>
+                        <td>
+                            <%= data[i].description %>
+                        </td>
+                        <td>
+                            <%= data[i].offer %>
+                        </td>
+                        <td>
+                            <% if(data[i].isActive===true) { %>
+                                <h4 style="color: rgb(0, 255, 47);">Active</h4>
+                                <% } else { %>
                                     <h4 style="color: rgb(255, 0, 0);">Inactive</h4>
-                                    <% } %>      
-                                </td>
-                                    <td>
-                                            <% if(data[i].isActive === true) { %>
-                                                <button class="btn btn-warning" style="width: 80px;" onclick="confirmAction('/admin/unlist?id=<%= data[i]._id %>', 'unlist this category?')">
-                                                    Unlist
-                                                </button>
-                                            <% } else { %>
-                                                <button class="btn btn-success" style="width: 80px;" onclick="confirmAction('/admin/list?id=<%= data[i]._id %>', 'list this category?')">
-                                                    List
-                                                </button>
-                                            <% } %>
-                                            
-                                        
-                                    <button class="btn btn-success" style="width: 80px;">
-                                        <a href="/admin/updateCategory?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Update</a>
+                                    <% } %>
+                        </td>
+                        <td>
+                            <% if(data[i].isActive===true) { %>
+                                <button class="btn btn-warning" style="width: 80px;"
+                                    onclick="confirmAction('/admin/unlist?id=<%= data[i]._id %>', 'unlist this category?')">
+                                    Unlist
+                                </button>
+                                <% } else { %>
+                                    <button class="btn btn-success" style="width: 80px;"
+                                        onclick="confirmAction('/admin/list?id=<%= data[i]._id %>', 'list this category?')">
+                                        List
                                     </button>
-                                    <button class="btn btn-danger" style="width: 80px;" onclick="confirmAction('/admin/softDeleteCategory?id=<%= data[i]._id %>', 'delete this category?')">
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                            <% } %>
-                            
-                        
-                        
-                    </tbody>
-                  </table>
-        </div>
-        <div class="container mt-3">
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
-                    <% for(let i=1; i<=totalPages; i++) { %>
-                        <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
-                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
-                        </li>
+                                    <% } %>
+
+
+                                        <button class="btn btn-success" style="width: 80px;">
+                                            <a href="/admin/updateCategory?id=<%= data[i]._id %>" class="text-white"
+                                                style="text-decoration: none;">Update</a>
+                                        </button>
+                                        <button class="btn btn-danger" style="width: 80px;"
+                                            onclick="confirmAction('/admin/softDeleteCategory?id=<%= data[i]._id %>', 'delete this category?')">
+                                            Delete
+                                        </button>
+                        </td>
+                    </tr>
                     <% } %>
-                </ul>
-            </nav>
-        </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        <script>
-            function confirmAction(url, message) {
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: `Do you want to ${message}`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes',
-                    cancelButtonText: 'No'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = url;
-                    }
-                });
-            }
-        
-            function showNotification(type, message) {
-                Swal.fire({
-                    icon: type, 
-                    title: message,
-                    timer: 3000,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-right'
-                });
-            }
-        </script>
-        
-       
+
+            </tbody>
+        </table>
+    </div>
+    <div class="container mt-3">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
+                <% for(let i=1; i<=totalPages; i++) { %>
+                    <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %>">
+                            <%= i %>
+                        </a>
+                    </li>
+                    <% } %>
+            </ul>
+        </nav>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        function confirmAction(url, message) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `Do you want to ${message}`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = url;
+                }
+            });
+        }
+
+        function showNotification(type, message) {
+            Swal.fire({
+                icon: type,
+                title: message,
+                timer: 3000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-right'
+            });
+        }
+    </script>

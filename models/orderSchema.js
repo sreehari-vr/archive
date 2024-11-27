@@ -5,33 +5,33 @@ const orderSchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
     ref: "user",
-    required: true
+    required: true,
   },
   items: [
     {
       productId: {
         type: Schema.Types.ObjectId,
         ref: "product",
-        required: true
+        required: true,
       },
       quantity: {
         type: Number,
-        required: true
+        required: true,
       },
       price: {
         type: Number,
-        required: true
+        required: true,
       },
-    }
+    },
   ],
   totalAmount: {
     type: Number,
-    required: true
+    required: true,
   },
   address: {
     addressType: {
       type: String,
-      required: true
+      required: true,
     },
     name: {
       type: String,
@@ -43,11 +43,11 @@ const orderSchema = new Schema({
     },
     landMark: {
       type: String,
-      required: true
+      required: true,
     },
     state: {
       type: String,
-      required: true
+      required: true,
     },
     pincode: {
       type: Number,
@@ -60,28 +60,39 @@ const orderSchema = new Schema({
     altPhone: {
       type: String,
       required: false,
-    }
+    },
   },
   orderDate: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   paymentMethod: {
     type: String,
     enum: ["cod", "razorpay", "wallet"],
-    default: 'cod',
+    default: "cod",
     required: true,
   },
   orderStatus: {
     type: String,
-        enum:['Pending','Delivered','Shipped','Cancelled','Returned','Refunded'],
-        default: "Pending"
+    enum: [
+      "Pending",
+      "Delivered",
+      "Shipped",
+      "Cancelled",
+      "Returned",
+      "Refunded",
+    ],
+    default: "Pending",
+  },
+  discount:{
+    type: Number,
+    default: 0,
   },
   paymentStatus: {
     type: String,
-    enum:['Pending','Failed','Refund','Paid'],
-    default: "Pending"
-  }
+    enum: ["Pending", "Failed", "Refund", "Paid"],
+    default: "Pending",
+  },
 });
 
 const Order = mongoose.model("Order", orderSchema);
