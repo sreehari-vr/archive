@@ -55,19 +55,16 @@
     const description = document.getElementById("description").value.trim();
     const offer = document.getElementById("offer").value.trim();
   
-    // Validate name
     if (name === "") {
       document.getElementById("name-error").innerText = "Category name is required.";
       isValid = false;
     }
   
-    // Validate description
     if (description === "") {
       document.getElementById("description-error").innerText = "Description is required.";
       isValid = false;
     }
   
-    // Validate offer
     if (offer === "") {
       document.getElementById("offer-error").innerText = "Offer is required.";
       isValid = false;

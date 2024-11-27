@@ -111,7 +111,7 @@
    const countdown = setInterval(function () {
      const minutes = Math.floor(timer / 60);
      const seconds = timer % 60;
-     resendBtn.disabled = true; // Disable resend button during countdown
+     resendBtn.disabled = true;
      verifyBtn.disabled = false;
 
 
@@ -121,7 +121,7 @@
      if (--timer < 0) {
        clearInterval(countdown);
        timerElement.textContent = 'OTP Expired';
-       resendBtn.disabled = false; // Enable resend button after countdown
+       resendBtn.disabled = false;
        verifyBtn.disabled = true;
      }
    }, 1000);

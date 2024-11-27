@@ -114,12 +114,11 @@
         confirmButtonText: "Yes, unlist!"
       }).then((result) => {
         if (result.isConfirmed) {
-          window.location.href = url; // Navigate to the unlist endpoint
+          window.location.href = url; 
         }
       });
     });
 
-    // SweetAlert for Listing Product
     $(".list-btn").click(function (event) {
       event.preventDefault();
       const url = $(this).data("href");
@@ -133,12 +132,11 @@
         confirmButtonText: "Yes, list!"
       }).then((result) => {
         if (result.isConfirmed) {
-          window.location.href = url; // Navigate to the list endpoint
+          window.location.href = url; 
         }
       });
     });
 
-    // SweetAlert for Deleting Product
     $(".delete-btn").click(function (event) {
       event.preventDefault();
       const url = $(this).data("href");
@@ -152,7 +150,7 @@
         confirmButtonText: "Yes, delete!"
       }).then((result) => {
         if (result.isConfirmed) {
-          window.location.href = url; // Navigate to the delete endpoint
+          window.location.href = url;
         }
       });
     });

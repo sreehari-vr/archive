@@ -96,7 +96,7 @@
 							</div>
 
 							<form action="/cart/<%= item.productId._id %>" method="post">
-								<input type="hidden" name="quantity" value="1"> <!-- Default quantity -->
+								<input type="hidden" name="quantity" value="1"> 
 								<button type="submit" class="btn btn-primary btn-addtocart">
 									<i class="icon-shopping-cart"></i> Add to Cart
 								</button>
@@ -107,7 +107,6 @@
 						</div>
 						<% }) %>
 						<% } else { %>
-							<!-- Empty Cart Message -->
 							<div class="text-center py-5">
 								<h3>Your wishlist is empty</h3>
 								<p class="text-muted mt-3">Looks like you haven't added any items to your Wishlist yet.</p>

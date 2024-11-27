@@ -98,7 +98,7 @@
               data: { status },
               success: (response) => {
                 Swal.fire("Updated!", response.message, "success").then(() => {
-                  location.reload(); // Reload the page to reflect changes
+                  location.reload(); 
                 });
               },
               error: (err) => {
@@ -106,12 +106,11 @@
               },
             });
           } else {
-            $(this).val($(this).data("original-status")); // Revert if cancelled
+            $(this).val($(this).data("original-status")); 
           }
         });
       });
     
-      // Save original value on focus
       $(".status-select").focus(function () {
         $(this).data("original-status", $(this).val());
       });

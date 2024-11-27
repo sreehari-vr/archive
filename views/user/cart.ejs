@@ -214,7 +214,6 @@
 				const couponCodeInput = document.getElementById("couponCodeInput");
 				const checkoutForm = document.getElementById("checkoutForm");
 			
-				// Function to recalculate totals
 				async function recalculateTotals(minPurchase = 0) {
 					let subTotal = 0;
 			
@@ -257,7 +256,6 @@
 					grandTotalElement.textContent = `₹${grandTotal.toFixed(2)}`;
 				}
 			
-				// Handle quantity input changes
 				quantityInputs.forEach((input) => {
 					input.addEventListener("input", async (event) => {
 						const productId = event.target.id.split("-")[1];
@@ -282,7 +280,6 @@
 					});
 				});
 			
-				// Apply coupon logic
 				applyCouponBtn.addEventListener("click", async (event) => {
 					event.preventDefault();
 			
@@ -317,7 +314,6 @@
 					}
 				});
 			
-				// Remove product from cart
 				const removeButtons = document.querySelectorAll(".closed");
 				removeButtons.forEach((btn) => {
 					btn.addEventListener("click", async (event) => {
@@ -351,23 +347,19 @@
 					});
 				});
 			
-				// Checkout form submission
 				checkoutForm.addEventListener("submit", () => {
 					const subtotal = parseFloat(document.querySelector("#subtotal").textContent.replace("₹", ""));
 					const discount = parseFloat(document.querySelector("#discount").textContent.replace("₹", ""));
 					const grandTotal = parseFloat(document.querySelector("#grandTotal").textContent.replace("₹", ""));
 			
-					// Get all quantities
 					const quantities = Array.from(document.querySelectorAll("input[name='quantity']"))
 						.map(input => ({ productId: input.id.split("-")[1], quantity: parseInt(input.value, 10) || 0 }));
 			
-					// Populate hidden fields
 					document.getElementById("subtotalInput").value = subtotal;
 					document.getElementById("discountInput").value = discount;
 					document.getElementById("grandTotalInput").value = grandTotal;
 					document.getElementById("quantitiesInput").value = JSON.stringify(quantities);
 			
-					// Pass the coupon code
 					const couponCode = couponCodeInput?.value.trim() || "";
 					document.getElementById("couponCodeInputHidden").value = couponCode;
 				});

@@ -22,16 +22,14 @@
 
 <script>
     document.getElementById('emailForm').addEventListener('submit', async function (e) {
-        e.preventDefault(); // Prevent default form submission
+        e.preventDefault();
         
         const emailInput = document.getElementById('email');
         const emailError = document.getElementById('email-error');
         const emailValue = emailInput.value.trim();
         
-        // Clear previous errors
         emailError.textContent = "";
 
-        // Validate email format
         const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
         if (!emailValue.match(emailPattern)) {
             Swal.fire({
@@ -43,7 +41,6 @@
         }
 
         try {
-            // Send the request
             const response = await fetch('/update-email', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -51,7 +48,7 @@
             });
 
             const result = await response.json();
-            console.log(result); // Log the result for debugging
+            console.log(result); 
 
             if (response.ok && result.success) {
                 Swal.fire({

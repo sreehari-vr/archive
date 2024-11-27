@@ -151,12 +151,11 @@
 
         if (paymentMethod === "razorpay") {
             try {
-                // Fetch order details from the backend
                 const response = await fetch("/order", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        amount: "<%= cart.grandTotal %>", // Grand total (Ensure this is passed dynamically)
+                        amount: "<%= cart.grandTotal %>", 
                         currency: "INR",
                     }),
                 });
@@ -165,14 +164,13 @@
 
                 if (orderData.order_id) {
                     const options = {
-                        key: "<%= process.env.RAZORPAYID %>", // Your Razorpay key
+                        key: "<%= process.env.RAZORPAYID %>",
                         amount: orderData.amount,
                         currency: orderData.currency,
                         name: "Archive",
                         description: "Complete your payment",
                         order_id: orderData.order_id,
                         handler: async function (paymentResponse) {
-                            // Send payment response to the server for verification
                             const verifyResponse = await fetch("/paymentCapture", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
@@ -195,7 +193,7 @@
                             }
                         },
                         prefill: {
-                            name: "Customer Name", // You can fetch user details dynamically
+                            name: "Customer Name", 
                             email: "customer@example.com",
                             contact: "9999999999",
                         },
@@ -218,7 +216,6 @@
                 alert("An error occurred during payment. Please try again.");
             }
         } else {
-            // For COD or Wallet, submit the form normally
             e.target.submit();
         }
     });

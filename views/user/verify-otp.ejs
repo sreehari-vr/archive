@@ -107,16 +107,13 @@
         const otpInput = document.getElementById("otpInput");
         const verifyBtn = document.querySelector(".verify-btn");
       
-        // Remove any non-numeric characters
         otpInput.value = otpInput.value.replace(/[^0-9]/g, "");
       
-        // Enable button only if input length is exactly 6
         if (otpInput.value.length !== 6) {
           verifyBtn.disabled = true;
         }
       });
       
-      // Initialize verify button as disabled when the page loads
       
 
 
@@ -137,7 +134,7 @@
                 showConfirmButton: false,
                 timer: 1500,
               });
-              startTimer(); // Restart the timer
+              startTimer(); 
             } else {
               Swal.fire({
                 icon: "error",
@@ -154,17 +151,16 @@
           }
         });
 
-      // Function to start and update the timer
       function startTimer() {
-        let timeLeft = 10; // Set time duration for OTP
+        let timeLeft = 10; 
         
         const timerElement = document.getElementById("timer");
         const resendBtn = document.getElementById("resendBtn");
-        const verifyBtn = document.querySelector(".verify-btn"); // Select the verify button
+        const verifyBtn = document.querySelector(".verify-btn"); 
 
 
-        resendBtn.disabled = true; // Disable resend button during countdown
-        verifyBtn.disabled = false; // Enable verify button initially
+        resendBtn.disabled = true; 
+        verifyBtn.disabled = false; 
 
 
         const timerId = setInterval(() => {
@@ -176,7 +172,7 @@
           if (timeLeft === 0) {
             clearInterval(timerId);
             timerElement.textContent = "You can now resend OTP";
-            resendBtn.disabled = false; // Enable resend button after countdown
+            resendBtn.disabled = false; 
             verifyBtn.disabled = true; 
           } else {
             timeLeft--;
@@ -184,13 +180,12 @@
         }, 1000);
       }
 
-      // Call this function to reset the timer on resend
       function resetTimer() {
         document.getElementById("timer").textContent = "";
         startTimer();
       }
 
-      startTimer(); // Start the timer when the page loads
+      startTimer(); 
 
       document
         .getElementById("otpForm")

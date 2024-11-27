@@ -47,7 +47,6 @@
 
 <script>
   function formValidate() {
-      // Clear previous error messages
       document.querySelectorAll('.error-message').forEach(el => el.innerText = '');
       let isValid = true;
 
@@ -56,7 +55,6 @@
       const name = document.getElementById("name").value.trim();
       const description = document.getElementById("description").value.trim();
 
-      // Validate name
       if (!name) {
           document.getElementById("name-error").innerText = "Category name is required.";
           isValid = false;
@@ -65,7 +63,6 @@
           isValid = false;
       }
 
-      // Validate description
       if (!description) {
           document.getElementById("description-error").innerText = "Description is required.";
           isValid = false;
@@ -77,11 +74,9 @@
       return isValid;
   }
 
-  // Add category function with form validation
   function addCategory(event) {
       event.preventDefault();
       
-      // Validate form inputs
       if (!formValidate()) {
           return;
       }

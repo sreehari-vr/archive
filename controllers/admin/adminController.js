@@ -70,13 +70,11 @@ const logout = async (req, res) => {
 
 const getSalesReport = async (req, res) => {
   try {
-    // Extract filter and custom date range from query parameters
     const { filter, startDate, endDate } = req.query;
 
     const now = new Date();
-    let query = {}; // To dynamically create filter conditions
+    let query = {}; 
 
-    // Filter logic based on the selected option
     if (filter === 'Daily') {
       const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
@@ -98,28 +96,23 @@ const getSalesReport = async (req, res) => {
     }
     
 
-    // Fetch required data based on the query
     const orders = await Order.find(query);
     const products = await Product.find();
     const carts = await Cart.find();
 
-    // Sales metrics
     const totalOrders = orders.length;
     const totalAmount = orders.reduce((sum, order) => sum + order.totalAmount, 0);
 
-    // Discounts and coupons
     const totalCouponOffers = carts.reduce((sum, cart) => sum + cart.discount, 0);
     const totalOffers = products.reduce((sum, product) => {
       return sum + (product.regularPrice - product.salePrice);
     }, 0);
 
-    // Order statuses
     const totalDelivered = orders.filter(order => order.orderStatus === "Delivered").length;
     const totalShipped = orders.filter(order => order.orderStatus === "Shipped").length;
     const totalReturned = orders.filter(order => order.orderStatus === "Returned").length;
     const totalCancelled = orders.filter(order => order.orderStatus === "Cancelled").length;
 
-    // Render the report page with calculated metrics
     res.render('report', {
       totalOrders,
       totalAmount,
@@ -145,7 +138,6 @@ const downloadExcelReport = async (req, res) => {
   try {
     const { filter, startDate, endDate } = req.query;
 
-    // Fetch data as in `getSalesReport`
     const now = new Date();
     let query = {};
     if (filter === 'Daily') {
@@ -169,7 +161,6 @@ const downloadExcelReport = async (req, res) => {
     const totalOrders = orders.length;
     const totalAmount = orders.reduce((sum, order) => sum + order.totalAmount, 0);
 
-    // Generate Excel
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Sales Report');
 
@@ -210,7 +201,6 @@ const downloadPdfReport = async (req, res) => {
   try {
     const { filter, startDate, endDate } = req.query;
 
-    // Fetch data as in `getSalesReport`
     const now = new Date();
     let query = {};
     if (filter === 'Daily') {
@@ -232,28 +222,26 @@ const downloadPdfReport = async (req, res) => {
 
     const orders = await Order.find(query)
       .populate({
-        path: 'items.productId', // Populate the `productId` field inside `items`
-        model: 'product', // Populate from the `Product` model
+        path: 'items.productId', 
+        model: 'product', 
       })
-      .populate('userId'); // Populate the `userId` field
+      .populate('userId'); 
 
     const totalOrders = orders.length;
     const totalAmount = orders.reduce((sum, order) => sum + order.totalAmount, 0);
 
-    // Generate PDF
     const doc = new PDFDocument();
     const fileName = `Sales_Report_${Date.now()}.pdf`;
-    const reportDir = path.join(__dirname, 'reports'); // Use absolute path for the reports directory
+    const reportDir = path.join(__dirname, 'reports');
 
-    // Ensure the 'reports' directory exists
     if (!fs.existsSync(reportDir)) {
       fs.mkdirSync(reportDir, { recursive: true });
     }
 
     const filePath = path.join(reportDir, fileName);
 
-    doc.pipe(fs.createWriteStream(filePath)); // Save to file
-    doc.pipe(res); // Stream to client
+    doc.pipe(fs.createWriteStream(filePath)); 
+    doc.pipe(res); 
 
     doc.fontSize(18).text('Sales Report', { align: 'center' });
     doc.fontSize(12).text(`Filter: ${filter}`);
@@ -264,7 +252,6 @@ const downloadPdfReport = async (req, res) => {
     doc.text('\n\nOrder Details:');
 
     orders.forEach(order => {
-      // User Details
       doc.text(`\nOrder ID: ${order._id}`);
       doc.text(`User: ${order.userId.name || 'N/A'}`);
       doc.text(`Address: ${order.address.name}, ${order.address.city}, ${order.address.state} - ${order.address.pincode}`);
@@ -272,7 +259,6 @@ const downloadPdfReport = async (req, res) => {
       doc.text(`Payment Status: ${order.paymentStatus}`);
       doc.text(`Order Status: ${order.orderStatus}`);
 
-      // Items List
       order.items.forEach(item => {
         doc.text(`Product: ${item.productId.name || 'N/A'}`);
         doc.text(`Quantity: ${item.quantity}`);

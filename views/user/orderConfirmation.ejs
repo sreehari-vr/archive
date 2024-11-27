@@ -12,7 +12,6 @@
         overflow: hidden;
     }
     
-    /* Success checkmark animation */
     .order-confirmation::before {
         content: '✓';
         position: absolute;
@@ -55,7 +54,6 @@
         line-height: 1.6;
     }
     
-    /* Order ID styling */
     .order-confirmation p:nth-of-type(2) {
         font-family: monospace;
         background: #f8f9fa;
@@ -68,7 +66,6 @@
         font-size: 0.95rem;
     }
     
-    /* Items list */
     .order-confirmation ul {
         list-style: none;
         padding: 0;
@@ -98,14 +95,12 @@
         background: #f1f3f5;
     }
     
-    /* Product quantity styling */
     .order-confirmation ul li::before {
         content: '×';
         margin-right: 0.5rem;
         color: #adb5bd;
     }
     
-    /* Total amount styling */
     .order-confirmation p:last-child {
         font-size: 1.4rem;
         font-weight: 600;
@@ -116,14 +111,12 @@
         border-radius: 8px;
     }
     
-    /* Price styling */
     .order-confirmation ul li span:last-child,
     .order-confirmation p:last-child span {
         color: #2c3e50;
         font-weight: 600;
     }
     
-    /* Print styles */
     @media print {
         .order-confirmation {
             box-shadow: none;
@@ -140,7 +133,6 @@
         }
     }
     
-    /* Responsive styles */
     @media (max-width: 768px) {
         .order-confirmation {
             margin: 1rem;
@@ -164,7 +156,6 @@
         }
     }
     
-    /* Success animation */
     @keyframes fadeInUp {
         from {
             opacity: 0;
@@ -187,13 +178,11 @@
     .order-confirmation > *:nth-child(4) { animation-delay: 0.4s; }
     .order-confirmation > *:nth-child(5) { animation-delay: 0.5s; }
     
-    /* Hover effects for interactivity */
     .order-confirmation:hover {
         transform: translateY(-2px);
         transition: transform 0.3s ease;
     }
     
-    /* Additional decorative elements */
     .order-confirmation::after {
         content: '';
         position: absolute;

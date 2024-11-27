@@ -29,7 +29,7 @@ const walletSchema = new Schema({
         default: Date.now, 
         description: {
           type: String,
-          default: "", // Optional description for the transaction
+          default: "", 
         },
       },
     },

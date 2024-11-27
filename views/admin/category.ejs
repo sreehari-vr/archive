@@ -103,16 +103,14 @@
                     cancelButtonText: 'No'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Redirect to the URL
                         window.location.href = url;
                     }
                 });
             }
         
-            // For success and error notifications
             function showNotification(type, message) {
                 Swal.fire({
-                    icon: type, // 'success', 'error', 'warning'
+                    icon: type, 
                     title: message,
                     timer: 3000,
                     showConfirmButton: false,

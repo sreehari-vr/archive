@@ -10,14 +10,13 @@ const category = require("../../models/categorySchema");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Ensure the 'uploads' folder exists
+    cb(null, "uploads/"); 
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Append timestamp to avoid filename collisions
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 
-// File filter to allow specific types of images
 const fileFilter = (req, file, cb) => {
   const allowedTypes = /jpeg|jpg|png|gif/;
   const extname = allowedTypes.test(
@@ -31,14 +30,13 @@ const fileFilter = (req, file, cb) => {
   cb(new Error("Only images are allowed!"));
 };
 
-// Initialize multer with storage, file size limit, and file filter
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // Limit file size to 10MB
-    fieldSize: 10 * 1024 * 1024, // Limit the field size to 10MB
-    fields: 20, // Allow up to 20 fields
-    files: 10, // Allow up to 10 files
+    fileSize: 10 * 1024 * 1024, 
+    fieldSize: 10 * 1024 * 1024, 
+    fields: 20, 
+    files: 10, 
   },
   fileFilter: fileFilter,
 });

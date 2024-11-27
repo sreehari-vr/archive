@@ -11,7 +11,6 @@
     <div class="container">
         <h1 class="display-4 mb-4">Sales Report</h1>
 
-        <!-- Filters for Timeframes -->
         <form method="GET" action="/admin/report" class="mb-4">
             <div class="form-group">
                 <label class="form-label fw-bold">Filter Sales Report:</label>
@@ -23,7 +22,6 @@
                 </select>
             </div>
 
-            <!-- Custom Date Range -->
             <div id="custom-date-range" class="<%= filter === 'Custom' ? '' : 'd-none' %> mb-3">
                 <div class="row g-3">
                     <div class="col-md-6">
@@ -50,9 +48,7 @@
             </div>
         </form>
 
-        <!-- Sales Metrics -->
         <div class="row g-4">
-            <!-- Total Orders -->
             <div class="col-md-6 col-lg-4">
                 <div class="card bg- text-white metric-card">
                     <div class="card-body">
@@ -62,7 +58,6 @@
                 </div>
             </div>
 
-            <!-- Total Amount -->
             <div class="col-md-6 col-lg-4">
                 <div class="card bg- text-white metric-card">
                     <div class="card-body">
@@ -72,7 +67,6 @@
                 </div>
             </div>
 
-            <!-- Total Discounts -->
             <div class="col-md-6 col-lg-4">
                 <div class="card bg- text-white metric-card">
                     <div class="card-body">
@@ -82,7 +76,6 @@
                 </div>
             </div>
 
-            <!-- Total Coupon Deductions -->
             <div class="col-md-6 col-lg-4">
                 <div class="card bg- text-white metric-card">
                     <div class="card-body">
@@ -92,7 +85,6 @@
                 </div>
             </div>
 
-            <!-- Total Delivered -->
             <div class="col-md-6 col-lg-4">
                 <div class="card bg- text-white metric-card">
                     <div class="card-body">
@@ -102,7 +94,6 @@
                 </div>
             </div>
 
-            <!-- Total Cancelled -->
             <div class="col-md-6 col-lg-4">
                 <div class="card bg- text-white metric-card">
                     <div class="card-body">
@@ -112,7 +103,6 @@
                 </div>
             </div>
 
-            <!-- Total Shipped -->
             <div class="col-md-6 col-lg-4">
                 <div class="card bg- text-white metric-card">
                     <div class="card-body">
@@ -122,7 +112,6 @@
                 </div>
             </div>
 
-            <!-- Total Returned -->
             <div class="col-md-6 col-lg-4">
                 <div class="card bg- text-white metric-card">
                     <div class="card-body">
@@ -135,7 +124,6 @@
     </div>
 
     <script>
-        // Show/hide custom date range fields
         const filterSelect = document.querySelector('select[name="filter"]');
         const customDateRange = document.getElementById('custom-date-range');
 

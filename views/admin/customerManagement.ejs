@@ -89,7 +89,6 @@
                     confirmButtonText: `Yes, ${actionText} it!`
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Send request to block/unblock user
                         fetch(actionUrl)
                             .then(response => {
                                 if (response.ok) {
@@ -98,7 +97,7 @@
                                         `User has been ${actionText.toLowerCase()}ed.`,
                                         'success'
                                     ).then(() => {
-                                        window.location.reload(); // Reload page to update data
+                                        window.location.reload();
                                     });
                                 } else {
                                     Swal.fire(
