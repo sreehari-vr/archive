@@ -39,7 +39,75 @@ const login = async (req, res) => {
 const loadAdminDash = async (req, res) => {
   try {
     if (req.session.admin) {
-      return res.render("adminDash");
+      const topSellingProducts = await Order.aggregate([
+        { $unwind: '$items' }, // Decompose items array into multiple documents
+        { 
+          $group: { 
+            _id: '$items.productId', // Group by product ID
+            totalSold: { $sum: '$items.quantity' } // Sum quantities sold
+          } 
+        },
+        { $sort: { totalSold: -1 } }, // Sort by totalSold in descending order
+        { $limit: 10 }, // Limit to top 10 products
+        {
+          $lookup: {
+            from: 'products', // Collection name for products
+            localField: '_id', // Match productId
+            foreignField: '_id',
+            as: 'product' // Join the product data
+          }
+        },
+        { $unwind: '$product' }, // Unwind the product array
+        {
+          $project: { // Project only necessary fields
+            _id: 0,
+            productName: '$product.productName',
+            totalSold: 1
+          }
+        }
+      ]);
+
+      const bestSellingCategories = await Order.aggregate([
+        { $unwind: '$items' },
+        { 
+          $lookup: {
+            from: 'products',
+            localField: 'items.productId',
+            foreignField: '_id',
+            as: 'product'
+          } 
+        },
+        { $unwind: '$product' },
+        { 
+          $lookup: {
+            from: 'categories', // Assuming the collection name for categories
+            localField: 'product.category', // Field in Product schema linking to Category
+            foreignField: '_id',
+            as: 'category'
+          } 
+        },
+        { $unwind: '$category' },
+        { 
+          $group: { 
+            _id: '$category.name', // Group by category name
+            totalSold: { $sum: '$items.quantity' } 
+          } 
+        },
+        { $sort: { totalSold: -1 } },
+        { $limit: 5 }, // Top 5 categories
+        {
+          $project: {
+            _id: 0,
+            categoryName: '$_id', // Set the group result as categoryName
+            totalSold: 1
+          }
+        }
+      ]);
+      
+      
+      
+
+      return res.render("adminDash",{topSellingProducts, bestSellingCategories});
     }
   } catch (error) {
     console.error("Error loading admin dashboard:", error);
@@ -242,28 +310,13 @@ const downloadPdfReport = async (req, res) => {
 
     const now = new Date();
     let query = {};
+
     if (filter === "Daily") {
-      const startOfDay = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate()
-      );
-      const endOfDay = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        23,
-        59,
-        59,
-        999
-      );
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
       query.orderDate = { $gte: startOfDay, $lte: endOfDay };
     } else if (filter === "Weekly") {
-      const startOfWeek = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate() - now.getDay()
-      );
+      const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(endOfWeek.getDate() + 6);
       query.orderDate = { $gte: startOfWeek, $lte: endOfWeek };
@@ -275,20 +328,19 @@ const downloadPdfReport = async (req, res) => {
       query.orderDate = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
 
-    const orders = await Order.find(query)
-      .populate({
-        path: "items.productId",
-        model: "product",
-      })
-      .populate("userId");
+    const orders = await Order.find(query);
+    const products = await Product.find();
 
     const totalOrders = orders.length;
-    const totalAmount = orders.reduce(
-      (sum, order) => sum + order.totalAmount,
-      0
-    );
+    const totalAmount = orders.reduce((sum, order) => sum + order.totalAmount, 0);
+    const totalCouponOffers = orders.reduce((sum, order) => sum + order.discount, 0);
+    const totalOffers = products.reduce((sum, product) => sum + (product.regularPrice - product.salePrice), 0);
+    const totalDelivered = orders.filter(order => order.orderStatus === "Delivered").length;
+    const totalShipped = orders.filter(order => order.orderStatus === "Shipped").length;
+    const totalReturned = orders.filter(order => order.orderStatus === "Returned").length;
+    const totalCancelled = orders.filter(order => order.orderStatus === "Cancelled").length;
 
-    const doc = new PDFDocument();
+    const doc = new PDFDocument({ margin: 30 });
     const fileName = `Sales_Report_${Date.now()}.pdf`;
     const reportDir = path.join(__dirname, "reports");
 
@@ -301,35 +353,52 @@ const downloadPdfReport = async (req, res) => {
     doc.pipe(fs.createWriteStream(filePath));
     doc.pipe(res);
 
-    doc.fontSize(18).text("Sales Report", { align: "center" });
-    doc.fontSize(12).text(`Filter: ${filter}`);
-    doc.text(
-      `Start Date: ${startDate || "N/A"} | End Date: ${endDate || "N/A"}`
-    );
-    doc.text(`Total Orders: ${totalOrders}`);
-    doc.text(`Total Amount: Rs. ${totalAmount.toFixed(2)}`);
+    // Header
+    doc
+      .fontSize(20)
+      .text("Sales Report", { align: "center", underline: true })
+      .moveDown(1.5);
 
-    doc.text("\n\nOrder Details:");
+    doc
+      .fontSize(12)
+      .fillColor("gray")
+      .text(`Filter: ${filter}`)
+      .text(`Start Date: ${startDate || "N/A"} | End Date: ${endDate || "N/A"}`)
+      .moveDown();
 
-    orders.forEach((order) => {
-      doc.text(`\nOrder ID: ${order._id}`);
-      doc.text(`User: ${order.userId.name || "N/A"}`);
-      doc.text(
-        `Address: ${order.address.name}, ${order.address.city}, ${order.address.state} - ${order.address.pincode}`
-      );
-      doc.text(`Payment Method: ${order.paymentMethod}`);
-      doc.text(`Payment Status: ${order.paymentStatus}`);
-      doc.text(`Order Status: ${order.orderStatus}`);
+    // Metrics Table
+    
 
-      order.items.forEach((item) => {
-        doc.text(`Product: ${item.productId.name || "N/A"}`);
-        doc.text(`Quantity: ${item.quantity}`);
-        doc.text(`Price: Rs. ${item.price}`);
-        doc.text(`Subtotal: Rs. ${(item.price * item.quantity).toFixed(2)}`);
-      });
+    const metrics = [
+      ["Total Orders", totalOrders],
+      ["Total Amount", `Rs. ${totalAmount.toFixed(2)}`],
+      ["Total Discounts", `Rs. ${totalOffers.toFixed(2)}`],
+      ["Total Coupon Deduction", `Rs. ${totalCouponOffers.toFixed(2)}`],
+      ["Total Delivered", totalDelivered],
+      ["Total Cancelled", totalCancelled],
+      ["Total Shipped", totalShipped],
+      ["Total Returned", totalReturned],
+    ];
 
-      doc.text(`\nOrder Total: Rs. ${order.totalAmount.toFixed(2)}`);
-      doc.text("-------------------------------------");
+    // Table Layout with Borders
+    const startX = doc.x;
+    let startY = doc.y;
+    const rowHeight = 20;
+    const colWidth = 250;
+
+    metrics.forEach(([label, value], i) => {
+      doc
+        .fontSize(12)
+        .rect(startX, startY, colWidth, rowHeight) // Left column border
+        .stroke()
+        .text(label, startX + 5, startY + 5);
+
+      doc
+        .rect(startX + colWidth, startY, colWidth, rowHeight) // Right column border
+        .stroke()
+        .text(value, startX + colWidth + 5, startY + 5);
+
+      startY += rowHeight;
     });
 
     doc.end();
@@ -342,6 +411,56 @@ const downloadPdfReport = async (req, res) => {
   }
 };
 
+const chart = async (req, res) => {
+  try {
+    const { filter, startDate, endDate } = req.query;
+
+    let query = {};
+    const now = new Date();
+
+    if (filter === "Daily") {
+      const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(now.setHours(23, 59, 59, 999));
+      query.orderDate = { $gte: startOfDay, $lte: endOfDay };
+    } else if (filter === "Weekly") {
+      const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      query.orderDate = { $gte: startOfWeek, $lte: endOfWeek };
+    } else if (filter === "Monthly") {
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      query.orderDate = { $gte: startOfMonth, $lte: endOfMonth };
+    } else if (filter === "Yearly") {
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
+      query.orderDate = { $gte: startOfYear, $lte: endOfYear };
+    } else if (filter === "Custom" && startDate && endDate) {
+      query.orderDate = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      };
+    }
+
+    const orders = await Order.find(query);
+
+    const data = {
+      orders: orders.length,
+      pending: orders.filter(o => o.orderStatus === "Pending").length,
+      delivered: orders.filter(o => o.orderStatus === "Delivered").length,
+      cancelled: orders.filter(o => o.orderStatus === "Cancelled").length,
+      shipped: orders.filter(o => o.orderStatus === "Shipped").length,
+      returned: orders.filter(o => o.orderStatus === "Returned").length,
+    };
+
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching sales data' });
+  }
+};
+
+
+
 module.exports = {
   loadAdminLogin,
   login,
@@ -350,4 +469,5 @@ module.exports = {
   getSalesReport,
   downloadExcelReport,
   downloadPdfReport,
+  chart
 };

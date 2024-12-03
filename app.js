@@ -11,6 +11,8 @@ const db = require("./config/db");
 const userRouter = require("./routes/userRouter.js");
 const adminRouter = require("./routes/adminRouter.js");
 const orderController = require("./controllers/user/orderController.js");
+const Order = require('./models/orderSchema');
+
 db();
 
 app.use(express.json());
@@ -83,13 +85,23 @@ app.post("/paymentCapture", async (req, res) => {
       razorpay_signature,
       selectedAddress,
       couponCode,
+      paymentStatus, // Add paymentStatus for failed case
     } = req.body;
 
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      console.error("Missing payment details");
-      return res
-        .status(400)
-        .json({ success: false, message: "Missing payment details" });
+    if (!razorpay_order_id) {
+      return res.status(400).json({ success: false, message: "Missing Razorpay order ID" });
+    }
+
+    if (paymentStatus === "Failed" || !razorpay_payment_id || !razorpay_signature) {
+      console.log("Payment failed, saving failed order.");
+
+      req.body.paymentMethod = "razorpay";
+      req.body.selectedAddress = selectedAddress;
+      req.body.couponCode = couponCode;
+      req.body.paymentFailed = true; // Indicate a failed payment in the order
+
+      await orderController.placeOrder(req, res);
+      return; // Avoid further verification for failed payments
     }
 
     const body = razorpay_order_id + "|" + razorpay_payment_id;
@@ -125,6 +137,13 @@ app.post("/paymentCapture", async (req, res) => {
       .json({ success: false, message: "Payment processing error" });
   }
 });
+
+
+
+
+
+
+
 
 app.listen(process.env.PORT, () => {
   console.log(`Server running on http://localhost:${process.env.PORT}`);

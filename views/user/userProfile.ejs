@@ -407,19 +407,25 @@
                                 </td>
                                 <td>
                                   <% if (order.orderStatus==="Cancelled" || order.orderStatus==="Returned" ) { %>
-                                    <a href="/orderDetailUser/<%=order._id%>">View details</a>
+                                    <a href="/orderDetailUser/<%=order._id%>">Details</a>
                                     <% } else if (order.orderStatus==="Delivered" ) { %>
                                       <button class="btn return-btn" data-order-id="<%= order._id %>"
                                         data-item-id="<%= item._id %>">
                                         Return
                                       </button>
                                       <a href="/orderDetailUser/<%=order._id%>">View details</a>
-                                      <% } else { %>
+                                      <% } else if (order.paymentStatus === "Failed" && order.paymentMethod === "razorpay") { %>
+                                        <button class="btn retry-btn" data-order-id="<%= order._id %>">
+                                          Retry Payment
+                                        </button>
+                                        <a href="/orderDetailUser/<%=order._id%>">Details</a>
+                                        <% }
+                                       else { %>
                                         <button class="btn cancel-btn" data-order-id="<%= order._id %>"
                                           data-item-id="<%= item._id %>">
                                           Cancel
                                         </button>
-                                        <a href="/orderDetailUser/<%=order._id%>">View details</a>
+                                        <a href="/orderDetailUser/<%=order._id%>">Details</a>
                                         <% } %>
 
 
@@ -628,6 +634,65 @@
         });
       });
     </script>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  document.querySelectorAll('.retry-btn').forEach(button => {
+    button.addEventListener('click', function () {
+      const orderId = this.dataset.orderId;
+
+      // Fetch payment details from the server
+      fetch(`/retryPayment/${orderId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const options = {
+              key: data.razorpayKey, // Razorpay API key
+              amount: data.amount,   // Payment amount in paise
+              currency: "INR",
+              name: "Your Company Name",
+              description: "Order Payment",
+              order_id: data.razorpayOrderId, // Razorpay order ID
+              handler: function (response) {
+                // Handle success
+                fetch(`/confirmPayment`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({
+                    orderId: orderId,
+                    razorpayPaymentId: response.razorpay_payment_id,
+                    razorpayOrderId: response.razorpay_order_id,
+                    razorpaySignature: response.razorpay_signature,
+                  })
+                }).then(res => res.json())
+                  .then(data => {
+                    if (data.success) {
+                      window.location.reload(); // Refresh the page
+                    } else {
+                      alert("Payment confirmation failed.");
+                    }
+                  });
+              },
+              prefill: {
+                name: data.userName,
+                email: data.userEmail,
+                contact: data.userPhone
+              },
+              theme: {
+                color: "#3399cc"
+              }
+            };
+            const rzp1 = new Razorpay(options);
+            rzp1.open();
+          } else {
+            alert("Failed to initiate payment retry.");
+          }
+        });
+    });
+  });
+</script>
 
   </main>
   <%- include("../../views/partials/user/footer") %>

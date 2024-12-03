@@ -145,6 +145,7 @@ const applyCoupon = async (req, res) => {
   }
 };
 
+
 module.exports = {
   cartLoad,
   cartAdd,

@@ -6,6 +6,8 @@ const userController = require("../controllers/user/userController");
 const cartController = require("../controllers/user/cartController");
 const orderController = require("../controllers/user/orderController");
 const wishlistController = require("../controllers/user/wishlistController");
+const invoiceController = require("../controllers/user/invoiceController");
+
 
 const { adminAuth, userAuth } = require("../middleware/auth");
 const { find } = require("../models/productSchema");
@@ -90,5 +92,9 @@ router.get(
   userAuth,
   orderController.orderDetailUser
 );
+router.get("/retryPayment/:orderId",orderController.retryPayment);
+router.post("/confirmPayment", orderController.confirmPayment);
+router.get("/getInvoice", invoiceController.getInvoice); // Handles the download request
+
 
 module.exports = router;

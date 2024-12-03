@@ -70,6 +70,8 @@
                         <div class="col-md-6 text-md-end">
                             <h3 class="mb-1"><strong>Total Amount:</strong> ₹<%= order.totalAmount %>
                             </h3>
+                            <button class="btn btn-link" onclick="downloadInvoice('<%= order._id %>')">Download Invoice</button>
+
                         </div>
                     </div>
 
@@ -147,5 +149,10 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     </body>
     <%- include("../../views/partials/user/footer") %>
-
+    <script>
+        function downloadInvoice(orderId) {
+            window.location.href = `/getInvoice?orderId=${orderId}`;
+        }
+      </script>
+      
         </html>

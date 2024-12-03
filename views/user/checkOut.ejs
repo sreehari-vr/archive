@@ -110,10 +110,13 @@
                                         <div class="radio">
                                             <label><input type="radio" name="paymentMethod" value="cod" required> Cash
                                                 on delivery</label>
+                                            <p class="codError" id="codError" style="color: red;"></p>
                                         </div>
                                         <div class="radio">
                                             <label><input type="radio" name="paymentMethod" value="wallet" required>
                                                 Wallet</label>
+                                            <p class="walletError" id="walletError" style="color: red;"></p>
+
                                         </div>
                                         <div class="radio">
                                             <label><input type="radio" name="paymentMethod" value="razorpay" required>
@@ -178,11 +181,33 @@
     <script>
         document.querySelector("#checkoutForm").addEventListener("submit", async (e) => {
             e.preventDefault();
-
+        
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
             const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked').value;
             const couponCode = document.querySelector("#couponCode").value;
-
+            const orderTotal = parseFloat("<%= cart.grandTotal %>"); // Get order total
+            const walletBalance = parseFloat("<%= walletBalance %>"); // Replace with actual wallet balance variable
+    
+            let valid = true;
+    
+            // Clear previous error messages
+            document.getElementById("codError").textContent = "";
+            document.getElementById("walletError").textContent = "";
+    
+            if (paymentMethod === "wallet" && walletBalance < orderTotal) {
+                document.getElementById("walletError").textContent = "Insufficient wallet balance.";
+                valid = false;
+            }
+    
+            if (paymentMethod === "cod" && orderTotal > 1000) {
+                document.getElementById("codError").textContent = "Cash on delivery is not available for orders above ₹1000.";
+                valid = false;
+            }
+    
+            if (!valid) {
+                return; // Prevent form submission if validation fails
+            }
+        
             if (paymentMethod === "razorpay") {
                 try {
                     const response = await fetch("/order", {
@@ -191,11 +216,12 @@
                         body: JSON.stringify({
                             amount: "<%= cart.grandTotal %>",
                             currency: "INR",
+                            retryOrderId: "<%= orderId %>", // Include retryOrderId if available
                         }),
                     });
-
+        
                     const orderData = await response.json();
-
+        
                     if (orderData.order_id) {
                         const options = {
                             key: "<%= process.env.RAZORPAYID %>",
@@ -214,11 +240,12 @@
                                         razorpay_signature: paymentResponse.razorpay_signature,
                                         selectedAddress,
                                         couponCode,
+                                        paymentStatus: "Success"
                                     }),
                                 });
-
+        
                                 const result = await verifyResponse.json();
-
+        
                                 if (verifyResponse.ok) {
                                     alert("Payment Successful!");
                                     window.location.href = `/orderConfirmation/${result.orderId}`;
@@ -226,22 +253,39 @@
                                     alert(result.message || "Payment verification failed. Please try again.");
                                 }
                             },
-                            prefill: {
-                                name: "Customer Name",
-                                email: "customer@example.com",
-                                contact: "9999999999",
-                            },
                             theme: {
                                 color: "#3399cc",
                             },
                         };
-
+        
                         const razorpay = new Razorpay(options);
                         razorpay.open();
-
-                        razorpay.on('payment.failed', function (response) {
+        
+                        razorpay.on('payment.failed', async function (response) {
                             alert(`Payment failed: ${response.error.description}`);
+                        
+                            // Inform the backend about the failed payment attempt
+                            const failureResponse = await fetch("/paymentCapture", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    razorpay_order_id: response.error.metadata.order_id,
+                                    paymentStatus: "Failed", // Explicitly mark as failed
+                                    selectedAddress,
+                                    couponCode,
+                                }),
+                            });
+                        
+                            const result = await failureResponse.json();
+                            if (failureResponse.ok) {
+                                alert("Order saved, but payment failed.");
+                                window.location.href = `/cart`;
+                            } else {
+                                alert(result.message || "Error saving failed order. Please contact support.");
+                            }
                         });
+                        
+                          
                     } else {
                         alert("Failed to create Razorpay order. Please try again.");
                     }
@@ -253,6 +297,7 @@
                 e.target.submit();
             }
         });
+        
     </script>
 
     <%- include('../../views/partials/user/footer')%>
