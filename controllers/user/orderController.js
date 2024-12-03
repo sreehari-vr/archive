@@ -28,6 +28,13 @@ const placeOrder = async (req, res) => {
 
     const totalAmount = cart.grandTotal;
 
+    for (const item of cart.items) {
+      const Product = await product.findById(item.productId._id);
+      if (!Product || Product.quantity < item.quantity) {
+        return res.status(400).send(`Not enough stock for product: ${item.productId.productName}`);
+      }
+    }
+
     let coupon = null;
     if (couponCode) {
       coupon = await Coupon.findOne({ code: couponCode, isActive: true });
@@ -48,10 +55,8 @@ const placeOrder = async (req, res) => {
       }
     }
 
-    // Default value for paymentStatus (we'll update it later based on the payment result)
-    let paymentStatus = 'Pending'; // Default status
+    let paymentStatus = 'Pending'; 
 
-    // Create the order object
     const newOrder = new Order({
       userId,
       items: cart.items.map((item) => ({
@@ -72,15 +77,14 @@ const placeOrder = async (req, res) => {
       },
       discount,
       paymentMethod,
-      paymentStatus, // Initial status
+      paymentStatus,
       razorpayOrderId: paymentMethod === 'razorpay' && !paymentFailed ? req.body.razorpay_order_id : null
     });
 
     await newOrder.save();
 
     if (paymentMethod === 'razorpay') {
-      // Check Razorpay payment status
-      paymentStatus = req.body.paymentStatus || 'Failed'; // Default to 'Failed' if not provided
+      paymentStatus = req.body.paymentStatus || 'Failed'; 
 
       if (paymentStatus === 'Success') {
         newOrder.paymentStatus = 'Paid';
@@ -88,11 +92,9 @@ const placeOrder = async (req, res) => {
         newOrder.paymentStatus = 'Failed';
       }
 
-      // Save updated order status
       await newOrder.save();
     }
 
-    // If the payment was successful, update product quantities and clear the cart
     if (!paymentFailed) {
       for (const item of cart.items) {
         const Product = await product.findById(item.productId._id);
@@ -104,7 +106,6 @@ const placeOrder = async (req, res) => {
 
       await Cart.findOneAndUpdate({ userId }, { items: [] });
 
-      // Return the order confirmation based on the payment method
       if (paymentMethod === "razorpay") {
         return res.json({ success: true, orderId: newOrder._id });
       } else if (paymentMethod === "cod" || paymentMethod === "wallet") {
@@ -195,23 +196,36 @@ const orderCancel = async (req, res) => {
 
 const orderReturn = async (req, res) => {
   try {
-    const { orderId, itemId } = req.params;
+    const { orderId } = req.params;
+    const { reason } = req.body;
     const userId = req.session.user;
+
+    if (!reason || reason.trim() === "") {
+      return res.status(400).send("Return reason is required");
+    }
+
     const order = await Order.findOne({ _id: orderId, userId });
+
     if (!order) {
       return res.status(404).send("Order not found");
     }
 
+    if (order.orderStatus !== "Delivered") {
+      return res.status(400).send("Only delivered orders can be returned");
+    }
+
     order.orderStatus = "Returned";
     order.paymentStatus = "Refund";
-    await order.save();
+    order.returnReason = reason;
 
-    res.redirect("/userProfile");
+    await order.save();
+    res.redirect("/userProfile"); 
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error fetching order");
+    res.status(500).send("Error processing return");
   }
 };
+
 
 const orderDetailUser = async (req, res) => {
   try {
@@ -239,18 +253,17 @@ const retryPayment = async (req, res) => {
     }
 
     const paymentOrder = await razorpay.orders.create({
-      amount: order.totalAmount * 100, // Amount in paise
+      amount: order.totalAmount * 100, 
       currency: "INR",
       receipt: `order_${order._id}`,
     });
 
-    // Update order with new Razorpay order ID
     order.razorpayOrderId = paymentOrder.id;
     await order.save();
 
     res.json({
       success: true,
-      razorpayKey: process.env.RAZORPAYID, // Use your Razorpay key here
+      razorpayKey: process.env.RAZORPAYID, 
       amount: paymentOrder.amount,
       razorpayOrderId: paymentOrder.id,
       userName: req.session.user.name,
@@ -268,7 +281,6 @@ const retryPayment = async (req, res) => {
 const confirmPayment = async (req, res) => {
   const { orderId, razorpayPaymentId, razorpayOrderId, razorpaySignature } = req.body;
 
-  // Add Razorpay validation logic here (optional)
   console.log(req.body)
   
   const order = await Order.findById(orderId);
@@ -286,7 +298,6 @@ const confirmPayment = async (req, res) => {
         }
       }
 
-      // Clear the cart after successful payment
       cart.items = [];
       await cart.save();
     }

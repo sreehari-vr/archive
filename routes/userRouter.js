@@ -79,6 +79,12 @@ router.get(
   orderController.orderReturn
 );
 
+router.post(
+  "/orderReturn/:orderId",
+  userAuth,
+  orderController.orderReturn
+);
+
 router.get("/forgotPass", userController.loadForgotPassword);
 router.post("/forgotPass", userController.verifyForgotPass);
 router.post("/verifyForgotPassOtp", userController.verifyForgotPassOtp);
@@ -94,7 +100,7 @@ router.get(
 );
 router.get("/retryPayment/:orderId",orderController.retryPayment);
 router.post("/confirmPayment", orderController.confirmPayment);
-router.get("/getInvoice", invoiceController.getInvoice); // Handles the download request
+router.get("/getInvoice", invoiceController.getInvoice); 
 
 
 module.exports = router;

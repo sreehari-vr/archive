@@ -93,9 +93,13 @@ const orderSchema = new Schema({
     enum: ["Pending", "Failed", "Refund", "Paid"],
     default: "Pending",
   },
+  returnReason: { 
+    type: String,
+    default: null
+  },
   razorpayOrderId: {
     type: String,
-    required: false, // Only relevant for Razorpay payments
+    required: false, 
   },
 });
 

@@ -40,26 +40,26 @@ const loadAdminDash = async (req, res) => {
   try {
     if (req.session.admin) {
       const topSellingProducts = await Order.aggregate([
-        { $unwind: '$items' }, // Decompose items array into multiple documents
+        { $unwind: '$items' },
         { 
           $group: { 
-            _id: '$items.productId', // Group by product ID
-            totalSold: { $sum: '$items.quantity' } // Sum quantities sold
+            _id: '$items.productId', 
+            totalSold: { $sum: '$items.quantity' }
           } 
         },
-        { $sort: { totalSold: -1 } }, // Sort by totalSold in descending order
-        { $limit: 10 }, // Limit to top 10 products
+        { $sort: { totalSold: -1 } }, 
+        { $limit: 10 }, 
         {
           $lookup: {
-            from: 'products', // Collection name for products
-            localField: '_id', // Match productId
+            from: 'products', 
+            localField: '_id', 
             foreignField: '_id',
-            as: 'product' // Join the product data
+            as: 'product' 
           }
         },
-        { $unwind: '$product' }, // Unwind the product array
+        { $unwind: '$product' }, 
         {
-          $project: { // Project only necessary fields
+          $project: { 
             _id: 0,
             productName: '$product.productName',
             totalSold: 1
@@ -80,8 +80,8 @@ const loadAdminDash = async (req, res) => {
         { $unwind: '$product' },
         { 
           $lookup: {
-            from: 'categories', // Assuming the collection name for categories
-            localField: 'product.category', // Field in Product schema linking to Category
+            from: 'categories', 
+            localField: 'product.category', 
             foreignField: '_id',
             as: 'category'
           } 
@@ -89,16 +89,16 @@ const loadAdminDash = async (req, res) => {
         { $unwind: '$category' },
         { 
           $group: { 
-            _id: '$category.name', // Group by category name
+            _id: '$category.name',
             totalSold: { $sum: '$items.quantity' } 
           } 
         },
         { $sort: { totalSold: -1 } },
-        { $limit: 5 }, // Top 5 categories
+        { $limit: 5 }, 
         {
           $project: {
             _id: 0,
-            categoryName: '$_id', // Set the group result as categoryName
+            categoryName: '$_id', 
             totalSold: 1
           }
         }
@@ -380,7 +380,6 @@ const downloadPdfReport = async (req, res) => {
       ["Total Returned", totalReturned],
     ];
 
-    // Table Layout with Borders
     const startX = doc.x;
     let startY = doc.y;
     const rowHeight = 20;
@@ -389,12 +388,12 @@ const downloadPdfReport = async (req, res) => {
     metrics.forEach(([label, value], i) => {
       doc
         .fontSize(12)
-        .rect(startX, startY, colWidth, rowHeight) // Left column border
+        .rect(startX, startY, colWidth, rowHeight)
         .stroke()
         .text(label, startX + 5, startY + 5);
 
       doc
-        .rect(startX + colWidth, startY, colWidth, rowHeight) // Right column border
+        .rect(startX + colWidth, startY, colWidth, rowHeight) 
         .stroke()
         .text(value, startX + colWidth + 5, startY + 5);
 

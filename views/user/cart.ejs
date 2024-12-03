@@ -99,7 +99,7 @@
 									<div class="display-tc">
 										<input type="number" id="quantity-<%= item.productId._id %>" name="quantity"
 											class="form-control input-number text-center" value="<%= item.quantity %>"
-											min="1" max="<%= item.productId.quantity %>">
+											min="1" max="<%= item.productId.quantity <= 10 ? item.productId.quantity : 10 %>">
 									</div>
 								</div>
 								<div class="one-eight text-center">
@@ -373,6 +373,41 @@
 					});
 				});
 
+			</script>
+
+			<script>
+				document.addEventListener("DOMContentLoaded", function () {
+					const quantityInputs = document.querySelectorAll("input[name='quantity']");
+				  
+					quantityInputs.forEach((input) => {
+					  input.addEventListener("input", (event) => {
+						const maxStock = parseInt(input.getAttribute("max"), 10) || 10; // Max stock value from input attribute
+						const minStock = 1; // Minimum allowable quantity
+				  
+						let value = parseInt(event.target.value, 10) || minStock; // Fallback to minStock if invalid
+				  
+						if (value < minStock) {
+						  value = minStock; // Reset to minimum if below
+						  Swal.fire("Warning!", "Quantity cannot be less than 1.", "warning");
+						}
+				  
+						if (value > maxStock) {
+						  value = maxStock; // Reset to maximum stock if exceeded
+						  Swal.fire("Warning!", "Quantity exceeds available stock.", "warning");
+						}
+				  
+						event.target.value = value; // Update input value
+					  });
+				  
+					  input.addEventListener("blur", (event) => {
+						if (!event.target.value || event.target.value < 1) {
+						  event.target.value = 1; // Ensure minimum on blur
+						  Swal.fire("Notice", "Quantity reset to minimum value.", "info");
+						}
+					  });
+					});
+				  });
+				  
 			</script>
 
 			<script>

@@ -2,6 +2,7 @@ const user = require("../../models/userSchema");
 const Coupon = require("../../models/couponSchema");
 const Cart = require("../../models/cartSchema");
 
+
 const cartLoad = async (req, res) => {
   const userId = req.session.user;
   try {
@@ -30,7 +31,8 @@ const cartAdd = async (req, res) => {
       );
 
       if (productIndex > -1) {
-        cart.items[productIndex].quantity += quantityToAdd;
+        res.redirect("/cart");
+        return;
       } else {
         cart.items.push({ productId, quantity: quantityToAdd });
       }

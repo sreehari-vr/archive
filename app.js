@@ -85,7 +85,7 @@ app.post("/paymentCapture", async (req, res) => {
       razorpay_signature,
       selectedAddress,
       couponCode,
-      paymentStatus, // Add paymentStatus for failed case
+      paymentStatus, 
     } = req.body;
 
     if (!razorpay_order_id) {
@@ -98,10 +98,10 @@ app.post("/paymentCapture", async (req, res) => {
       req.body.paymentMethod = "razorpay";
       req.body.selectedAddress = selectedAddress;
       req.body.couponCode = couponCode;
-      req.body.paymentFailed = true; // Indicate a failed payment in the order
+      req.body.paymentFailed = true;
 
       await orderController.placeOrder(req, res);
-      return; // Avoid further verification for failed payments
+      return; 
     }
 
     const body = razorpay_order_id + "|" + razorpay_payment_id;

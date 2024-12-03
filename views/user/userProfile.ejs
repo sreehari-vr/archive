@@ -409,11 +409,10 @@
                                   <% if (order.orderStatus==="Cancelled" || order.orderStatus==="Returned" ) { %>
                                     <a href="/orderDetailUser/<%=order._id%>">Details</a>
                                     <% } else if (order.orderStatus==="Delivered" ) { %>
-                                      <button class="btn return-btn" data-order-id="<%= order._id %>"
-                                        data-item-id="<%= item._id %>">
+                                      <button class="btn return-order-btn" data-order-id="<%= order._id %>">
                                         Return
                                       </button>
-                                      <a href="/orderDetailUser/<%=order._id%>">View details</a>
+                                      <a href="/orderDetailUser/<%=order._id%>">Details</a>
                                       <% } else if (order.paymentStatus === "Failed" && order.paymentMethod === "razorpay") { %>
                                         <button class="btn retry-btn" data-order-id="<%= order._id %>">
                                           Retry Payment
@@ -434,6 +433,7 @@
                               </tr>
                               <% }) %>
                                 <% }) %>
+                              
 
 
                                   </tr>
@@ -441,6 +441,9 @@
                           </table>
                         </div>
                       </div>
+
+                      
+                      
                     </div>
                   </div>
 
@@ -508,6 +511,30 @@
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            
+            <div id="returnOrderModal" class="modal fade" tabindex="-1" aria-labelledby="returnOrderLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="returnOrderLabel">Return Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <form id="returnOrderForm" method="POST">
+                    <div class="modal-body">
+                      <div class="mb-3">
+                        <label for="reason" class="form-label">Reason for Return</label>
+                        <textarea class="form-control" id="reason" name="reason" required></textarea>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                  </form>
                 </div>
               </div>
             </div>
@@ -612,28 +639,28 @@
       });
 
 
-      document.querySelectorAll('.return-btn').forEach(button => {
-        button.addEventListener('click', function () {
-          const orderId = this.dataset.orderId;
-          const itemId = this.dataset.itemId;
-          const cancelUrl = `/orderReturn/${orderId}/${itemId}`;
+      
+    </script>
 
-          Swal.fire({
-            title: 'Are you sure?',
-            text: 'Do you want to return this order? This action cannot be undone.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes'
-          }).then((result) => {
-            if (result.isConfirmed) {
-              window.location.href = cancelUrl;
-            }
+    <script>
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const returnButtons = document.querySelectorAll('.return-order-btn');
+        const returnOrderForm = document.getElementById('returnOrderForm');
+        const reasonTextarea = document.getElementById('reason');
+    
+        returnButtons.forEach(button => {
+          button.addEventListener('click', function () {
+            const orderId = this.dataset.orderId;
+            returnOrderForm.action = `/orderReturn/${orderId}`;
+            reasonTextarea.value = ''; 
+            const returnOrderModal = new bootstrap.Modal(document.getElementById('returnOrderModal'));
+            returnOrderModal.show();
           });
         });
       });
     </script>
+    
 
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
@@ -641,20 +668,18 @@
     button.addEventListener('click', function () {
       const orderId = this.dataset.orderId;
 
-      // Fetch payment details from the server
       fetch(`/retryPayment/${orderId}`)
         .then(response => response.json())
         .then(data => {
           if (data.success) {
             const options = {
-              key: data.razorpayKey, // Razorpay API key
-              amount: data.amount,   // Payment amount in paise
+              key: data.razorpayKey, 
+              amount: data.amount,   
               currency: "INR",
               name: "Your Company Name",
               description: "Order Payment",
-              order_id: data.razorpayOrderId, // Razorpay order ID
+              order_id: data.razorpayOrderId, 
               handler: function (response) {
-                // Handle success
                 fetch(`/confirmPayment`, {
                   method: "POST",
                   headers: {
@@ -669,7 +694,7 @@
                 }).then(res => res.json())
                   .then(data => {
                     if (data.success) {
-                      window.location.reload(); // Refresh the page
+                      window.location.reload(); 
                     } else {
                       alert("Payment confirmation failed.");
                     }

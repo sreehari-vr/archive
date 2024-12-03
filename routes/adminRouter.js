@@ -92,6 +92,6 @@ router.get("/report", adminAuth, adminController.getSalesReport);
 router.get("/report/pdf", adminAuth, adminController.downloadPdfReport);
 router.get("/report/excel", adminAuth, adminController.downloadExcelReport);
 
-router.get('/chart',adminAuth, adminController.chart)
+router.get("/chart", adminAuth, adminController.chart);
 
 module.exports = router;
