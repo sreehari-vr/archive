@@ -31,7 +31,11 @@ const listOrders = async (req, res) => {
     const totalOrders = await Order.countDocuments();
     const totalPages = Math.ceil(totalOrders / limit);
 
-    const orders = await Order.find().populate("userId items.productId").exec();
+    const orders = await Order.find()
+    .populate("userId items.productId")
+    .sort({ orderDate: -1 })
+    .exec();
+  
     res.render("orders", {
       orders,
       data: orderData,

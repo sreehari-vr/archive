@@ -21,6 +21,7 @@ const customerInfo = async (req, res) => {
     })
       .limit(limit)
       .skip((page - 1) * limit)
+      .sort({createdAt:-1})
       .exec();
 
     const count = await User.find({

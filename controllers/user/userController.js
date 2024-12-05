@@ -256,7 +256,7 @@ const renderUserProfile = async (req, res) => {
     const id = req.session.user;
     const data = await user.findById(id);
     const userAddress = await Address.findOne({ userId: id });
-    const orders = await Order.find({ userId: id }).populate("items.productId");
+    const orders = await Order.find({ userId: id }).populate("items.productId").sort({orderDate:-1});
     const wallet = await Wallet.findOne({ userId: id });
 
     if (!data) {

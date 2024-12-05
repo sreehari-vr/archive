@@ -106,6 +106,35 @@ const placeOrder = async (req, res) => {
 
       await Cart.findOneAndUpdate({ userId }, { items: [] });
 
+      if (paymentMethod === 'wallet') {
+        let wallet = await Wallet.findOne({ userId });
+      
+        // Create wallet if it doesn't exist
+        if (!wallet) {
+          wallet = new Wallet({
+            userId,
+            balance: 0, // Initial balance set to 0
+            transactionHistory: [], // Empty transaction history
+          });
+          await wallet.save();
+        }
+      
+        // Check if the wallet has sufficient balance
+        if (wallet.balance < totalAmount) {
+          return res.status(400).json({ success: false, message: "Insufficient wallet balance." });
+        }
+      
+        // Deduct the balance
+        wallet.balance -= totalAmount;
+        wallet.transactionHistory.push({
+          type: "Debit",
+          amount: totalAmount,
+          description: `Spent for order ${newOrder._id}`,
+        });
+        await wallet.save();
+      }
+      
+
       if (paymentMethod === "razorpay") {
         return res.json({ success: true, orderId: newOrder._id });
       } else if (paymentMethod === "cod" || paymentMethod === "wallet") {
