@@ -1,122 +1,162 @@
 <%- include('../../views/partials/admin/header.ejs') %>
-    <style>
-        .error-message {
-            color: red;
-        }
 
-        .thumbnails-container {
-            display: flex;
-            overflow-x: auto;
-        }
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-8 pt-5">
+      <div class="card border-0 shadow-lg">
+        <div class="card-header bg-gradient-primary text-white py-3">
+          <h2 class="text-center mb-0">Add New Category</h2>
+        </div>
+        <div class="card-body p-4">
+          <form id="addCategoryForm" onsubmit="addCategory(event)" class="needs-validation" novalidate>
+            <div class="row g-3">
+              <div class="col-12">
+                <label for="name" class="form-label">Category Name</label>
+                <div class="input-group has-validation">
+                  <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    id="name" 
+                    name="name" 
+                    required
+                  />
+                  <div class="invalid-feedback" id="name-error">Category name is required</div>
+                </div>
+              </div>
 
-        .thumbnail {
-            margin-right: 10px;
-        }
-    </style>
-    <div class="container mt-5">
-        <h2>Add Category</h2>
-        <form id="addCategoryForm" action="/admin/addCategory" method="post" onsubmit="addCategory(event)">
+              <div class="col-12">
+                <label for="description" class="form-label">Category Description</label>
+                <div class="input-group has-validation">
+                  <span class="input-group-text"><i class="bi bi-text-paragraph"></i></span>
+                  <textarea 
+                    class="form-control" 
+                    id="description" 
+                    name="description" 
+                    rows="3" 
+                    required
+                  ></textarea>
+                  <div class="invalid-feedback" id="description-error">Description is required</div>
+                </div>
+              </div>
 
-            <div class="form-group">
-                <label for="name">Category Name:</label>
-                <input type="text" id="name" name="name" class="form-control">
-                <span id="name-error" class="error-message"></span>
+              <div class="col-12">
+                <label for="offer" class="form-label">Offer Percentage</label>
+                <div class="input-group has-validation">
+                  <span class="input-group-text"><i class="bi bi-percent"></i></span>
+                  <input 
+                    type="number" 
+                    class="form-control" 
+                    id="offer" 
+                    name="offer" 
+                    required
+                  />
+                  <div class="invalid-feedback" id="offer-error">Enter a valid offer percentage</div>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary w-100 py-2">
+                  Create Category
+                </button>
+              </div>
             </div>
-
-            <div class="form-group">
-                <label for="description">Category Description:</label>
-                <textarea id="description" name="description" class="form-control"></textarea>
-                <span id="description-error" class="error-message"></span>
-            </div>
-
-            <div class="form-group">
-                <label for="offer">Offer:</label>
-                <input type="number" id="offer" name="offer" class="form-control">
-                <span id="offer-error" class="error-message"></span>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Add Category</button>
-        </form>
-
+          </form>
+        </div>
+      </div>
     </div>
+  </div>
+</div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<script>
+function formValidate() {
+    document.querySelectorAll('.invalid-feedback').forEach(el => el.style.display = 'none');
+    let isValid = true;
 
+    const namePattern = /^[a-z\s]+$/i;
+    const name = document.getElementById("name").value.trim();
+    const description = document.getElementById("description").value.trim();
+    const offer = document.getElementById("offer").value.trim();
 
-    <script>
-        function formValidate() {
-            document.querySelectorAll('.error-message').forEach(el => el.innerText = '');
-            let isValid = true;
+    if (!name) {
+        document.getElementById("name-error").style.display = 'block';
+        document.getElementById("name-error").innerText = "Category name is required.";
+        isValid = false;
+    } else if (!namePattern.test(name)) {
+        document.getElementById("name-error").style.display = 'block';
+        document.getElementById("name-error").innerText = "Category name can only contain letters and spaces.";
+        isValid = false;
+    }
 
-            const namePattern = /^[a-z\s]+$/i;
+    if (!description) {
+        document.getElementById("description-error").style.display = 'block';
+        document.getElementById("description-error").innerText = "Description is required.";
+        isValid = false;
+    } else if (description.length < 10) {
+        document.getElementById("description-error").style.display = 'block';
+        document.getElementById("description-error").innerText = "Description must be at least 10 characters.";
+        isValid = false;
+    }
 
-            const name = document.getElementById("name").value.trim();
-            const description = document.getElementById("description").value.trim();
+    if (!offer || isNaN(offer) || offer < 0 || offer > 100) {
+        document.getElementById("offer-error").style.display = 'block';
+        document.getElementById("offer-error").innerText = "Offer must be between 0 and 100.";
+        isValid = false;
+    }
 
-            if (!name) {
-                document.getElementById("name-error").innerText = "Category name is required.";
-                isValid = false;
-            } else if (!namePattern.test(name)) {
-                document.getElementById("name-error").innerText = "Category name can only contain letters and spaces.";
-                isValid = false;
+    return isValid;
+}
+
+function addCategory(event) {
+    event.preventDefault();
+
+    if (!formValidate()) {
+        return;
+    }
+
+    const name = document.getElementById('name').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const offer = document.getElementById('offer').value.trim();
+
+    $.ajax({
+        method: 'POST',
+        url: '/admin/addCategory',
+        data: {
+            name,
+            description,
+            offer
+        },
+        success: function (response) {
+            if (response.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Category added successfully.',
+                    timer: 1500
+                }).then(() => {
+                    window.location.href = '/admin/category';
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Not Added',
+                    text: response.error || 'Category could not be added.',
+                });
             }
-
-            if (!description) {
-                document.getElementById("description-error").innerText = "Description is required.";
-                isValid = false;
-            } else if (description.length < 10) {
-                document.getElementById("description-error").innerText = "Description must be at least 10 characters.";
-                isValid = false;
-            }
-
-            return isValid;
-        }
-
-        function addCategory(event) {
-            event.preventDefault();
-
-            if (!formValidate()) {
-                return;
-            }
-
-            const name = document.getElementById('name').value.trim();
-            const description = document.getElementById('description').value.trim();
-            const offer = document.getElementById('offer').value.trim();
-
-            $.ajax({
-                method: 'POST',
-                url: '/admin/addCategory',
-                data: {
-                    name,
-                    description,
-                    offer
-                },
-                success: function (response) {
-                    if (response.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success',
-                            text: 'Category added successfully.',
-                        }).then(() => {
-                            window.location.href = '/admin/category';
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: response.error || 'Category could not be added.',
-                        });
-                    }
-                },
-                error: function (xhr) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: xhr.responseJSON?.error || 'Something went wrong.',
-                    });
-                },
+        },
+        error: function (xhr) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error occurred',
+                text: xhr.responseJSON?.error || 'Something went wrong.',
             });
-        }
-    </script>
+        },
+    });
+}
+</script>
+
+<%- include("../../views/partials/admin/footer") %>

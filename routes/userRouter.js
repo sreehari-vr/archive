@@ -13,7 +13,8 @@ const { adminAuth, userAuth } = require("../middleware/auth");
 const { find } = require("../models/productSchema");
 const user = require("../models/userSchema");
 
-router.get("/", userAuth, userController.loadHomepage);
+router.get("/", userController.loadLanding);
+router.get("/home", userAuth, userController.loadHomepage);
 router.get("/signup", userController.loadSignup);
 router.get("/login", userController.loadLogin);
 router.post("/login", userController.login);
@@ -29,13 +30,13 @@ router.get(
   passport.authenticate("google", { failureRedirect: "/signup" }),
   (req, res) => {
     req.session.user = req.user._id;
-    res.redirect("/");
+    res.redirect("/home");
   }
 );
 router.get("/productDetail/:id", userController.loadDetailPage);
 router.get("/logout", userController.logout);
-router.get("/userProfile", userController.renderUserProfile);
-router.get("/shop", userAuth, userController.loadShop);
+router.get("/userProfile", userAuth, userController.renderUserProfile);
+router.get("/shop", userController.loadShop);
 
 router.get("/changePassword", userAuth, userController.loadChangePass);
 router.post("/changePassword", userAuth, userController.changePassword);

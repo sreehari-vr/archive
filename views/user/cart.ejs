@@ -411,8 +411,31 @@
 			</script>
 
 			<script>
-				document.getElementById('refresh').addEventListener('click', function() {
-				  location.reload();
+				document.getElementById("refresh").addEventListener("click", async function (event) {
+					event.preventDefault();
+				
+					// Reset coupon code input
+					const couponCodeInput = document.getElementById("couponCodeInput");
+					couponCodeInput.value = "";
+				
+					// Reset hidden coupon code field
+					const couponCodeInputHidden = document.getElementById("couponCodeInputHidden");
+					if (couponCodeInputHidden) couponCodeInputHidden.value = "";
+				
+					// Get the current subtotal from the DOM
+					const subTotalElement = document.querySelector("#subtotal");
+					const subTotal = parseFloat(subTotalElement.textContent.replace("₹", ""));
+				
+					// Reset discount and grand total
+					const discountElement = document.querySelector("#discount");
+					const grandTotalElement = document.querySelector("#grandTotal");
+				
+					discountElement.textContent = "₹0.00";
+					grandTotalElement.textContent = `₹${subTotal.toFixed(2)}`;
+				
+					// Optionally, display a success message
+					Swal.fire("Coupon Removed!", "The coupon has been removed successfully.", "success");
 				});
+				
 			  </script>
 			<%- include("../../views/partials/user/footer") %>

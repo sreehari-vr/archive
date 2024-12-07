@@ -89,22 +89,24 @@
         </div>
         <div class="row row-pb-md">
             <% for(let i = 0; i < product.length; i++) { %>
-                <div class="col-lg-3 mb-4 text-center">
-                  <div class="product-entry border">
-                    <a href="/productDetail/<%= product[i]._id %>" class="prod-img">
-                      <% 
-                        // Normalize the path
-                        const imagePath = product[i].productImage[0].replace(/\\/g, '/'); 
-                        const finalImagePath = imagePath.startsWith('uploads/') ? '/' + imagePath : '/uploads/' + imagePath; 
-                      %>
-                      <img src="<%= finalImagePath %>" class="img-fluid" alt="<%= product[i].productName %>" style="height: 280px; width:300px">
-                    </a>
-                    <div class="desc">
-                      <h2><a href="/productDetail/<%= product[i]._id %>"><%= product[i].productName %></a></h2>
-                      <span class="price">₹ <%= product[i].salePrice %></span>
-                    </div>
+              <div class="col-lg-3 mb-4 text-center">
+                <div class="product-entry border">
+                  <a href="/productDetail/<%= product[i]._id %>" class="prod-img">
+                    <% 
+                      let finalImagePath = '/path/to/default/image.jpg'; // Add default image path
+                      if (product[i].productImage && product[i].productImage[0]) {
+                        const imagePath = product[i].productImage[0].replace(/\\/g, '/');
+                        finalImagePath = imagePath.startsWith('uploads/') ? '/' + imagePath : '/uploads/' + imagePath;
+                      }
+                    %>
+                    <img src="<%= finalImagePath %>" class="img-fluid" alt="<%= product[i].productName %>" style="height: 280px; width:300px">
+                  </a>
+                  <div class="desc">
+                    <h2><a href="/productDetail/<%= product[i]._id %>"><%= product[i].productName %></a></h2>
+                    <span class="price">₹ <%= product[i].salePrice %></span>
                   </div>
                 </div>
+              </div>
               <% } %>
                   
     </div>

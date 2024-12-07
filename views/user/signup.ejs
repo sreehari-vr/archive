@@ -5,6 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Join Archive - Sign Up</title>
+  <link rel="shortcut icon" type="image/png" href="../../../uploads/archivelogo.png" />
+
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <style>
@@ -147,7 +149,7 @@
       <div class="col-md-6">
         <div class="signup-container">
           <div class="signup-header">
-            <img src="../../uploads/logo (2).png" alt="Login Illustration" class="login-illustration"
+            <img src="../../uploads/archivelog.png" alt="Login Illustration" class="login-illustration"
               style="height: 100px;">
           </div>
           <div class="signup-form">
@@ -177,6 +179,11 @@
                   name="cPassword" />
                 <label for="cPassword">Confirm Password</label>
                 <div id="error5" class="error-message"></div>
+              </div>
+              <div class="form-floating">
+                <input type="text" class="form-control" id="referral" placeholder="referralCode" name="referral" />
+                <label for="referral">Referral code (Optional)</label>
+                <div id="error6" class="error-message"></div>
               </div>
 
               <%if(locals.message && message.length>0){%>

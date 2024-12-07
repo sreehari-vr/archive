@@ -296,6 +296,10 @@
                         <p class="card-text">
                           <strong>Email: <%= data.email%></strong>
                         </p>
+                          <p>Referral code: <strong id="referralCode"><%= data.referralCode %></strong></p>
+                          <button 
+                         class="btn btn-sm btn-success ml-2" onclick="copyToClipboard()">Copy Referral Code</button>
+                        
 
                         <%if(data.phone !=null){%>
                           <a href="/changeEmail" class="btn btn-sm btn-success ml-2">Change Email</a>
@@ -397,7 +401,7 @@
                                   <%= order._id %>
                                 </td>
                                 <td>
-                                  <%= item.productId.productName %>
+                                  <%= item.productId?.productName %>
                                 </td>
                                 <td style="color:darkmagenta;">
                                   <%= order.orderStatus %>
@@ -718,6 +722,34 @@
     });
   });
 </script>
+
+
+<script>
+  function copyToClipboard() {
+    const referralCode = document.getElementById("referralCode").textContent;
+
+    navigator.clipboard.writeText(referralCode)
+      .then(() => {
+        // Show success SweetAlert
+        Swal.fire({
+          icon: "success",
+          title: "Copied!",
+          text: "Referral code copied to clipboard.",
+          showConfirmButton: false,
+          timer: 1500 // Automatically closes after 1.5 seconds
+        });
+      })
+      .catch((err) => {
+        // Show error SweetAlert
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Failed to copy referral code. Please try again!",
+        });
+      });
+  }
+</script>
+
 
   </main>
   <%- include("../../views/partials/user/footer") %>

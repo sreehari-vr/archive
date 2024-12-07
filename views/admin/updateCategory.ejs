@@ -1,128 +1,167 @@
 <%- include('../../views/partials/admin/header.ejs') %>
-  <style>
-    .error-message {
-      color: red;
-    }
 
-    .thumbnails-container {
-      display: flex;
-      overflow-x: auto;
-    }
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-8 pt-5">
+      <div class="card border-0 shadow-lg">
+        <div class="card-header bg-gradient-primary text-white py-3">
+          <h2 class="text-center mb-0">Update Category</h2>
+        </div>
+        <div class="card-body p-4">
+          <form id="updateCategoryForm" onsubmit="editCategory(event)" class="needs-validation" novalidate>
+            <input type="hidden" name="id" value="<%= data._id %>">
+            <div class="row g-3">
+              <div class="col-12">
+                <label for="name" class="form-label">Category Name</label>
+                <div class="input-group has-validation">
+                  <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    id="name" 
+                    name="name" 
+                    value="<%= data.name %>"
+                    required
+                  />
+                  <div class="invalid-feedback" id="name-error">Category name is required</div>
+                </div>
+              </div>
 
-    .thumbnail {
-      margin-right: 10px;
-    }
-  </style>
+              <div class="col-12">
+                <label for="description" class="form-label">Category Description</label>
+                <div class="input-group has-validation">
+                  <span class="input-group-text"><i class="bi bi-text-paragraph"></i></span>
+                  <textarea 
+                    class="form-control" 
+                    id="description" 
+                    name="description" 
+                    rows="3" 
+                    required
+                  ><%= data.description %></textarea>
+                  <div class="invalid-feedback" id="description-error">Description is required</div>
+                </div>
+              </div>
 
-  <div class="container mt-5">
-    <h2>Update Category</h2>
-    <form action="/admin/updateCategory" method="post" onsubmit="editCategory(event)">
-      <input type="hidden" name="id" value="<%= data._id %>">
+              <div class="col-12">
+                <label for="offer" class="form-label">Offer Percentage</label>
+                <div class="input-group has-validation">
+                  <span class="input-group-text"><i class="bi bi-percent"></i></span>
+                  <input 
+                    type="number" 
+                    class="form-control" 
+                    id="offer" 
+                    name="offer" 
+                    value="<%= data.offer %>"
+                    required
+                  />
+                  <div class="invalid-feedback" id="offer-error">Enter a valid offer percentage</div>
+                </div>
+              </div>
 
-      <div class="form-group">
-        <label for="name">Category Name:</label>
-        <input type="text" id="name" name="name" class="form-control" value="<%= data.name %>">
-        <div id="name-error" class="error-message"></div>
-
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary w-100 py-2">
+                  Update Category
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
-
-      <div class="form-group">
-        <label for="description">Category Description:</label>
-        <textarea id="description" name="description" class="form-control"><%= data.description %></textarea>
-        <div id="description-error" class="error-message"></div>
-
-      </div>
-
-      <div class="form-group">
-        <label for="offer">Offer:</label>
-        <input type="number" id="offer" name="offer" class="form-control" value="<%= data.offer %>">
-        <span id="offer-error" class="error-message"></span>
-      </div>
-
-      <button type="submit" class="btn btn-primary">Update</button>
-    </form>
+    </div>
   </div>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</div>
 
-  <script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    function formValidate() {
-      document.querySelectorAll(".error-message").forEach((el) => (el.innerText = ""));
-      let isValid = true;
+<script>
+function formValidate() {
+    document.querySelectorAll('.invalid-feedback').forEach(el => el.style.display = 'none');
+    let isValid = true;
 
-      const name = document.getElementById("name").value.trim();
-      const description = document.getElementById("description").value.trim();
-      const offer = document.getElementById("offer").value.trim();
+    const namePattern = /^[a-z\s]+$/i;
+    const name = document.getElementById("name").value.trim();
+    const description = document.getElementById("description").value.trim();
+    const offer = document.getElementById("offer").value.trim();
 
-      if (name === "") {
+    if (!name) {
+        document.getElementById("name-error").style.display = 'block';
         document.getElementById("name-error").innerText = "Category name is required.";
         isValid = false;
-      }
+    } else if (!namePattern.test(name)) {
+        document.getElementById("name-error").style.display = 'block';
+        document.getElementById("name-error").innerText = "Category name can only contain letters and spaces.";
+        isValid = false;
+    }
 
-      if (description === "") {
+    if (!description) {
+        document.getElementById("description-error").style.display = 'block';
         document.getElementById("description-error").innerText = "Description is required.";
         isValid = false;
-      }
-
-      if (offer === "") {
-        document.getElementById("offer-error").innerText = "Offer is required.";
+    } else if (description.length < 10) {
+        document.getElementById("description-error").style.display = 'block';
+        document.getElementById("description-error").innerText = "Description must be at least 10 characters.";
         isValid = false;
-      } else if (isNaN(offer) || offer < 0 || offer > 100) {
-        document.getElementById("offer-error").innerText = "Offer must be a percentage between 0 and 100.";
-        isValid = false;
-      }
-
-      return isValid;
     }
 
+    if (!offer || isNaN(offer) || offer < 0 || offer > 100) {
+        document.getElementById("offer-error").style.display = 'block';
+        document.getElementById("offer-error").innerText = "Offer must be between 0 and 100.";
+        isValid = false;
+    }
 
-    function editCategory(event) {
-      event.preventDefault();
+    return isValid;
+}
 
-      if (!formValidate()) {
+function editCategory(event) {
+    event.preventDefault();
+
+    if (!formValidate()) {
         return;
-      }
+    }
 
-      const id = document.querySelector('input[name="id"]').value;
-      const name = document.getElementById("name").value.trim();
-      const description = document.getElementById("description").value.trim();
-      const offer = document.getElementById("offer").value.trim();
+    const id = document.querySelector('input[name="id"]').value;
+    const name = document.getElementById('name').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const offer = document.getElementById('offer').value.trim();
 
-      $.ajax({
-        method: "post",
-        url: "/admin/updateCategory",
+    $.ajax({
+        method: 'POST',
+        url: '/admin/updateCategory',
         data: {
-          id,
-          name,
-          description,
-          offer,
+            id,
+            name,
+            description,
+            offer
         },
         success: function (response) {
-          console.log(response);
-          if (response.success) {
-            Swal.fire({
-              icon: "success",
-              title: "Successfully updated",
-              text: response.message || "Category updated",
-            }).then(() => {
-              window.location.href = "/admin/category";
-            });
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: "Not updated",
-              text: response.error || "Category not updated",
-            });
-          }
+            if (response.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Category updated successfully.',
+                    timer: 1500
+                }).then(() => {
+                    window.location.href = '/admin/category';
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Not Updated',
+                    text: response.error || 'Category could not be updated.',
+                });
+            }
         },
-        error: function () {
-          Swal.fire({
-            icon: "error",
-            title: "Error occurred",
-            text: "Something went wrong",
-          });
+        error: function (xhr) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error occurred',
+                text: xhr.responseJSON?.error || 'Something went wrong.',
+            });
         },
-      });
-    }
-  </script>
+    });
+}
+</script>
+
+<%- include("../../views/partials/admin/footer") %>

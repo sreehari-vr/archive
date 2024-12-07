@@ -1,0 +1,154 @@
+<%-include('../../views/partials/user/landingHeader')%>
+			<div class="sale">
+				<div class="container">
+					<div class="row">
+						<div class="col-sm-8 offset-sm-2 text-center">
+							<div class="row">
+								<div class="owl-carousel2">
+									<div class="item">
+										<div class="col">
+											<h3><a href="#">25% off (Almost) Everything! Use Code: Summer Sale</a></h3>
+										</div>
+									</div>
+									<div class="item">
+										<div class="col">
+											<h3><a href="#">Our biggest sale yet 50% off </a></h3>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</nav>
+		<aside id="colorlib-hero">
+			<div class="flexslider">
+				<ul class="slides">
+			   	<li style="background-image: url(images/banner1.png);">
+			   		<div class="overlay"></div>
+			   		<div class="container-fluid">
+			   			<div class="row">
+				   			<div class="col-sm-6 offset-sm-3 text-center slider-text">
+				   				<div class="slider-text-inner">
+				   					<div class="desc">
+					   					<h1 class="head-1">Home</h1>
+					   					<h2 class="head-2">Decor</h2>
+					   					<h2 class="head-3">Collection</h2>
+					   					<p class="category"><span>New trending </span></p>
+					   					<p><a href="#" class="btn btn-primary">Shop Collection</a></p>
+				   					</div>
+				   				</div>
+				   			</div>
+				   		</div>
+			   		</div>
+			   	</li>
+			   	<li style="background-image: url(images/banner2.png);">
+			   		<div class="overlay"></div>
+			   		<div class="container-fluid">
+			   			<div class="row">
+				   			<div class="col-sm-6 offset-sm-3 text-center slider-text">
+				   				<div class="slider-text-inner">
+				   					<div class="desc">
+					   					<h1 class="head-1">Huge</h1>
+					   					<h2 class="head-2">Sale</h2>
+					   					<h2 class="head-3"><strong class="font-weight-bold">50%</strong> Off</h2>
+					   					<p class="category"><span>Big sale </span></p>
+					   					<p><a href="#" class="btn btn-primary">Shop Collection</a></p>
+				   					</div>
+				   				</div>
+				   			</div>
+				   		</div>
+			   		</div>
+			   	</li>
+			   	<li style="background-image: url(images/banner3.png);">
+			   		<div class="overlay"></div>
+			   		<div class="container-fluid">
+			   			<div class="row">
+				   			<div class="col-sm-6 offset-sm-3 text-center slider-text">
+				   				<div class="slider-text-inner">
+				   					<div class="desc">
+					   					<h1 class="head-1">New</h1>
+					   					<h2 class="head-2">Arrival</h2>
+					   					<h2 class="head-3">up to <strong class="font-weight-bold">30%</strong> off</h2>
+					   					<p><a href="#" class="btn btn-primary">Shop Collection</a></p>
+				   					</div>
+				   				</div>
+				   			</div>
+				   		</div>
+			   		</div>
+			   	</li>
+			  	</ul>
+		  	</div>
+		</aside>
+		
+
+		<div class="colorlib-product">
+			<div class="container">
+				<div class="row">
+					<div class="col-sm-8 offset-sm-2 text-center colorlib-heading">
+						<h2>New Arrivals</h2>
+					</div>
+				</div>
+				<div class="row row-pb-md">
+					<% for (let i = 0; i < product.length; i++) { %>
+						<div class="col-lg-3 mb-4 text-center">
+						  <div class="product-entry border">
+							<a href="/productDetail/<%= product[i]._id %>" class="prod-img">
+							  <% 
+								let finalImagePath;
+								if (product[i].productImage && product[i].productImage.length > 0) {
+								  const imagePath = product[i].productImage[0].replace(/\\/g, '/');
+								  finalImagePath = imagePath.startsWith('uploads/') ? '/' + imagePath : '/uploads/' + imagePath;
+								} else {
+								  finalImagePath = '/uploads/noimage.jpg'; // Set a default placeholder image
+								}
+							  %>
+							  <img src="<%= finalImagePath %>" class="img-fluid" alt="<%= product[i].productName %>" style="height: 280px; width:300px">
+							</a>
+							<div class="desc">
+							  <h2><a href="/productDetail/<%= product[i]._id %>"><%= product[i].productName %></a></h2>
+							  <span class="price">₹ <%= product[i].salePrice %></span>
+							</div>
+						  </div>
+						</div>
+					  <% } %>
+					  
+						  
+			</div>
+			<div class="row">
+				<div class="col-md-12 text-center">
+					<p><a href="/shop" class="btn btn-primary btn-lg">Shop All Products</a></p>
+				</div>
+			</div>
+		</div>
+		</div>
+
+		<div class="colorlib-partner">
+			<div class="container">
+				<div class="row">
+					<div class="col-sm-8 offset-sm-2 text-center colorlib-heading colorlib-heading-sm">
+						<h2>Trusted Partners</h2>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col partner-col text-center">
+						<img src="images/brand-1.jpg" class="img-fluid" alt="Free html4 bootstrap 4 template">
+					</div>
+					<div class="col partner-col text-center">
+						<img src="images/brand-2.jpg" class="img-fluid" alt="Free html4 bootstrap 4 template">
+					</div>
+					<div class="col partner-col text-center">
+						<img src="images/brand-3.jpg" class="img-fluid" alt="Free html4 bootstrap 4 template">
+					</div>
+					<div class="col partner-col text-center">
+						<img src="images/brand-4.jpg" class="img-fluid" alt="Free html4 bootstrap 4 template">
+					</div>
+					<div class="col partner-col text-center">
+						<img src="images/brand-5.jpg" class="img-fluid" alt="Free html4 bootstrap 4 template">
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<%-include('../../views/partials/user/footer')%>

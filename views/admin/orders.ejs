@@ -1,88 +1,180 @@
 <%- include("../../views/partials/admin/header") %>
 
-  <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
-  </head>
-  <div class="content-header">
-    <div>
-      <h2 class="content-title card-title">Orders</h2>
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2 class="h2 mb-0 fw-bold text-primary">Orders</h2>
     </div>
   </div>
-  <header class="card-header text-center mb-20 d-flex gap-5">
-    <form action="/admin/orders" method="get" class="d-inline">
-      <div class="input-group input-group-sm border border-1 border-grey rounded-pill"
-        style="width: 500px; margin-left: 230px;">
-        <input type="text" class="form-control border-0 rounded-pill" placeholder="Search orders or users"
-          name="search">
-        <button class="btn border-0" type="submit">Search</button>
-      </div>
-    </form>
-  </header>
-  <div class="right mt-5">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Order ID</th>
-          <th>User</th>
-          <th>Product(s)</th>
-          <th>Total Amount</th>
-          <th>Payment Method</th>
-          <th>Order Date</th>
-          <th>Order status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% orders.forEach(order=> { %>
-          <tr>
-            <td>
-              <%= order._id %>
-            </td>
-            <td>
-              <%= order.userId ? order.userId.name : "Unknown User" %>
-            </td>
-            <td>
-              <% order.items.forEach(item=> { %>
-                <div class="mb-2">
-                  <%= item.productId.productName %> (Qty: <%= item.quantity %>, ₹<%= item.price %>)<br>
-                </div>
-                <% }); %>
-            </td>
-            <td>
-              ₹<%= order.totalAmount %>
-            </td>
-            <td>
-              <%= order.paymentMethod %>
-            </td>
-            <td>
-              <%= order.orderDate.toDateString() %>
-            </td>
-            <td>
-              <%= order.orderStatus %>
 
-            </td>
-            <td>
-              <a href="/admin/orders/<%= order._id %>">View Order</a>
-            </td>
-          </tr>
-          <% }); %>
-      </tbody>
-    </table>
+  <!-- Search Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body bg-light">
+          <div class="row align-items-center">
+            <div class="col-12">
+              <form action="/admin/orders" method="get">
+                <div class="input-group">
+                  <input type="text" class="form-control form-control-lg" placeholder="Search orders or users" name="search">
+                  <button class="btn btn-primary btn-lg" type="submit">
+                    <i class="bi bi-search"></i> <span class="d-none d-sm-inline">Search</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="container mt-3">
+  <!-- Desktop Table View (visible on md and up) -->
+  <div class="d-none d-md-block">
+    <div class="card shadow">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0 align-middle">
+            <thead class="bg-light">
+              <tr>
+                <th class="border-0 text-uppercase small fw-bold">Order ID</th>
+                <th class="border-0 text-uppercase small fw-bold">User</th>
+                <th class="border-0 text-uppercase small fw-bold">Products</th>
+                <th class="border-0 text-uppercase small fw-bold">Total Amount</th>
+                <th class="border-0 text-uppercase small fw-bold">Payment</th>
+                <th class="border-0 text-uppercase small fw-bold">Date</th>
+                <th class="border-0 text-uppercase small fw-bold">Status</th>
+                <th class="border-0 text-uppercase small fw-bold">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% orders.forEach(order => { %>
+                <tr>
+                  <td><span class="fw-bold text-primary"><%= order._id %></span></td>
+                  <td><%= order.userId ? order.userId.name : "Unknown User" %></td>
+                  <td>
+                    <% order.items.forEach(item => { %>
+                      <div class="mb-1">
+                        <small class="text-muted">
+                          <%= item.productId.productName %> 
+                          <span class="badge bg-light text-dark border">
+                            Qty: <%= item.quantity %>
+                          </span>
+                          <span class="fw-bold text-success">₹<%= item.price %></span>
+                        </small>
+                      </div>
+                    <% }); %>
+                  </td>
+                  <td><span class="fw-bold text-success">₹<%= order.totalAmount %></span></td>
+                  <td><span class="badge bg-info text-dark"><%= order.paymentMethod %></span></td>
+                  <td><span class="badge bg-light text-dark border"><%= order.orderDate.toDateString() %></span></td>
+                  <td>
+                    <% const statusColors = {
+                      'Pending': 'warning',
+                      'Processing': 'info',
+                      'Shipped': 'primary',
+                      'Delivered': 'success',
+                      'Cancelled': 'danger'
+                    } %>
+                    <span class="badge bg-<%= statusColors[order.orderStatus] %>-subtle text-<%= statusColors[order.orderStatus] %> px-3">
+                      <%= order.orderStatus %>
+                    </span>
+                  </td>
+                  <td>
+                    <a href="/admin/orders/<%= order._id %>" class="btn btn-primary btn-sm">
+                      <i class="bi bi-eye"></i> View
+                    </a>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Card View (visible on sm and below) -->
+  <div class="d-md-none">
+    <% orders.forEach(order => { %>
+      <div class="card shadow-sm mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge bg-primary">#<%= order._id %></span>
+            <% const statusColors = {
+              'Pending': 'warning',
+              'Processing': 'info',
+              'Shipped': 'primary',
+              'Delivered': 'success',
+              'Cancelled': 'danger'
+            } %>
+            <span class="badge bg-<%= statusColors[order.orderStatus] %>-subtle text-<%= statusColors[order.orderStatus] %>">
+              <%= order.orderStatus %>
+            </span>
+          </div>
+          
+          <h5 class="card-title mb-2"><%= order.userId ? order.userId.name : "Unknown User" %></h5>
+          
+          <div class="row g-2 mb-3">
+            <div class="col-12">
+              <div class="small text-muted">Products</div>
+              <% order.items.forEach(item => { %>
+                <div class="fw-bold mb-1">
+                  <%= item.productId.productName %>
+                  <div class="small text-muted">
+                    Qty: <%= item.quantity %> | ₹<%= item.price %>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+            <div class="col-6">
+              <div class="small text-muted">Total Amount</div>
+              <div class="fw-bold text-success">₹<%= order.totalAmount %></div>
+            </div>
+            <div class="col-6">
+              <div class="small text-muted">Payment Method</div>
+              <div class="fw-bold"><%= order.paymentMethod %></div>
+            </div>
+            <div class="col-12">
+              <div class="small text-muted">Order Date</div>
+              <div class="fw-bold"><%= order.orderDate.toDateString() %></div>
+            </div>
+          </div>
+          
+          <div class="d-grid">
+            <a href="/admin/orders/<%= order._id %>" class="btn btn-outline-primary">
+              <i class="bi bi-eye"></i> View Order Details
+            </a>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+
+  <!-- Pagination -->
+  <div class="d-flex justify-content-center mt-4">
     <nav aria-label="Page navigation">
-      <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
+      <ul class="pagination">
         <% for(let i=1; i <=totalPages; i++) { %>
           <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
             <a class="page-link" href="?page=<%= i %>" aria-current="<%= (i === currentPage) ? 'page' : '' %>">
               <%= i %>
             </a>
           </li>
-          <% } %>
+        <% } %>
       </ul>
     </nav>
   </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<!-- Bootstrap Icons CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+<!-- Sweet Alert CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<%- include("../../views/partials/admin/footer") %>

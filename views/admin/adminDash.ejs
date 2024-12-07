@@ -1,150 +1,220 @@
 <%- include("../../views/partials/admin/header") %>
 
-<div class="container">
-    <h3>Sales Report</h3>
-    <form id="filterForm">
-      <label for="filter">Filter By:</label>
-      <select id="filter" name="filter">
-        <option value="Daily">Daily</option>
-        <option value="Weekly">Weekly</option>
-        <option value="Monthly">Monthly</option>
-        <option value="Yearly">Yearly</option>
-        <option value="Custom">Custom</option>
-      </select>
-  
-      <label for="startDate">Start Date:</label>
-      <input type="date" id="startDate" name="startDate" disabled />
-  
-      <label for="endDate">End Date:</label>
-      <input type="date" id="endDate" name="endDate" disabled />
-  
-      <button type="button" onclick="applyFilter()">Apply</button>
-    </form>
-  
-    <canvas id="myChart"></canvas>
+<div class="container py-4">
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h3 class="border-bottom pb-3">Sales Report</h3>
+    </div>
   </div>
 
-  <div class="container">
-    <h2>Top 10 Best-Selling Products</h2>
-    
-    <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Product Name</th>
-          <th>Quantity Sold</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% if (topSellingProducts && topSellingProducts.length > 0) { %>
-          <% topSellingProducts.forEach((product, index) => { %>
-            <tr>
-              <td><%= index + 1 %></td>
-              <td><%= product.productName %></td>
-              <td><%= product.totalSold %></td>
-            </tr>
-          <% }) %>
-        <% } else { %>
-          <tr>
-            <td colspan="3">No data available</td>
-          </tr>
-        <% } %>
-      </tbody>
-    </table>
-  
-    <h2>Best-Selling Categories</h2>
-    
-    <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Category Name</th>
-          <th>Quantity Sold</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% if (bestSellingCategories && bestSellingCategories.length > 0) { %>
-          <% bestSellingCategories.forEach((category, index) => { %>
-            <tr>
-              <td><%= index + 1 %></td>
-              <td><%= category.categoryName %></td>
-              <td><%= category.totalSold %></td>
-            </tr>
-          <% }) %>
-        <% } else { %>
-          <tr>
-            <td colspan="3">No data available</td>
-          </tr>
-        <% } %>
-      </tbody>
-    </table>
+  <!-- Filter Form -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <form id="filterForm" class="row g-3 align-items-end">
+            <div class="col-md-3 col-sm-6">
+              <label for="filter" class="form-label">Filter By:</label>
+              <select id="filter" name="filter" class="form-select">
+                <option value="Daily">Daily</option>
+                <option value="Weekly">Weekly</option>
+                <option value="Monthly">Monthly</option>
+                <option value="Yearly">Yearly</option>
+                <option value="Custom">Custom</option>
+              </select>
+            </div>
+            <div class="col-md-3 col-sm-6">
+              <label for="startDate" class="form-label">Start Date:</label>
+              <input type="date" id="startDate" name="startDate" class="form-control" disabled />
+            </div>
+            <div class="col-md-3 col-sm-6">
+              <label for="endDate" class="form-label">End Date:</label>
+              <input type="date" id="endDate" name="endDate" class="form-control" disabled />
+            </div>
+            <div class="col-md-3 col-sm-6">
+              <button type="button" onclick="applyFilter()" class="btn btn-primary w-100">Apply Filter</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
-  <script>
-    let myChart;
-  
-    function createChart(data) {
-      if (myChart) myChart.destroy();
-  
-      const ctx = document.getElementById('myChart').getContext('2d');
-      myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['Orders', 'Pending', 'Delivered', 'Cancelled', 'Shipped', 'Returned'],
-          datasets: [{
-            label: 'Metrics',
-            data: data,
-            backgroundColor: [
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(153, 102, 255, 0.2)',
-              'rgba(255, 159, 64, 0.2)',
-            ],
-            borderColor: [
-              'rgba(54, 162, 235, 1)',
-              'rgba(75, 192, 192, 1)',
-              'rgba(255, 99, 132, 1)',
-              'rgba(153, 102, 255, 1)',
-              'rgba(255, 159, 64, 1)',
-            ],
-            borderWidth: 1
-          }]
+  <!-- Chart -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <canvas id="myChart" style="min-height: 300px;"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Products and Categories -->
+  <div class="row">
+    <!-- Top 10 Products -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-transparent">
+          <h5 class="card-title mb-0">Top 10 Best-Selling Products</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Product Name</th>
+                  <th>Quantity Sold</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (topSellingProducts && topSellingProducts.length > 0) { %>
+                  <% topSellingProducts.forEach((product, index) => { %>
+                    <tr>
+                      <td><%= index + 1 %></td>
+                      <td><%= product.productName %></td>
+                      <td><%= product.totalSold %></td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="3" class="text-center">No data available</td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Best Categories -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-transparent">
+          <h5 class="card-title mb-0">Best-Selling Categories</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Category Name</th>
+                  <th>Quantity Sold</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (bestSellingCategories && bestSellingCategories.length > 0) { %>
+                  <% bestSellingCategories.forEach((category, index) => { %>
+                    <tr>
+                      <td><%= index + 1 %></td>
+                      <td><%= category.categoryName %></td>
+                      <td><%= category.totalSold %></td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="3" class="text-center">No data available</td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  let myChart;
+
+  function createChart(data) {
+    if (myChart) myChart.destroy();
+
+    const ctx = document.getElementById('myChart').getContext('2d');
+    myChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Orders', 'Pending', 'Delivered', 'Cancelled', 'Shipped', 'Returned'],
+        datasets: [{
+          label: 'Metrics',
+          data: data,
+          backgroundColor: [
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(153, 102, 255, 0.6)',
+            'rgba(255, 159, 64, 0.6)',
+            'rgba(255, 205, 86, 0.6)'
+          ],
+          borderColor: [
+            'rgba(54, 162, 235, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(255, 99, 132, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)',
+            'rgba(255, 205, 86, 1)'
+          ],
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+          }
         },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              drawBorder: false
+            }
+          },
+          x: {
+            grid: {
+              display: false
             }
           }
         }
-      });
-    }
-  
-    async function applyFilter() {
-      const filter = document.getElementById('filter').value;
-      const startDate = document.getElementById('startDate').value;
-      const endDate = document.getElementById('endDate').value;
-  
-      try {
-        const response = await fetch(`/admin/chart?filter=${filter}&startDate=${startDate}&endDate=${endDate}`);
-        const data = await response.json();
-        
-        createChart([data.orders, data.pending, data.delivered, data.cancelled, data.shipped, data.returned]);
-      } catch (error) {
-        console.error('Error fetching data:', error);
       }
-    }
-  
-    document.getElementById('filter').addEventListener('change', function () {
-      const isCustom = this.value === 'Custom';
-      document.getElementById('startDate').disabled = !isCustom;
-      document.getElementById('endDate').disabled = !isCustom;
     });
-  
-    applyFilter(); 
-  </script>
-  
+  }
+
+  async function applyFilter() {
+    const filter = document.getElementById('filter').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+
+    try {
+      const response = await fetch(`/admin/chart?filter=${filter}&startDate=${startDate}&endDate=${endDate}`);
+      const data = await response.json();
+      
+      createChart([data.orders, data.pending, data.delivered, data.cancelled, data.shipped, data.returned]);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }
+
+  document.getElementById('filter').addEventListener('change', function() {
+    const isCustom = this.value === 'Custom';
+    document.getElementById('startDate').disabled = !isCustom;
+    document.getElementById('endDate').disabled = !isCustom;
+  });
+
+  // Initialize chart on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    applyFilter();
+  });
+</script>
+
+<%- include("../../views/partials/admin/footer") %>

@@ -1,0 +1,150 @@
+<%- include("../../views/partials/admin/header") %>
+
+<div class="container">
+    <h3>Sales Report</h3>
+    <form id="filterForm">
+      <label for="filter">Filter By:</label>
+      <select id="filter" name="filter">
+        <option value="Daily">Daily</option>
+        <option value="Weekly">Weekly</option>
+        <option value="Monthly">Monthly</option>
+        <option value="Yearly">Yearly</option>
+        <option value="Custom">Custom</option>
+      </select>
+  
+      <label for="startDate">Start Date:</label>
+      <input type="date" id="startDate" name="startDate" disabled />
+  
+      <label for="endDate">End Date:</label>
+      <input type="date" id="endDate" name="endDate" disabled />
+  
+      <button type="button" onclick="applyFilter()">Apply</button>
+    </form>
+  
+    <canvas id="myChart"></canvas>
+  </div>
+
+  <div class="container">
+    <h2>Top 10 Best-Selling Products</h2>
+    
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Product Name</th>
+          <th>Quantity Sold</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (topSellingProducts && topSellingProducts.length > 0) { %>
+          <% topSellingProducts.forEach((product, index) => { %>
+            <tr>
+              <td><%= index + 1 %></td>
+              <td><%= product.productName %></td>
+              <td><%= product.totalSold %></td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="3">No data available</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  
+    <h2>Best-Selling Categories</h2>
+    
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Category Name</th>
+          <th>Quantity Sold</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (bestSellingCategories && bestSellingCategories.length > 0) { %>
+          <% bestSellingCategories.forEach((category, index) => { %>
+            <tr>
+              <td><%= index + 1 %></td>
+              <td><%= category.categoryName %></td>
+              <td><%= category.totalSold %></td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="3">No data available</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script>
+    let myChart;
+  
+    function createChart(data) {
+      if (myChart) myChart.destroy();
+  
+      const ctx = document.getElementById('myChart').getContext('2d');
+      myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Orders', 'Pending', 'Delivered', 'Cancelled', 'Shipped', 'Returned'],
+          datasets: [{
+            label: 'Metrics',
+            data: data,
+            backgroundColor: [
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(153, 102, 255, 0.2)',
+              'rgba(255, 159, 64, 0.2)',
+            ],
+            borderColor: [
+              'rgba(54, 162, 235, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(255, 99, 132, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)',
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+  
+    async function applyFilter() {
+      const filter = document.getElementById('filter').value;
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+  
+      try {
+        const response = await fetch(`/admin/chart?filter=${filter}&startDate=${startDate}&endDate=${endDate}`);
+        const data = await response.json();
+        
+        createChart([data.orders, data.pending, data.delivered, data.cancelled, data.shipped, data.returned]);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    }
+  
+    document.getElementById('filter').addEventListener('change', function () {
+      const isCustom = this.value === 'Custom';
+      document.getElementById('startDate').disabled = !isCustom;
+      document.getElementById('endDate').disabled = !isCustom;
+    });
+  
+    applyFilter(); 
+  </script>
+  

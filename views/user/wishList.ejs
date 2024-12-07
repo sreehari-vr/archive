@@ -76,13 +76,13 @@
 							<div class="product-cart d-flex">
 								<div class="one-forth">
 									<div class="product-img mr-3">
-										<img src="<%= item.productId.productImage[0].replace(/\\/g, '/') %>"
-											alt="<%= item.productId.productName %>" style="height: 6rem;">
+										<img src="<%= item.productId.productImage && item.productId.productImage[0] ? 
+												 item.productId.productImage[0].replace(/\\/g, '/') : '/images/default-product.jpg' %>"
+											 alt="<%= item.productId.productName %>" 
+											 style="height: 6rem;">
 									</div>
 									<div class="display-tc">
-										<h3>
-											<%= item.productId.productName %>
-										</h3>
+										<h3><%= item.productId.productName %></h3>
 									</div>
 								</div>
 								<div class="one-eight text-center">
@@ -90,22 +90,23 @@
 										<span class="price">₹<%= item.productId.salePrice.toFixed(2) %></span>
 									</div>
 								</div>
-
 								<div class="one-eight text-center">
 									<div class="display-tc">
 										<a href="/wishlist/remove/<%= item.productId._id %>" class="closed"></a>
 									</div>
 								</div>
-
-								<form action="/cart/<%= item.productId._id %>" method="post">
-									<input type="hidden" name="quantity" value="1">
-									<button type="submit" class="btn btn-primary btn-addtocart">
-										<i class="icon-shopping-cart"></i> Add to Cart
-									</button>
-								</form>
-
-
-
+								<div class="one-eight text-center">
+									<div class="display-tc">
+										<form action="/cart/<%= item.productId._id %>" method="post">
+											<input type="hidden" name="quantity" value="1">
+											<input type="hidden" name="grandTotal" value="<%= item.productId.salePrice %>">
+											<input type="hidden" name="subTotal" value="<%= item.productId.salePrice %>">
+											<button type="submit" class="btn btn-primary btn-addtocart">
+												<i class="icon-shopping-cart"></i> Add to Cart
+											</button>
+										</form>
+									</div>
+								</div>
 							</div>
 							<% }) %>
 								<% } else { %>
@@ -118,8 +119,8 @@
 									<% } %>
 				</div>
 			</div>
-			
-	</div>
+
+		</div>
 
 
-	<%- include("../../views/partials/user/footer") %>
+		<%- include("../../views/partials/user/footer") %>

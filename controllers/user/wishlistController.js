@@ -22,7 +22,7 @@ const addWishlist = async (req, res) => {
         (item) => item.productId.toString() === productId
       );
       if (already) {
-        return res.status(403).json({ message: "Product already exists" });
+        return res.redirect("/wishlist");
       }
       userWishlist.items.push({ productId });
       await userWishlist.save();

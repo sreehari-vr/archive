@@ -100,41 +100,65 @@ const addProducts = async (req, res) => {
       offer,
     } = req.body;
 
+    // Check if the product name already exists
     const existProduct = await Product.findOne({ productName });
     if (existProduct) {
       return res
         .status(400)
         .json({ success: false, error: "Product name already exists" });
     }
+
     const images = [];
     if (req.files && req.files.length > 0) {
-      for (let i = 0; i < req.files.length; i++) {
-        const originalImagePath = req.files[i].path;
-        const resizedImagePath = path.join(
-          "uploads",
-          `${path.parse(req.files[i].filename).name}-resized${path.extname(
-            req.files[i].filename
-          )}`
-        );
-        await sharp(originalImagePath)
-          .resize({ height: 440, width: 440 })
-          .toFile(resizedImagePath);
+      for (const file of req.files) {
+        const originalImagePath = file.path;
+        
+        // Generate unique filename using UUID or similar
+        const uniqueFilename = `${Date.now()}-${Math.random().toString(36).substring(2)}-${path.parse(file.filename).name}${path.extname(file.filename)}`;
+        const resizedImagePath = path.join("uploads", uniqueFilename);
 
-        images.push(resizedImagePath);
+        try {
+          // Resize and save the image
+          await sharp(originalImagePath)
+            .resize({ height: 440, width: 440 })
+            .toFile(resizedImagePath);
+
+          // Delete the original uploaded file
+          if (fs.existsSync(originalImagePath)) {
+            fs.unlinkSync(originalImagePath);
+          }
+
+          // Push normalized image path to array
+          images.push(resizedImagePath.replace(/\\/g, "/"));
+        } catch (error) {
+          // If there's an error processing the image, cleanup and continue
+          if (fs.existsSync(resizedImagePath)) {
+            fs.unlinkSync(resizedImagePath);
+          }
+          console.error("Error processing image:", error);
+          continue;
+        }
       }
     }
 
+    // Fetch category details and calculate the applicable offer
     const categoryDetails = await Category.findById(category);
     if (!categoryDetails) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Category not found" });
+      // Cleanup uploaded images if category not found
+      images.forEach(imagePath => {
+        const fullPath = path.join(__dirname, "../../", imagePath);
+        if (fs.existsSync(fullPath)) {
+          fs.unlinkSync(fullPath);
+        }
+      });
+      return res.status(404).json({ success: false, error: "Category not found" });
     }
+
     const categoryOffer = categoryDetails.offer || 0;
     const applicableOffer = Math.max(Number(offer), Number(categoryOffer));
-
     const salePrice = regularPrice - (regularPrice * applicableOffer) / 100;
 
+    // Create and save the new product
     const newProduct = new Product({
       productName,
       description,
@@ -150,7 +174,16 @@ const addProducts = async (req, res) => {
     await newProduct.save();
     return res.status(200).json({ success: true, message: "Product added" });
   } catch (error) {
-    console.error(error);
+    // Cleanup any uploaded images in case of error
+    if (images && images.length > 0) {
+      images.forEach(imagePath => {
+        const fullPath = path.join(__dirname, "../../", imagePath);
+        if (fs.existsSync(fullPath)) {
+          fs.unlinkSync(fullPath);
+        }
+      });
+    }
+    console.error("Error in addProducts:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -167,25 +200,24 @@ const updateProduct = async (req, res) => {
       offer,
     } = req.body;
 
+    // Check if the category exists
     const categoryDetails = await Category.findById(category);
     if (!categoryDetails) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Category not found" });
+      return res.status(404).json({ success: false, error: "Category not found" });
     }
 
+    // Calculate the applicable offer and sale price
     const categoryOffer = categoryDetails.offer || 0;
     const applicableOffer = Math.max(Number(offer), Number(categoryOffer));
-
     const salePrice = regularPrice - (regularPrice * applicableOffer) / 100;
+
+    // Check for duplicate product name
     const existProduct = await Product.findOne({
       productName,
       _id: { $ne: id },
     });
     if (existProduct) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Product name already exists" });
+      return res.status(400).json({ success: false, error: "Product name already exists" });
     }
 
     const updatedProduct = {
@@ -198,47 +230,76 @@ const updateProduct = async (req, res) => {
       offer,
     };
 
-    const images = [];
-    if (req.files && req.files.length > 0) {
-      for (let i = 0; i < req.files.length; i++) {
-        const originalImagePath = req.files[i].path;
-        const resizedImagePath = path.join(
-          "uploads",
-          `${path.parse(req.files[i].filename).name}-resized${path.extname(
-            req.files[i].filename
-          )}`
-        );
+    // Ensure `imagesToDelete` is an array
+    const imagesToDelete = Array.isArray(req.body.imagesToDelete)
+      ? req.body.imagesToDelete
+      : req.body.imagesToDelete
+      ? [req.body.imagesToDelete]
+      : [];
 
-        await sharp(originalImagePath)
-          .resize({ height: 440, width: 440 })
-          .toFile(resizedImagePath);
+    // Handle image deletion
+    if (imagesToDelete.length > 0) {
+      const product = await Product.findById(id);
 
-        images.push(`uploads/${path.basename(resizedImagePath)}`);
+      if (!product) {
+        return res.status(404).json({ success: false, error: "Product not found" });
       }
 
-      await Product.findByIdAndUpdate(
-        id,
-        {
-          $set: updatedProduct,
-          $push: { productImage: { $each: images } },
-        },
-        { new: true }
+      product.productImage = product.productImage.filter(
+        (image) => !imagesToDelete.includes(image)
       );
-    } else {
-      await Product.findByIdAndUpdate(
-        id,
-        { $set: updatedProduct },
-        { new: true }
-      );
-    }
-    console.log(images);
 
-    res.status(200).json({ success: true, message: "product updated" });
+      // Delete images from the filesystem
+      for (const imagePath of imagesToDelete) {
+        const fullPath = path.join(__dirname, "../../", imagePath);
+        if (fs.existsSync(fullPath)) {
+          fs.unlinkSync(fullPath);
+        }
+      }
+
+      await product.save();
+    }
+
+    // Handle new image uploads
+    const newImages = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const originalImagePath = file.path;
+
+        // Use unique identifier to avoid duplicate names
+        const uniqueFilename = `${Date.now()}-${path.parse(file.filename).name}-resized${path.extname(file.filename)}`;
+        const resizedImagePath = path.join("uploads", uniqueFilename);
+
+        // Check if the image already exists before resizing
+        if (!fs.existsSync(resizedImagePath)) {
+          // Resize and save the new image
+          await sharp(originalImagePath)
+            .resize({ height: 440, width: 440 })
+            .toFile(resizedImagePath);
+        }
+
+        newImages.push(resizedImagePath.replace(/\\/g, "/"));
+      }
+    }
+
+    // Update the product
+    await Product.findByIdAndUpdate(
+      id,
+      {
+        $set: updatedProduct, // Update fields
+        $push: { productImage: { $each: newImages } }, // Append new images
+      },
+      { new: true }
+    );
+
+    res.status(200).json({ success: true, message: "Product updated" });
   } catch (error) {
-    console.log(error);
+    console.error("Error in updateProduct:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
 
 const renderUpdateProductForm = async (req, res) => {
   const id = req.query.id;

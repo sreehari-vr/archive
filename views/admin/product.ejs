@@ -1,203 +1,290 @@
 <%- include("../../views/partials/admin/header") %>
 
-  <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
-  </head>
-  <div class="content-header">
-    <div>
-      <h2 class="content-title card-title">Products</h2>
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2 class="h2 mb-0 fw-bold text-primary">Products</h2>
     </div>
   </div>
-  <header class="card-header text-center mb-20 d-flex gap-5">
-    <form action="/admin/products" method="get" class="d-inline">
-      <div class="input-group input-group-sm border border-1 border-grey rounded-pill"
-        style="width: 500px; margin-left: 230px;">
-        <input type="text" class="form-control border-0 rounded-pill" placeholder="Search products or brands"
-          name="search">
-        <button class="btn  border-0" type="submit">Search</button>
-      </div>
-    </form>
-    <form action="/admin/addProduct" method="get" class="d-inline ml-5">
-      <button class="btn btn-success border-0" type="submit">Add new</button>
-    </form>
-  </header>
-  <div class="right mt-5">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th scope="col"><b>No.</b></th>
-          <th scope="col" style="width: 200px;"><b>Product name</b></th>
-          <th scope="col" style="width: 300px;"><b>Description</b></th>
-          <th scope="col"><b>Offer</b></th>
-          <th scope="col"><b>Category</b></th>
-          <th scope="col"><b>Regular Price</b></th>
-          <th scope="col"><b>Sale Price</b></th>
-          <th scope="col"><b>Quantity</b></th>
-          <th scope="col"><b>Image</b></th>
-          <th scope="col"><b>Status</b></th>
-          <th scope="col"><b>Action</b></th>
-        </tr>
-      </thead>
-      <tbody>
 
-        <% for(let i=0; i < data.length; i++) { %>
-          <tr style="height: 150px;">
-            <td>
-              <%= i + 1 %>
-            </td>
-            <td>
-              <%= data[i].productName %>
-            </td>
-            <td>
-              <%= data[i].description %>
-            </td>
-            <td>
-              <%= data[i].offer %>%
-            </td>
-            <td>
-              <% if (data[i].category) { %>
-                <%= data[i].category.name %>
-                  <% } else { %>
-                    <span>No Category</span>
-                    <% } %>
-            </td>
-            <td>
-              <%= data[i].regularPrice %>
-            </td>
-            <td>
-              <%= data[i].salePrice %>
-            </td>
-            <td>
-              <%= data[i].quantity %>
-            </td>
-            <td>
-              <% if (data[i].productImage && data[i].productImage.length> 0) { %>
-                <% const imagePath=data[i].productImage[0].replace(/\\/g, '/' ); %>
-                  <img src="/<%= imagePath %>" alt="<%= data[i].productName %>" style="width: 100px; height: auto;" />
-                  <% } else { %>
-                    <span>No Image</span>
-                    <% } %>
-            </td>
-
-
-            <td>
-              <% if(data[i].isActive===true) { %>
-                <h5 style="color: rgb(0, 255, 47);">Active</h5>
-                <% } else { %>
-                  <h5 style="color: rgb(255, 0, 0);">Inactive</h5>
-                  <% } %>
-            </td>
-
-
-
-            <td>
-              <% if (data[i].isActive===true) { %>
-                <button class="btn btn-warning unlist-btn" style="width: 80px;"
-                  data-href="/admin/unlistProduct?id=<%= data[i]._id %>">
-                  Unlist
-                </button>
-                <% } else { %>
-                  <button class="btn btn-success list-btn" style="width: 80px;"
-                    data-href="/admin/listProduct?id=<%= data[i]._id %>">
-                    List
+  <!-- Search and Add Button Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body bg-light">
+          <div class="row align-items-center">
+            <div class="col-12 col-md-8 mb-3 mb-md-0">
+              <form action="/admin/products" method="get">
+                <div class="input-group">
+                  <input type="text" class="form-control form-control-lg" placeholder="Search products or brands" name="search">
+                  <button class="btn btn-primary btn-lg" type="submit">
+                    <i class="bi bi-search"></i> <span class="d-none d-sm-inline">Search</span>
                   </button>
-                  <% } %>
-
-
-                    <button class="btn btn-success" style="width: 80px;">
-                      <a href="/admin/updateProduct?id=<%= data[i]._id %>" class="text-white"
-                        style="text-decoration: none;">Update</a>
-                    </button>
-                    <button class="btn btn-danger delete-btn" style="width: 80px;"
-                      data-href="/admin/softDeleteProduct?id=<%= data[i]._id %>">
-                      Delete
-                    </button>
-            </td>
-          </tr>
-          <% } %>
-      </tbody>
-
-    </table>
-  </div>
-  </div>
+                </div>
+              </form>
+            </div>
+            <div class="col-12 col-md-4 text-center text-md-end">
+              <form action="/admin/addProduct" method="get" class="d-inline">
+                <button class="btn btn-success btn-lg w-100 w-md-auto" type="submit">
+                  <i class="bi bi-plus-circle"></i> Add new
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="container mt-3">
-    <nav aria-label="Page navigation">
-      <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
-        <% for(let i=1; i<=totalPages; i++) { %>
-          <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
-            <a class="page-link" href="?page=<%= i %>">
-              <%= i %>
+  <!-- Desktop Table View (visible on md and up) -->
+  <div class="d-none d-md-block">
+    <div class="card shadow">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0 align-middle">
+            <thead class="bg-light">
+              <tr>
+                <th class="border-0 text-uppercase small fw-bold">No.</th>
+                <th class="border-0 text-uppercase small fw-bold">Image</th>
+                <th class="border-0 text-uppercase small fw-bold">Product Name</th>
+                <th class="border-0 text-uppercase small fw-bold">Description</th>
+                <th class="border-0 text-uppercase small fw-bold">Category</th>
+                <th class="border-0 text-uppercase small fw-bold">Regular Price</th>
+                <th class="border-0 text-uppercase small fw-bold">Sale Price</th>
+                <th class="border-0 text-uppercase small fw-bold">Offer</th>
+                <th class="border-0 text-uppercase small fw-bold">Quantity</th>
+                <th class="border-0 text-uppercase small fw-bold">Status</th>
+                <th class="border-0 text-uppercase small fw-bold">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% for(let i=0; i < data.length; i++) { %>
+                <tr>
+                  <td><%= i + 1 %></td>
+                  <td>
+                    <% if (data[i].productImage && data[i].productImage.length > 0) { %>
+                      <% const imagePath = data[i].productImage[0].replace(/\\/g, '/'); %>
+                      <img src="/<%= imagePath %>" alt="<%= data[i].productName %>" class="rounded" style="width: 50px; height: 50px; object-fit: cover;" />
+                    <% } else { %>
+                      <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                        <i class="bi bi-image text-muted"></i>
+                      </div>
+                    <% } %>
+                  </td>
+                  <td><span class="fw-bold text-primary"><%= data[i].productName %></span></td>
+                  <td><small class="text-muted"><%= data[i].description %></small></td>
+                  <td>
+                    <% if (data[i].category) { %>
+                      <span class="badge bg-light text-dark"><%= data[i].category.name %></span>
+                    <% } else { %>
+                      <span class="badge bg-light text-muted">No Category</span>
+                    <% } %>
+                  </td>
+                  <td><span class="text-muted">₹<%= data[i].regularPrice %></span></td>
+                  <td><span class="fw-bold text-success">₹<%= data[i].salePrice %></span></td>
+                  <td><span class="badge bg-warning text-dark"><%= data[i].offer %>%</span></td>
+                  <td><%= data[i].quantity %></td>
+                  <td>
+                    <% if(data[i].isActive===true) { %>
+                      <span class="badge bg-success-subtle text-success px-3">Active</span>
+                    <% } else { %>
+                      <span class="badge bg-danger-subtle text-danger px-3">Inactive</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <div class="btn-group">
+                      <% if (data[i].isActive===true) { %>
+                        <button class="btn btn-warning unlist-btn" data-href="/admin/unlistProduct?id=<%= data[i]._id %>">
+                          <i class="bi bi-pause-circle"></i> Unlist
+                        </button>
+                      <% } else { %>
+                        <button class="btn btn-success list-btn" data-href="/admin/listProduct?id=<%= data[i]._id %>">
+                          <i class="bi bi-play-circle"></i> List
+                        </button>
+                      <% } %>
+                      <a href="/admin/updateProduct?id=<%= data[i]._id %>" class="btn btn-primary">
+                        <i class="bi bi-pencil-square"></i> Edit
+                      </a>
+                      <button class="btn btn-danger delete-btn" data-href="/admin/softDeleteProduct?id=<%= data[i]._id %>">
+                        <i class="bi bi-trash"></i> Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Card View (visible on sm and below) -->
+  <div class="d-md-none">
+    <% for(let i=0; i < data.length; i++) { %>
+      <div class="card shadow-sm mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge bg-primary">#<%= i + 1 %></span>
+            <% if(data[i].isActive===true) { %>
+              <span class="badge bg-success-subtle text-success">Active</span>
+            <% } else { %>
+              <span class="badge bg-danger-subtle text-danger">Inactive</span>
+            <% } %>
+          </div>
+
+          <div class="text-center mb-3">
+            <% if (data[i].productImage && data[i].productImage.length > 0) { %>
+              <% const imagePath = data[i].productImage[0].replace(/\\/g, '/'); %>
+              <img src="/<%= imagePath %>" alt="<%= data[i].productName %>" class="rounded" style="max-width: 150px; height: auto;" />
+            <% } else { %>
+              <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 150px;">
+                <i class="bi bi-image text-muted fs-1"></i>
+              </div>
+            <% } %>
+          </div>
+          
+          <h5 class="card-title text-primary mb-2"><%= data[i].productName %></h5>
+          <p class="card-text small text-muted mb-2"><%= data[i].description %></p>
+          
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <div class="small text-muted">Category</div>
+              <div class="fw-bold"><%= data[i].category ? data[i].category.name : 'No Category' %></div>
+            </div>
+            <div class="col-6">
+              <div class="small text-muted">Offer</div>
+              <div class="fw-bold text-warning"><%= data[i].offer %>%</div>
+            </div>
+            <div class="col-6">
+              <div class="small text-muted">Regular Price</div>
+              <div class="fw-bold">₹<%= data[i].regularPrice %></div>
+            </div>
+            <div class="col-6">
+              <div class="small text-muted">Sale Price</div>
+              <div class="fw-bold text-success">₹<%= data[i].salePrice %></div>
+            </div>
+            <div class="col-12">
+              <div class="small text-muted">Quantity</div>
+              <div class="fw-bold"><%= data[i].quantity %></div>
+            </div>
+          </div>
+          
+          <div class="d-grid gap-2">
+            <% if (data[i].isActive===true) { %>
+              <button class="btn btn-outline-warning unlist-btn" data-href="/admin/unlistProduct?id=<%= data[i]._id %>">
+                <i class="bi bi-pause-circle"></i> Unlist
+              </button>
+            <% } else { %>
+              <button class="btn btn-outline-success list-btn" data-href="/admin/listProduct?id=<%= data[i]._id %>">
+                <i class="bi bi-play-circle"></i> List
+              </button>
+            <% } %>
+            <a href="/admin/updateProduct?id=<%= data[i]._id %>" class="btn btn-outline-primary">
+              <i class="bi bi-pencil-square"></i> Edit
             </a>
-          </li>
-          <% } %>
-      </ul>
-    </nav>
+            <button class="btn btn-outline-danger delete-btn" data-href="/admin/softDeleteProduct?id=<%= data[i]._id %>">
+              <i class="bi bi-trash"></i> Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    <% } %>
   </div>
 
+  <!-- Pagination -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+          <% for(let i=1; i<=totalPages; i++) { %>
+            <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+              <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+            </li>
+          <% } %>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
 
+<!-- Bootstrap Icons CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+<!-- Sweet Alert CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
 
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+  $(document).ready(function () {
+    const swalWithBootstrapButtons = Swal.mixin({
+      customClass: {
+        confirmButton: 'btn btn-primary ms-2',
+        cancelButton: 'btn btn-light'
+      },
+      buttonsStyling: false
+    });
 
-  <script>
-    $(document).ready(function () {
-      $(".unlist-btn").click(function (event) {
-        event.preventDefault();
-        const url = $(this).data("href");
-        Swal.fire({
-          title: "Are you sure?",
-          text: "Do you want to unlist this product?",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#d33",
-          cancelButtonColor: "#3085d6",
-          confirmButtonText: "Yes, unlist!"
-        }).then((result) => {
-          if (result.isConfirmed) {
-            window.location.href = url;
-          }
-        });
-      });
-
-      $(".list-btn").click(function (event) {
-        event.preventDefault();
-        const url = $(this).data("href");
-        Swal.fire({
-          title: "Are you sure?",
-          text: "Do you want to list this product?",
-          icon: "info",
-          showCancelButton: true,
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor: "#d33",
-          confirmButtonText: "Yes, list!"
-        }).then((result) => {
-          if (result.isConfirmed) {
-            window.location.href = url;
-          }
-        });
-      });
-
-      $(".delete-btn").click(function (event) {
-        event.preventDefault();
-        const url = $(this).data("href");
-        Swal.fire({
-          title: "Are you sure?",
-          text: "Do you want to delete this product?",
-          icon: "error",
-          showCancelButton: true,
-          confirmButtonColor: "#d33",
-          cancelButtonColor: "#3085d6",
-          confirmButtonText: "Yes, delete!"
-        }).then((result) => {
-          if (result.isConfirmed) {
-            window.location.href = url;
-          }
-        });
+    // Unlist Button Handler
+    $(".unlist-btn").click(function (event) {
+      event.preventDefault();
+      const url = $(this).data("href");
+      swalWithBootstrapButtons.fire({
+        title: "Unlist Product?",
+        text: "This will temporarily remove the product from the store",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, unlist",
+        cancelButtonText: "Cancel",
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = url;
+        }
       });
     });
-  </script>
+
+    // List Button Handler
+    $(".list-btn").click(function (event) {
+      event.preventDefault();
+      const url = $(this).data("href");
+      swalWithBootstrapButtons.fire({
+        title: "List Product?",
+        text: "This will make the product available in the store",
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonText: "Yes, list",
+        cancelButtonText: "Cancel",
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = url;
+        }
+      });
+    });
+
+    // Delete Button Handler
+    $(".delete-btn").click(function (event) {
+      event.preventDefault();
+      const url = $(this).data("href");
+      swalWithBootstrapButtons.fire({
+        title: "Delete Product?",
+        text: "This action cannot be undone",
+        icon: "error",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete",
+        cancelButtonText: "Cancel",
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = url;
+        }
+      });
+    });
+  });
+</script>
+
+<%- include("../../views/partials/admin/footer") %>

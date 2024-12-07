@@ -47,6 +47,11 @@ const userSchema = new Schema({
       },
     },
   ],
+  referralCode: {
+    type: String,
+    unique: true,
+    required: true,
+  }
 });
 
 const user = mongoose.model("user", userSchema);
