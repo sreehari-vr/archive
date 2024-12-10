@@ -193,20 +193,45 @@
     <% } %>
   </div>
 
-  <!-- Pagination -->
-  <div class="row mt-4">
-    <div class="col-12">
-      <nav aria-label="Page navigation">
-        <ul class="pagination justify-content-center">
-          <% for(let i=1; i<=totalPages; i++) { %>
-            <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
-              <a class="page-link" href="?page=<%= i %>"><%= i %></a>
-            </li>
-          <% } %>
-        </ul>
-      </nav>
-    </div>
+  <div class="pagination-container">
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center">
+        <!-- Previous Button -->
+        <% if (currentPage > 1) { %>
+          <li class="page-item">
+            <a class="page-link" href="/admin/products?page=<%= currentPage - 1 %>" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+        <% } else { %>
+          <li class="page-item disabled">
+            <span class="page-link">&laquo;</span>
+          </li>
+        <% } %>
+  
+        <!-- Page Numbers -->
+        <% for (let i = 1; i <= totalPages; i++) { %>
+          <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+            <a class="page-link" href="/admin/products?page=<%= i %>"><%= i %></a>
+          </li>
+        <% } %>
+  
+        <!-- Next Button -->
+        <% if (currentPage < totalPages) { %>
+          <li class="page-item">
+            <a class="page-link" href="/admin/products?page=<%= currentPage + 1 %>" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        <% } else { %>
+          <li class="page-item disabled">
+            <span class="page-link">&raquo;</span>
+          </li>
+        <% } %>
+      </ul>
+    </nav>
   </div>
+  
 </div>
 
 <!-- Bootstrap Icons CSS -->

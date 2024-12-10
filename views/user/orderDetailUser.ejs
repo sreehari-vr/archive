@@ -38,6 +38,13 @@
             background-color: var(--primary-color);
             border-color: var(--primary-color);
         }
+        
+        .order-summary {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
     </style>
     </head>
 
@@ -67,10 +74,19 @@
                             </span>
                         </div>
                         <div class="col-md-6 text-md-end">
-                            <h3 class="mb-1"><strong>Total Amount:</strong> ₹<%= order.totalAmount %>
-                            </h3>
-                            <button class="btn btn-link" onclick="downloadInvoice('<%= order._id %>')">Download Invoice</button>
-
+                            <%if(order.orderStatus !== 'Cancelled'){%>
+                                <h3 class="mb-1">
+                                    <% if(order.discount > 0) { %>
+                                        <div>
+                                            <small class="text-success">Discount Applied: ₹<%= order.discount %></small>
+                                        </div>
+                                    <% } %>
+                                    <strong>Total Amount:</strong> ₹<%= order.totalAmount %>
+                                </h3>
+                            <%}%>
+                            <%if(order.orderStatus === 'Delivered'){%>
+                                <button class="btn btn-link" onclick="downloadInvoice('<%= order._id %>')">Download Invoice</button>
+                            <%}%>
                         </div>
                     </div>
 
@@ -78,34 +94,55 @@
                     <div class="table-responsive">
                         <table class="table">
                             <thead class="table-light">
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Price</th>
-                                    <th>Quantity</th>
-                                    <th>Discount</th>
-                                    <th>Sub total</th>
-                                </tr>
+                              <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Sub total</th>
+                                <th>Order Status</th>
+                                <th>Payment Status</th>
+                                <th></th>
+                              </tr>
                             </thead>
                             <tbody>
-                                <% order.items.forEach(item=> { %>
-                                    <tr>
-                                        <td>
-                                            <%= item.productId.productName %>
-                                        </td>
-                                        <td>₹<%= item.price %>
-                                        </td>
-                                        <td>
-                                            <%= item.quantity %>
-                                        </td>
-                                        <td>
-                                            ₹<%= order.discount %>
-                                        </td>
-                                        <td>₹<%= item.price * item.quantity %>
-                                        </td>
-                                    </tr>
-                                    <% }); %>
+                              <% order.items.forEach(item => { %>
+                                <tr>
+                                  <td>
+                                    <%= item.productId.productName %>
+                                  </td>
+                                  <td>₹<%= item.price %></td>
+                                  <td><%= item.quantity %></td>
+                                  <td>₹<%= item.price * item.quantity %></td>
+                                  <td style="text-transform: capitalize;">
+                                    <%= item.orderStatus %>
+                                  </td>
+                                  <td style="text-transform: capitalize;">
+                                    <%= item.paymentStatus %>
+                                  </td>
+                                  <td>
+                                    <% if (item.orderStatus === "Delivered") { %>
+                                        <button class="btn return-item-btn" data-order-id="<%= order._id %>" data-item-id="<%= item._id %>">
+                                            Return Item
+                                          </button>
+                                          
+                                    <% } else if (
+                                      item.orderStatus === "Pending" ||
+                                      item.orderStatus === "Shipped" ||
+                                      item.orderStatus === "Processing"
+                                    ) { %>
+                                      <button
+                                        class="btn cancel-btn"
+                                        data-order-id="<%= order._id %>"
+                                        data-item-id="<%= item._id %>"
+                                      >
+                                        Cancel
+                                      </button>
+                                    <% } %>
+                                  </td>
+                                </tr>
+                              <% }); %>
                             </tbody>
-                        </table>
+                          </table>
                     </div>
 
                     <h6 class="section-title mb-3">Shipping Address</h6>
@@ -136,18 +173,43 @@
                                 <p class="mb-1"><strong>Alternate Phone:</strong>
                                     <%= order.address.altPhone %>
                                 </p>
-                                <% } %>
+                            <% } %>
                         </div>
                     </div>
-
-                    <!-- Action Buttons -->
-                    <!-- <div class="mt-4">
-                    <button class="btn btn-outline-secondary me-2">Track Order</button>
-                    <button class="btn btn-outline-secondary">Download Invoice</button>
-                </div> -->
                 </div>
             </div>
         </div>
+        <!-- Return Item Modal -->
+<div class="modal fade" id="returnOrderModal" tabindex="-1" aria-labelledby="returnOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="returnOrderForm" method="POST">
+          <div class="modal-header">
+            <h5 class="modal-title" id="returnOrderModalLabel">Return Item</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="reason" class="form-label">Reason for Return</label>
+              <textarea
+                class="form-control"
+                id="reason"
+                name="reason"
+                rows="3"
+                placeholder="Enter the reason for returning this item"
+                required
+              ></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Submit Return</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     </body>
@@ -156,6 +218,50 @@
         function downloadInvoice(orderId) {
             window.location.href = `/getInvoice?orderId=${orderId}`;
         }
-      </script>
-      
-        </html>
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.querySelectorAll('.cancel-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const orderId = this.dataset.orderId;
+                const itemId = this.dataset.itemId;
+                const cancelUrl = `/itemCancel/${orderId}/${itemId}`;
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'Do you want to cancel this item? This action cannot be undone.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = cancelUrl;
+                    }
+                });
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const returnButtons = document.querySelectorAll('.return-item-btn');
+            const returnOrderForm = document.getElementById('returnOrderForm');
+            const reasonTextarea = document.getElementById('reason');
+          
+            returnButtons.forEach(button => {
+              button.addEventListener('click', function () {
+                const orderId = this.dataset.orderId;
+                const itemId = this.dataset.itemId;
+                returnOrderForm.action = `/itemReturn/${orderId}/${itemId}`;
+                reasonTextarea.value = '';
+                const returnOrderModal = new bootstrap.Modal(document.getElementById('returnOrderModal'));
+                returnOrderModal.show();
+              });
+            });
+          });
+          
+    </script>
+</html>

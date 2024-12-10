@@ -3,35 +3,39 @@ const Product = require("../../models/productSchema");
 
 const categoryInfo = async (req, res) => {
   try {
-    let search = "";
-    if (req.query.search) {
-      search = req.query.search;
-    }
-
-    let page = 1;
-    if (req.query.page) {
-      page = req.query.page;
-    }
+    const page = parseInt(req.query.page) || 1;
     const limit = 4;
     const skip = (page - 1) * limit;
-    const categoryData = await Category.find({
+    const search = req.query.search || "";
+
+    const searchQuery = {
       deletedAt: null,
-      $or: [{ name: { $regex: ".*" + search + ".*", $options: "i" } }],
-    })
+      ...(search && {
+        $or: [
+          { name: { $regex: new RegExp(search, "i") } },
+          { description: { $regex: new RegExp(search, "i") } }
+        ]
+      })
+    };
+
+    const totalCategories = await Category.countDocuments(searchQuery);
+
+    const categoryData = await Category.find(searchQuery)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const totalCategories = await Category.countDocuments();
     const totalPages = Math.ceil(totalCategories / limit);
+
     res.render("category", {
       data: categoryData,
-      currentPage: page,
       totalPages: totalPages,
-      totalCategories: totalCategories,
+      currentPage: page,
+      search 
     });
   } catch (error) {
     console.error(error);
+    res.status(500).send('Server Error');
   }
 };
 
@@ -48,11 +52,14 @@ const check = async (req, res) => {
         .json({ success: false, error: "Category name is required" });
     }
 
-    const existingCategory = await Category.findOne({ name });
+    const existingCategory = await Category.findOne({
+      name: { $regex: new RegExp(`^${name}$`, 'i') },
+    });
+
     if (existingCategory) {
       return res
         .status(400)
-        .json({ success: false, error: "Category already exists" });
+        .json({ success: false, error: "Category already exists." });
     }
     const newCategory = new Category({ name, description, offer });
     await newCategory.save();
@@ -71,7 +78,10 @@ const updateCategory = async (req, res) => {
   const { id, name, description, offer } = req.body;
 
   try {
-    const existCategory = await Category.findOne({ name });
+    const existCategory = await Category.findOne({
+      name: { $regex: new RegExp(`^${name}$`, 'i') },
+    });
+
     if (existCategory && existCategory._id.toString() !== id) {
       return res.status(400).json({
         success: false,

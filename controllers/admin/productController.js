@@ -47,11 +47,8 @@ const productInfo = async (req, res) => {
       search = req.query.search;
     }
 
-    let page = 1;
-    if (req.query.page) {
-      page = req.query.page;
-    }
-    limit = 6;
+    let page = parseInt(req.query.page) || 1; 
+    const limit = 6; 
     const skip = (page - 1) * limit;
 
     const productData = await Product.find({
@@ -64,9 +61,14 @@ const productInfo = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    const categories = await Category.find({ deletedAt: null });
-    const totalProducts = await Product.countDocuments();
+    const totalProducts = await Product.countDocuments({
+      deletedAt: null,
+      category: { $ne: null },
+      $or: [{ productName: { $regex: ".*" + search + ".*", $options: "i" } }],
+    });
+
     const totalPages = Math.ceil(totalProducts / limit);
+
     res.render("product", {
       data: productData,
       currentPage: page,
@@ -77,6 +79,7 @@ const productInfo = async (req, res) => {
     console.error(error);
   }
 };
+
 
 const getAddProduct = async (req, res) => {
   try {
@@ -100,7 +103,6 @@ const addProducts = async (req, res) => {
       offer,
     } = req.body;
 
-    // Check if the product name already exists
     const existProduct = await Product.findOne({ productName });
     if (existProduct) {
       return res
@@ -113,25 +115,20 @@ const addProducts = async (req, res) => {
       for (const file of req.files) {
         const originalImagePath = file.path;
         
-        // Generate unique filename using UUID or similar
         const uniqueFilename = `${Date.now()}-${Math.random().toString(36).substring(2)}-${path.parse(file.filename).name}${path.extname(file.filename)}`;
         const resizedImagePath = path.join("uploads", uniqueFilename);
 
         try {
-          // Resize and save the image
           await sharp(originalImagePath)
             .resize({ height: 440, width: 440 })
             .toFile(resizedImagePath);
 
-          // Delete the original uploaded file
           if (fs.existsSync(originalImagePath)) {
             fs.unlinkSync(originalImagePath);
           }
 
-          // Push normalized image path to array
           images.push(resizedImagePath.replace(/\\/g, "/"));
         } catch (error) {
-          // If there's an error processing the image, cleanup and continue
           if (fs.existsSync(resizedImagePath)) {
             fs.unlinkSync(resizedImagePath);
           }
@@ -141,10 +138,8 @@ const addProducts = async (req, res) => {
       }
     }
 
-    // Fetch category details and calculate the applicable offer
     const categoryDetails = await Category.findById(category);
     if (!categoryDetails) {
-      // Cleanup uploaded images if category not found
       images.forEach(imagePath => {
         const fullPath = path.join(__dirname, "../../", imagePath);
         if (fs.existsSync(fullPath)) {
@@ -158,7 +153,6 @@ const addProducts = async (req, res) => {
     const applicableOffer = Math.max(Number(offer), Number(categoryOffer));
     const salePrice = regularPrice - (regularPrice * applicableOffer) / 100;
 
-    // Create and save the new product
     const newProduct = new Product({
       productName,
       description,
@@ -174,7 +168,6 @@ const addProducts = async (req, res) => {
     await newProduct.save();
     return res.status(200).json({ success: true, message: "Product added" });
   } catch (error) {
-    // Cleanup any uploaded images in case of error
     if (images && images.length > 0) {
       images.forEach(imagePath => {
         const fullPath = path.join(__dirname, "../../", imagePath);
@@ -200,18 +193,15 @@ const updateProduct = async (req, res) => {
       offer,
     } = req.body;
 
-    // Check if the category exists
     const categoryDetails = await Category.findById(category);
     if (!categoryDetails) {
       return res.status(404).json({ success: false, error: "Category not found" });
     }
 
-    // Calculate the applicable offer and sale price
     const categoryOffer = categoryDetails.offer || 0;
     const applicableOffer = Math.max(Number(offer), Number(categoryOffer));
     const salePrice = regularPrice - (regularPrice * applicableOffer) / 100;
 
-    // Check for duplicate product name
     const existProduct = await Product.findOne({
       productName,
       _id: { $ne: id },
@@ -230,14 +220,12 @@ const updateProduct = async (req, res) => {
       offer,
     };
 
-    // Ensure `imagesToDelete` is an array
     const imagesToDelete = Array.isArray(req.body.imagesToDelete)
       ? req.body.imagesToDelete
       : req.body.imagesToDelete
       ? [req.body.imagesToDelete]
       : [];
 
-    // Handle image deletion
     if (imagesToDelete.length > 0) {
       const product = await Product.findById(id);
 
@@ -249,7 +237,6 @@ const updateProduct = async (req, res) => {
         (image) => !imagesToDelete.includes(image)
       );
 
-      // Delete images from the filesystem
       for (const imagePath of imagesToDelete) {
         const fullPath = path.join(__dirname, "../../", imagePath);
         if (fs.existsSync(fullPath)) {
@@ -260,19 +247,15 @@ const updateProduct = async (req, res) => {
       await product.save();
     }
 
-    // Handle new image uploads
     const newImages = [];
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         const originalImagePath = file.path;
 
-        // Use unique identifier to avoid duplicate names
         const uniqueFilename = `${Date.now()}-${path.parse(file.filename).name}-resized${path.extname(file.filename)}`;
         const resizedImagePath = path.join("uploads", uniqueFilename);
 
-        // Check if the image already exists before resizing
         if (!fs.existsSync(resizedImagePath)) {
-          // Resize and save the new image
           await sharp(originalImagePath)
             .resize({ height: 440, width: 440 })
             .toFile(resizedImagePath);
@@ -282,12 +265,11 @@ const updateProduct = async (req, res) => {
       }
     }
 
-    // Update the product
     await Product.findByIdAndUpdate(
       id,
       {
-        $set: updatedProduct, // Update fields
-        $push: { productImage: { $each: newImages } }, // Append new images
+        $set: updatedProduct, 
+        $push: { productImage: { $each: newImages } }, 
       },
       { new: true }
     );

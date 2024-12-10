@@ -2,12 +2,42 @@ const Coupon = require("../../models/couponSchema");
 
 const loadCoupon = async (req, res) => {
   try {
-    const coupon = await Coupon.find({ deletedAt: null });
-    res.render("coupon", { coupon });
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+    const search = req.query.search || "";
+
+    const searchQuery = {
+      deletedAt: null,
+      ...(search && {
+        $or: [
+          { code: { $regex: new RegExp(search, "i") } },
+          { description: { $regex: new RegExp(search, "i") } }
+        ]
+      })
+    };
+
+    const totalCoupons = await Coupon.countDocuments(searchQuery);
+
+    const coupon = await Coupon.find(searchQuery)
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 }); 
+
+    const totalPages = Math.ceil(totalCoupons / limit);
+
+    res.render("coupon", { 
+      coupon, 
+      totalPages, 
+      currentPage: page,
+      search 
+    });
   } catch (error) {
     console.error(error);
+    res.status(500).send('Server Error');
   }
 };
+
 
 const loadAddCoupon = async (req, res) => {
   try {
@@ -29,6 +59,57 @@ const addCoupon = async (req, res) => {
       usageLimit,
       perUserLimit,
     } = req.body;
+
+
+    const existingCoupon = await Coupon.findOne({ code: code.toUpperCase() });
+    if (existingCoupon) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Coupon code already exists" 
+      });
+    }
+
+    if (discount <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Discount amount must be greater than 0"
+      });
+    }
+
+    if (minPurchase < 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Minimum purchase amount cannot be negative"
+      });
+    }
+
+    if (usageLimit && usageLimit <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Usage limit must be greater than 0"
+      });
+    }
+
+    if (perUserLimit && perUserLimit < 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Per user limit must be greater than 0"
+      });
+    }
+
+    if (discount >= minPurchase) {
+      return res.status(400).json({
+        success: false,
+        error: "Discount amount must be less than minimum purchase amount"
+      });
+    }
+
+    if (!expDate) {
+      return res.status(400).json({
+        success: false,
+        error: "Expiry date is required"
+      });
+    }
 
     const newCoupon = new Coupon({
       code,
@@ -110,7 +191,17 @@ const updateCoupon = async (req, res) => {
     if (!coupon) {
       return res.status(404).json({ error: "Coupon not found." });
     }
-    
+    const existingCoupon = await Coupon.findOne({
+      code: code.toUpperCase(),
+      _id: { $ne: id } 
+    });
+
+    if (existingCoupon) {
+      return res.status(400).json({ 
+        success: false,
+        error: "Coupon code already exists" 
+      });
+    }
 
     coupon.code = code;
     coupon.description = description;

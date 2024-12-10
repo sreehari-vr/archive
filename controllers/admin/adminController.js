@@ -8,6 +8,7 @@ const fs = require("fs");
 const bcrypt = require("bcrypt");
 const path = require("path");
 
+
 const loadAdminLogin = async (req, res) => {
   if (req.session.admin) {
     return res.redirect("/admin/adminDash");
@@ -15,26 +16,38 @@ const loadAdminLogin = async (req, res) => {
   res.render("adminLogin", { message: null });
 };
 
+
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const admin = await User.findOne({ email: email, isAdmin: true });
-    if (admin) {
-      const passwordMatch = bcrypt.compare(password, admin.password);
-      if (passwordMatch) {
-        req.session.admin = true;
-        return res.redirect("/admin/adminDash");
-      } else {
-        return res.redirect("/admin/login");
-      }
-    } else {
-      return res.redirect("/admin/login");
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      return res.render("adminLogin", { message: "Invalid email format." });
     }
+
+    if (password.length < 6) {
+      return res.render("adminLogin", { message: "Password must be at least 6 characters long." });
+    }
+
+    const admin = await User.findOne({ email: email, isAdmin: true });
+    if (!admin) {
+      return res.render("adminLogin", { message: "No admin account found with this email." });
+    }
+
+    const passwordMatch =await bcrypt.compare(password, admin.password);
+    if (!passwordMatch) {
+      return res.render("adminLogin", { message: "Incorrect password. Please try again." });
+    }
+
+    req.session.admin = true;
+    return res.redirect("/admin/adminDash");
   } catch (error) {
     console.error("Admin login error:", error);
-    res.render("adminLogin", { message: "Login failed. Please try again." });
+    res.render("adminLogin", { message: "An error occurred. Please try again." });
   }
 };
+
 
 const loadAdminDash = async (req, res) => {
   try {
@@ -353,7 +366,6 @@ const downloadPdfReport = async (req, res) => {
     doc.pipe(fs.createWriteStream(filePath));
     doc.pipe(res);
 
-    // Header
     doc
       .fontSize(20)
       .text("Sales Report", { align: "center", underline: true })
@@ -366,7 +378,6 @@ const downloadPdfReport = async (req, res) => {
       .text(`Start Date: ${startDate || "N/A"} | End Date: ${endDate || "N/A"}`)
       .moveDown();
 
-    // Metrics Table
     
 
     const metrics = [

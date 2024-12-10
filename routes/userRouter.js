@@ -70,10 +70,23 @@ router.get(
 );
 
 router.get(
+  "/paymentFailure/:id",
+  userAuth,
+  orderController.paymentFailure
+);
+
+router.get(
   "/orderCancel/:orderId/:itemId",
   userAuth,
   orderController.orderCancel
 );
+
+router.get(
+  "/itemCancel/:orderId/:itemId",
+  userAuth,
+  orderController.itemCancel
+);
+
 router.get(
   "/orderReturn/:orderId/:itemId",
   userAuth,
@@ -85,6 +98,10 @@ router.post(
   userAuth,
   orderController.orderReturn
 );
+
+router.post('/itemReturn/:orderId/:itemId',userAuth,
+  orderController.itemReturn);
+
 
 router.get("/forgotPass", userController.loadForgotPassword);
 router.post("/forgotPass", userController.verifyForgotPass);
@@ -99,9 +116,10 @@ router.get(
   userAuth,
   orderController.orderDetailUser
 );
+
 router.get("/retryPayment/:orderId",orderController.retryPayment);
 router.post("/confirmPayment", orderController.confirmPayment);
 router.get("/getInvoice", invoiceController.getInvoice); 
-
+router.get('/search', userController.searchProducts);
 
 module.exports = router;

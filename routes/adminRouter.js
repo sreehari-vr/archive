@@ -79,6 +79,15 @@ router.post(
   orderController.updatePaymentStatus
 );
 
+router.post('/orders/:orderId/items/:itemId/update-status',adminAuth,
+  orderController.updateItemStatus
+); 
+
+router.post('/orders/:orderId/items/:itemId/update-payment-status',adminAuth,
+  orderController.updateItemPaymentStatus
+);  
+
+
 router.get("/coupon", adminAuth, couponController.loadCoupon);
 router.get("/addCoupon", adminAuth, couponController.loadAddCoupon);
 router.post("/addCoupon", adminAuth, couponController.addCoupon);

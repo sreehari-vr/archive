@@ -51,12 +51,22 @@
 								<img src="../../uploads/archivelog.png" alt="Login Illustration" class="login-illustration" style="height: 85px;">
 							</div>
 						<div class="col-sm-5 col-md-3">
-							<form action="javascript:void(0)" class="search-wrap" id="searchForm">
+							<form action="/search" method="get" class="search-wrap" id="searchForm">
 								<div class="form-group">
-								  <input type="search" id="searchInput" class="form-control search" placeholder="Search" autocomplete="off">
-								  <button class="btn btn-primary submit-search text-center" type="submit"><i class="icon-search"></i></button>
+								  <input 
+									type="search" 
+									id="searchInput" 
+									name="query" 
+									class="form-control search" 
+									placeholder="Search" 
+									autocomplete="off"
+									required>
+								  <button class="btn btn-primary submit-search text-center" type="submit">
+									<i class="icon-search"></i>
+								  </button>
 								</div>
 							  </form>
+							  
 							  <div id="searchResults" class="search-results"></div>
 							  
 			         </div>
@@ -64,7 +74,7 @@
 					<div class="row">
 						<div class="col-sm-12 text-left menu-1">
 							<ul>
-								<li class="active"><a href="/">Home</a></li>
+								<li class="active"><a href="/home">Home</a></li>
 								<li class="has-dropdown">
 									<a href="/shop">Shop</a>
 									
@@ -88,3 +98,26 @@
 					</div>
 				</div>
 			</div>
+			<script>
+				document.getElementById('searchInput').addEventListener('input', async (event) => {
+					const query = event.target.value.trim();
+					const searchResultsContainer = document.getElementById('searchResults');
+				  
+					if (!query) {
+					  searchResultsContainer.innerHTML = '';
+					  return;
+					}
+				  
+					try {
+					  const response = await fetch(`/api/search?query=${query}`);
+					  const results = await response.json();
+				  
+					  searchResultsContainer.innerHTML = results
+						.map(product => `<a href="/shop?query=${product._id}" class="search-result-item">${product.productName}</a>`)
+						.join('');
+					} catch (error) {
+					  console.error('Error fetching search results:', error);
+					}
+				  });
+				  
+			</script>

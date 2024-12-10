@@ -170,5 +170,32 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
+<script>
+    document.getElementById("admin-login").addEventListener("submit", function (event) {
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        let isValid = true;
+
+        if (!emailPattern.test(email)) {
+            isValid = false;
+            alert("Please enter a valid email address.");
+            emailInput.focus();
+        }
+
+        if (password.length < 6) {
+            isValid = false;
+            alert("Password must be at least 6 characters long.");
+            passwordInput.focus();
+        }
+
+        if (!isValid) {
+            event.preventDefault(); 
+        }
+    });
+</script>
 
 </html>

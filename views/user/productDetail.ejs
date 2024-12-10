@@ -197,5 +197,37 @@
             });
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const quantityInput = document.getElementById("quantity");
+            const btnMinus = document.querySelector(".quantity-left-minus");
+            const btnPlus = document.querySelector(".quantity-right-plus");
+        
+            btnMinus.addEventListener("click", function () {
+                let currentQuantity = parseInt(quantityInput.value);
+                if (currentQuantity > parseInt(quantityInput.min)) {
+                    quantityInput.value = currentQuantity - 1;
+                }
+            });
+        
+            btnPlus.addEventListener("click", function () {
+                let currentQuantity = parseInt(quantityInput.value);
+                const maxQuantity = parseInt(quantityInput.max);
+        
+                if (currentQuantity < maxQuantity) {
+                    quantityInput.value = currentQuantity + 1;
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Maximum Limit Reached',
+                        text: `You can only add up to ${maxQuantity} items.`,
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+        });
+        
+    </script>
 
     <%- include('../../views/partials/user/footer') %>

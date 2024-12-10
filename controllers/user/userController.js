@@ -197,12 +197,9 @@ const verifyOtp = async (req, res) => {
         transactionHistory: [],
       });
 
-      // Handle referral logic
       if (userData.referrerId) {
-        // Credit Rs. 21 to the referred user
         await addMoneyToWallet(newUser._id, 21, "Credit", "Referral bonus");
 
-        // Credit Rs. 101 to the referrer's wallet
         await addMoneyToWallet(userData.referrerId, 101, "Credit", "Referred a new user");
       }
 
@@ -315,16 +312,26 @@ const renderUserProfile = async (req, res) => {
     const id = req.session.user;
     const data = await user.findById(id);
     const userAddress = await Address.findOne({ userId: id });
-    const orders = await Order.find({ userId: id }).populate("items.productId").sort({orderDate:-1});
     const wallet = await Wallet.findOne({ userId: id });
 
     if (!data) {
-      console.log("user does not exist");
+      console.log("User does not exist");
       return res.status(404).json({ error: "User not found" });
     }
+
+    const { page = 1, limit = 5 } = req.query; 
+    const skip = (page - 1) * limit;
+
+    const totalOrders = await Order.countDocuments({ userId: id });
+    const orders = await Order.find({ userId: id })
+      .populate("items.productId")
+      .sort({ orderDate: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
     const addressCount = userAddress ? userAddress.address.length : 0;
     const maxCount = 3;
-    console.log(id);
+
     return res.render("userProfile", {
       data,
       address: userAddress ? userAddress.address : [],
@@ -332,12 +339,15 @@ const renderUserProfile = async (req, res) => {
       maxCount,
       orders,
       wallet: wallet || { balance: 0, transactionHistory: [] },
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(totalOrders / limit),
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 const loadChangeEmail = async (req, res) => {
   try {
@@ -686,58 +696,67 @@ const loadCheckout = async (req, res) => {
 
 const loadShop = async (req, res) => {
   try {
-    const { sort, filter } = req.query;
+    const { sort, filter, page = 1 } = req.query; 
     const categories = await category.find({ isActive: true });
 
     let filterCategory = filter || "all";
+    const limit = 12; 
+    const skip = (page - 1) * limit;
 
-    let productData = await Product.find({
+    let productQuery = {
       isActive: true,
       deletedAt: null,
       category: { $in: categories.map((category) => category._id) },
-    });
+    };
 
     if (filterCategory !== "all" && filterCategory !== "available") {
-      productData = productData.filter(
-        (product) => product.category.toString() === filterCategory
-      );
+      productQuery.category = filterCategory;
     }
 
     if (filterCategory === "available") {
-      productData = productData.filter((product) => product.quantity > 0);
+      productQuery.quantity = { $gt: 0 };
     }
 
+    let sortOrder = { createdAt: -1 }; 
     switch (sort) {
       case "price-asc":
-        productData = productData.sort((a, b) => a.salePrice - b.salePrice);
+        sortOrder = { salePrice: 1 };
         break;
       case "price-desc":
-        productData = productData.sort((a, b) => b.salePrice - a.salePrice);
-        break;
-      case "new":
-        productData = productData.sort((a, b) => b.createdAt - a.createdAt);
+        sortOrder = { salePrice: -1 };
         break;
       case "name-asc":
-        productData.sort((a, b) => a.productName.localeCompare(b.productName));
+        sortOrder = { productName: 1 };
         break;
       case "name-desc":
-        productData.sort((a, b) => b.productName.localeCompare(a.productName));
+        sortOrder = { productName: -1 };
         break;
       default:
-        productData = productData.sort((a, b) => b.createdAt - a.createdAt);
-        break;
+        break; 
     }
+
+    const productData = await Product.find(productQuery)
+      .sort(sortOrder)
+      .skip(skip)
+      .limit(limit)
+      .exec();
+
+    const totalProducts = await Product.countDocuments(productQuery);
+    const totalPages = Math.ceil(totalProducts / limit);
 
     res.render("shop", {
       product: productData,
       sort,
       categories,
       filterCategory,
+      currentPage: parseInt(page),
+      totalPages,
     });
   } catch (error) {
     console.error(error);
   }
 };
+
 
 
 const loadForgotPassword = async (req, res) => {
@@ -819,6 +838,41 @@ const newPassword = async (req, res) => {
   }
 };
 
+
+const searchProducts = async (req, res) => {
+  try {
+    const { query } = req.query; 
+    if (!query) {
+      return res.redirect('/shop'); 
+    }
+
+    const regex = new RegExp(query, 'i'); 
+    const products = await Product.find({
+      $or: [
+        { productName: regex },
+        { description: regex },
+      ],
+      isActive: true,
+      deletedAt: null,
+    }).limit(20); 
+
+    res.render('shop', {
+      product: products,
+      sort: null,
+      categories: [],
+      filterCategory: 'all',
+      currentPage: 1,
+      totalPages: 1, 
+    });
+  } catch (error) {
+    console.error('Error fetching search results:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+
+
+
 module.exports = {
   loadHomepage,
   loadSignup,
@@ -848,5 +902,6 @@ module.exports = {
   loadForgotPassword,
   verifyForgotPassOtp,
   newPassword,
-  loadLanding
+  loadLanding,
+  searchProducts
 };

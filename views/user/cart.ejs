@@ -8,12 +8,12 @@
 						<div class="owl-carousel2">
 							<div class="item">
 								<div class="col">
-									<h3><a href="#">25% off (Almost) Everything! Use Code: Summer Sale</a></h3>
+									<h3><a href="#">₹15 off (Almost) Everything! Use Code: SUPERDEAL15</a></h3>
 								</div>
 							</div>
 							<div class="item">
 								<div class="col">
-									<h3><a href="#">Our biggest sale yet 50% off all summer shoes</a></h3>
+									<h3><a href="#">₹300 off Use Code: FLASHSALE300</a></h3>
 								</div>
 							</div>
 						</div>
@@ -96,10 +96,14 @@
 									</div>
 								</div>
 								<div class="one-eight text-center">
-									<div class="display-tc">
+									<div class="display-tc d-flex justify-content-center align-items-center">
+										<button class="btn btn-outline-secondary btn-sm quantity-btn" data-action="decrease">-</button>
 										<input type="number" id="quantity-<%= item.productId._id %>" name="quantity"
-											class="form-control input-number text-center" value="<%= item.quantity %>"
-											min="1" max="<%= item.productId.quantity <= 10 ? item.productId.quantity : 10 %>">
+											class="form-control input-number text-center mx-2" style="width: 60px"
+											value="<%= item.quantity %>" min="1" 
+											max="<%= item.productId.quantity <= 10 ? item.productId.quantity : 10 %>"
+											readonly>
+										<button class="btn btn-outline-secondary btn-sm quantity-btn" data-action="increase">+</button>
 									</div>
 								</div>
 								<div class="one-eight text-center">
@@ -377,65 +381,71 @@
 
 			<script>
 				document.addEventListener("DOMContentLoaded", function () {
-					const quantityInputs = document.querySelectorAll("input[name='quantity']");
-				  
-					quantityInputs.forEach((input) => {
-					  input.addEventListener("input", (event) => {
-						const maxStock = parseInt(input.getAttribute("max"), 10) || 10; // Max stock value from input attribute
-						const minStock = 1; // Minimum allowable quantity
-				  
-						let value = parseInt(event.target.value, 10) || minStock; // Fallback to minStock if invalid
-				  
-						if (value < minStock) {
-						  value = minStock; // Reset to minimum if below
-						  Swal.fire("Warning!", "Quantity cannot be less than 1.", "warning");
-						}
-				  
-						if (value > maxStock) {
-						  value = maxStock; // Reset to maximum stock if exceeded
-						  Swal.fire("Warning!", "Quantity exceeds available stock.", "warning");
-						}
-				  
-						event.target.value = value; // Update input value
-					  });
-				  
-					  input.addEventListener("blur", (event) => {
-						if (!event.target.value || event.target.value < 1) {
-						  event.target.value = 1; // Ensure minimum on blur
-						  Swal.fire("Notice", "Quantity reset to minimum value.", "info");
-						}
-					  });
+					const quantityButtons = document.querySelectorAll(".quantity-btn");
+					
+					quantityButtons.forEach(button => {
+						button.addEventListener("click", function() {
+							const action = this.dataset.action;
+							const inputContainer = this.closest('.display-tc');
+							const input = inputContainer.querySelector('input[name="quantity"]');
+							const currentValue = parseInt(input.value, 10);
+							const maxStock = parseInt(input.getAttribute("max"), 10) || 10;
+							const minStock = 1;
+							
+							let newValue = currentValue;
+							
+							if (action === "increase" && currentValue < maxStock) {
+								newValue = currentValue + 1;
+							} else if (action === "decrease" && currentValue > minStock) {
+								newValue = currentValue - 1;
+							}
+							
+							if (newValue !== currentValue) {
+								input.value = newValue;
+								
+								const inputEvent = new Event('input', {
+									bubbles: true,
+									cancelable: true,
+								});
+								input.dispatchEvent(inputEvent);
+							}
+							
+							if (newValue === maxStock && action === "increase") {
+								Swal.fire("Warning!", "Quantity exceeds available stock.", "warning");
+							} else if (newValue === minStock && action === "decrease") {
+								Swal.fire("Warning!", "Quantity cannot be less than 1.", "warning");
+							}
+						});
 					});
-				  });
-				  
-			</script>
+					
+				});
+				</script>
 
 			<script>
 				document.getElementById("refresh").addEventListener("click", async function (event) {
 					event.preventDefault();
 				
-					// Reset coupon code input
 					const couponCodeInput = document.getElementById("couponCodeInput");
 					couponCodeInput.value = "";
 				
-					// Reset hidden coupon code field
 					const couponCodeInputHidden = document.getElementById("couponCodeInputHidden");
 					if (couponCodeInputHidden) couponCodeInputHidden.value = "";
 				
-					// Get the current subtotal from the DOM
 					const subTotalElement = document.querySelector("#subtotal");
 					const subTotal = parseFloat(subTotalElement.textContent.replace("₹", ""));
 				
-					// Reset discount and grand total
 					const discountElement = document.querySelector("#discount");
 					const grandTotalElement = document.querySelector("#grandTotal");
 				
 					discountElement.textContent = "₹0.00";
 					grandTotalElement.textContent = `₹${subTotal.toFixed(2)}`;
 				
-					// Optionally, display a success message
 					Swal.fire("Coupon Removed!", "The coupon has been removed successfully.", "success");
 				});
 				
 			  </script>
+
+			  
+				
+			  
 			<%- include("../../views/partials/user/footer") %>

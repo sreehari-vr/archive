@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      text-align: center;
+      padding: 50px;
+      color: #333;
+    }
+    h1 {
+      font-size: 72px;
+      color: #e74c3c;
+    }
+    p {
+      font-size: 20px;
+    }
+    .message {
+      margin: 20px 0;
+      font-weight: bold;
+      color: #555;
+    }
+    a {
+      text-decoration: none;
+      color: #007bff;
+      font-size: 18px;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>Oops!</h1>
+  <p>Something went wrong on our end. We're working to fix it.</p>
+
+  <div class="message">
+    <% if (error && error.stack) { %>
+      <pre><%= error.stack %></pre>
+    <% } else { %>
+      <p>Try refreshing the page or come back later.</p>
+    <% } %>
+  </div>
+
+  <a href="/home">Go back to the homepage</a>
+</body>
+</html>

@@ -22,6 +22,27 @@ const orderSchema = new Schema({
         type: Number,
         required: true,
       },
+      orderStatus: {
+        type: String,
+        enum: [
+          "Pending",
+          "Delivered",
+          "Shipped",
+          "Cancelled",
+          "Returned",
+          "Processing",
+        ],
+        default: "Pending",
+      },
+      paymentStatus: {
+        type: String,
+        enum: ["Pending", "Failed", "Refunded", "Paid", "N/A"],
+        default: "Pending",
+      },
+      returnReason: { 
+        type: String,
+        default: null
+      }
     },
   ],
   totalAmount: {
@@ -80,7 +101,7 @@ const orderSchema = new Schema({
       "Shipped",
       "Cancelled",
       "Returned",
-      "Refunded",
+      "Processing",
     ],
     default: "Pending",
   },
@@ -90,7 +111,7 @@ const orderSchema = new Schema({
   },
   paymentStatus: {
     type: String,
-    enum: ["Pending", "Failed", "Refund", "Paid"],
+    enum: ["Pending", "Failed", "Refunded", "Paid", "Partially Refunded", "N/A"],
     default: "Pending",
   },
   returnReason: { 
@@ -101,6 +122,11 @@ const orderSchema = new Schema({
     type: String,
     required: false, 
   },
+  couponId: {
+    type: Schema.Types.ObjectId,
+    ref: "Coupon",
+    default: null,
+  }
 });
 
 const Order = mongoose.model("Order", orderSchema);

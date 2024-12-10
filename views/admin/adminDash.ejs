@@ -1,14 +1,12 @@
 <%- include("../../views/partials/admin/header") %>
 
 <div class="container py-4">
-  <!-- Page Header -->
   <div class="row mb-4">
     <div class="col-12">
       <h3 class="border-bottom pb-3">Sales Report</h3>
     </div>
   </div>
 
-  <!-- Filter Form -->
   <div class="row mb-4">
     <div class="col-12">
       <div class="card shadow-sm">
@@ -41,7 +39,6 @@
     </div>
   </div>
 
-  <!-- Chart -->
   <div class="row mb-4">
     <div class="col-12">
       <div class="card shadow-sm">
@@ -52,9 +49,7 @@
     </div>
   </div>
 
-  <!-- Top Products and Categories -->
   <div class="row">
-    <!-- Top 10 Products -->
     <div class="col-lg-6 mb-4">
       <div class="card shadow-sm h-100">
         <div class="card-header bg-transparent">
@@ -91,7 +86,6 @@
       </div>
     </div>
 
-    <!-- Best Categories -->
     <div class="col-lg-6 mb-4">
       <div class="card shadow-sm h-100">
         <div class="card-header bg-transparent">
@@ -211,7 +205,6 @@
     document.getElementById('endDate').disabled = !isCustom;
   });
 
-  // Initialize chart on page load
   document.addEventListener('DOMContentLoaded', function() {
     applyFilter();
   });

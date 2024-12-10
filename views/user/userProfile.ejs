@@ -384,72 +384,102 @@
                             <thead>
                               <tr>
                                 <th>Order Id</th>
-                                <th>Product</th>
+                                <th>Products</th>
                                 <th>Status</th>
                                 <th>Total</th>
                                 <th>Actions</th>
                               </tr>
                             </thead>
                             <tbody>
-                              <tr>
-
-                                <% orders.forEach(order=> { %>
-
-                                  <% order.items.forEach(item=> { %>
-                              <tr>
-                                <td>
-                                  <%= order._id %>
-                                </td>
-                                <td>
-                                  <%= item.productId?.productName %>
-                                </td>
-                                <td style="color:darkmagenta;">
-                                  <%= order.orderStatus %>
-                                </td>
-                                <td>₹
-                                  <%= order.totalAmount %>
-                                </td>
-                                <td>
-                                  <% if (order.orderStatus==="Cancelled" || order.orderStatus==="Returned" ) { %>
-                                    <a href="/orderDetailUser/<%=order._id%>">Details</a>
-                                    <% } else if (order.orderStatus==="Delivered" ) { %>
-                                      <button class="btn return-order-btn" data-order-id="<%= order._id %>">
-                                        Return
-                                      </button>
+                              <% orders.forEach(order => { %>
+                                <tr>
+                                  <td><%= order._id %></td>
+                                  <td>
+                                    <ul>
+                                      <% order.items.forEach(item => { %>
+                                        <li><%= item.productId?.productName %></li>
+                                        <li style="background-color: #88c8bc; color:#000">
+                                          <i>Qty: <%= item.quantity %></i>
+                                        </li><br>
+                                      <% }) %>
+                                    </ul>
+                                  </td>
+                                  <td style="color:darkmagenta;"><%= order.orderStatus %></td>
+                                  <td>₹<%= order.totalAmount %></td>
+                                  <td>
+                                    <% if (order.orderStatus === "Cancelled" || order.orderStatus === "Returned") { %>
                                       <a href="/orderDetailUser/<%=order._id%>">Details</a>
-                                      <% } else if (order.paymentStatus === "Failed" && order.paymentMethod === "razorpay") { %>
-                                        <button class="btn retry-btn" data-order-id="<%= order._id %>">
-                                          Retry Payment
-                                        </button>
-                                        <a href="/orderDetailUser/<%=order._id%>">Details</a>
-                                        <% }
-                                       else { %>
-                                        <button class="btn cancel-btn" data-order-id="<%= order._id %>"
-                                          data-item-id="<%= item._id %>">
-                                          Cancel
-                                        </button>
-                                        <a href="/orderDetailUser/<%=order._id%>">Details</a>
-                                        <% } %>
-
-
-
-                                </td>
-                              </tr>
+                                    <% } else if (order.orderStatus === "Delivered") { %>
+                                      <button class="btn return-order-btn" data-order-id="<%= order._id %>">Return</button>
+                                      <a href="/orderDetailUser/<%=order._id%>">Details</a>
+                                    <% } else if (order.paymentStatus === "Failed" && order.paymentMethod === "razorpay") { %>
+                                      <button class="btn retry-btn" data-order-id="<%= order._id %>">Retry Payment</button>
+                                      <a href="/orderDetailUser/<%=order._id%>">Details</a>
+                                    <% } else { %>
+                                      <button class="btn cancel-btn" data-order-id="<%= order._id %>">Cancel</button>
+                                      <a href="/orderDetailUser/<%=order._id%>">Details</a>
+                                    <% } %>
+                                  </td>
+                                </tr>
                               <% }) %>
-                                <% }) %>
-                              
-
-
-                                  </tr>
                             </tbody>
                           </table>
                         </div>
+                  
+                        <!-- Pagination -->
+                        <div class="d-flex justify-content-center mt-3">
+                          <nav aria-label="Order navigation">
+                            <ul class="pagination">
+                              <!-- Previous Button -->
+                              <% if (currentPage > 1) { %>
+                                <li class="page-item">
+                                  <a 
+                                    class="page-link" 
+                                    href="?page=<%= currentPage - 1 %>" 
+                                    aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                  </a>
+                                </li>
+                              <% } else { %>
+                                <li class="page-item disabled">
+                                  <span class="page-link">&laquo;</span>
+                                </li>
+                              <% } %>
+                  
+                              <!-- Page Numbers -->
+                              <% for (let i = 1; i <= totalPages; i++) { %>
+                                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                  <a 
+                                    class="page-link" 
+                                    href="?page=<%= i %>">
+                                    <%= i %>
+                                  </a>
+                                </li>
+                              <% } %>
+                  
+                              <!-- Next Button -->
+                              <% if (currentPage < totalPages) { %>
+                                <li class="page-item">
+                                  <a 
+                                    class="page-link" 
+                                    href="?page=<%= currentPage + 1 %>" 
+                                    aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                  </a>
+                                </li>
+                              <% } else { %>
+                                <li class="page-item disabled">
+                                  <span class="page-link">&raquo;</span>
+                                </li>
+                              <% } %>
+                            </ul>
+                          </nav>
+                        </div>
                       </div>
-
-                      
-                      
                     </div>
                   </div>
+                  
+                  
 
 
                   <div class="tab-pane fade" id="track-orders" role="tabpanel" aria-labelledby="track-orders-tab">
@@ -736,11 +766,11 @@
           title: "Copied!",
           text: "Referral code copied to clipboard.",
           showConfirmButton: false,
-          timer: 1500 // Automatically closes after 1.5 seconds
+          timer: 1500 
         });
       })
       .catch((err) => {
-        // Show error SweetAlert
+        
         Swal.fire({
           icon: "error",
           title: "Oops...",

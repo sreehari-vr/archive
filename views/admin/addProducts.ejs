@@ -221,8 +221,27 @@ function cropImage(index) {
 
 function validateForm() {
   const form = document.querySelector('form');
-  const isValid = form.checkValidity();
+  let isValid = form.checkValidity();
   form.classList.add('was-validated');
+  
+  const regularPrice = parseFloat(document.getElementById('regularPrice').value);
+  const quantity = parseInt(document.getElementById('quantity').value);
+  
+  if (regularPrice < 0) {
+    document.getElementById('regularPrice-error').textContent = "Price cannot be negative";
+    document.getElementById('regularPrice').setCustomValidity("Price cannot be negative");
+    isValid = false;
+  } else {
+    document.getElementById('regularPrice').setCustomValidity("");
+  }
+  
+  if (quantity < 0) {
+    document.getElementById('quantity-error').textContent = "Quantity cannot be negative";
+    document.getElementById('quantity').setCustomValidity("Quantity cannot be negative");
+    isValid = false;
+  } else {
+    document.getElementById('quantity').setCustomValidity("");
+  }
   
   if (!Object.keys(croppedFiles).length) {
     Swal.fire({
@@ -257,7 +276,7 @@ function addProduct(event) {
 
   $.ajax({
     method: "POST",
-    url: "http://localhost:3000/admin/addProduct",
+    url: "/admin/addProduct",
     data: formData,
     contentType: false,
     processData: false,
@@ -272,11 +291,17 @@ function addProduct(event) {
           window.location.href = "/admin/products";
         });
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Not Added",
-          text: response.error || "Product not Added",
-        });
+        if (response.error === "Product name already exists") {
+          document.getElementById('productName-error').textContent = "Product name already exists";
+          document.getElementById('product_name').setCustomValidity("Product name already exists");
+          document.querySelector('form').classList.add('was-validated');
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Not Added",
+            text: response.error || "Product not Added",
+          });
+        }
       }
     },
     error: function(error) {
@@ -284,7 +309,7 @@ function addProduct(event) {
       Swal.fire({
         icon: "error",
         title: "Error occurred",
-        text: "Something went wrong",
+        text: error.responseJSON?.error || "Something went wrong",
       });
     },
   });

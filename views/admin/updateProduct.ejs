@@ -251,63 +251,87 @@ function cropImage(index) {
 
 function validateForm() {
   const form = document.querySelector('form');
-  const isValid = form.checkValidity();
+  let isValid = form.checkValidity();
   form.classList.add('was-validated');
+  
+  // Get form values
+  const regularPrice = parseFloat(document.getElementById('regularPrice').value);
+  const quantity = parseInt(document.getElementById('quantity').value);
+  
+  // Reset custom error messages
+  document.getElementById('regularPrice-error').textContent = "Enter a valid price";
+  document.getElementById('quantity-error').textContent = "Enter a valid quantity";
+  
+  // Validate regular price
+  if (regularPrice < 0) {
+    document.getElementById('regularPrice-error').textContent = "Price cannot be negative";
+    document.getElementById('regularPrice').setCustomValidity("Price cannot be negative");
+    isValid = false;
+  } else {
+    document.getElementById('regularPrice').setCustomValidity("");
+  }
+  
+  // Validate quantity
+  if (quantity < 0) {
+    document.getElementById('quantity-error').textContent = "Quantity cannot be negative";
+    document.getElementById('quantity').setCustomValidity("Quantity cannot be negative");
+    isValid = false;
+  } else {
+    document.getElementById('quantity').setCustomValidity("");
+  }
+  
   return isValid;
 }
 
-let imagesToDelete = [];
-
-function deleteImage(imagePath, index) {
-  // Add the image path to the imagesToDelete array
-  imagesToDelete.push(imagePath);
-  
-  // Optionally, you can also remove the image from the UI
-  const imageElement = document.querySelector(`img[src="/${imagePath.replace(/\\/g, '/')}"]`).parentElement;
-  imageElement.remove();
-}
-
 function editProduct(event) {
-    event.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+  event.preventDefault();
   
-    const formData = new FormData();
-    formData.append('id', document.getElementById('Updateid').value);
-    formData.append('productName', document.getElementById('product_name').value);
-    formData.append('description', document.getElementById('descriptionid').value);
-    formData.append('regularPrice', document.getElementById('regularPrice').value);
-    formData.append('quantity', document.getElementById('quantity').value);
-    formData.append('category', document.getElementById('category').value);
-    formData.append('offer', document.getElementById('offer').value);
+  if (!validateForm()) {
+    return;
+  }
+
+  const formData = new FormData();
+  const productId = document.getElementById('Updateid').value;
   
-    // Append cropped images
-    Object.keys(croppedFiles).forEach(index => {
-      formData.append('images', croppedFiles[index]);
-    });
-  
-    // Append images to delete
-    imagesToDelete.forEach(image => {
-      formData.append('imagesToDelete', image);
-    });
-  
-    fetch('/admin/updateProduct', {
-      method: 'POST',
-      body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        Swal.fire({
-          icon: "success",
-          title: "Successfully Updated",
-          text: "Product Updated",
-          timer: 1500
-        }).then(() => {
-          window.location.href = "/admin/products";
-        });
+  formData.append('id', productId);
+  formData.append('productName', document.getElementById('product_name').value);
+  formData.append('description', document.getElementById('descriptionid').value);
+  formData.append('regularPrice', document.getElementById('regularPrice').value);
+  formData.append('quantity', document.getElementById('quantity').value);
+  formData.append('category', document.getElementById('category').value);
+  formData.append('offer', document.getElementById('offer').value);
+
+  // Append cropped images
+  Object.keys(croppedFiles).forEach(index => {
+    formData.append('images', croppedFiles[index]);
+  });
+
+  // Append images to delete
+  imagesToDelete.forEach(image => {
+    formData.append('imagesToDelete', image);
+  });
+
+  fetch('/admin/updateProduct', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      Swal.fire({
+        icon: "success",
+        title: "Successfully Updated",
+        text: "Product Updated",
+        timer: 1500
+      }).then(() => {
+        window.location.href = "/admin/products";
+      });
+    } else {
+      // Handle specific error cases
+      if (data.error === "Product name already exists") {
+        document.getElementById('productName-error').textContent = "Product name already exists";
+        document.getElementById('product_name').setCustomValidity("Product name already exists");
+        document.querySelector('form').classList.add('was-validated');
       } else {
         Swal.fire({
           icon: "error",
@@ -315,16 +339,17 @@ function editProduct(event) {
           text: data.error || "Product not Updated",
         });
       }
-    })
-    .catch(error => {
-      console.error("error response:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error occurred",
-        text: "Something went wrong",
-      });
+    }
+  })
+  .catch(error => {
+    console.error("error response:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error occurred",
+      text: "Something went wrong",
     });
-  }
+  });
+}
 </script>
 
 <%- include("../../views/partials/admin/footer") %>

@@ -133,7 +133,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-function formValidate() {
+  function formValidate() {
     document.querySelectorAll('.invalid-feedback').forEach(el => el.style.display = 'none');
     let isValid = true;
 
@@ -146,7 +146,6 @@ function formValidate() {
     const perUserLimit = Number(document.getElementById('pageUserLimit').value.trim());
 
     const codePattern = /^[A-Za-z0-9]{3,15}$/;
-
     if (!code) {
         document.getElementById("code-error").style.display = 'block';
         document.getElementById("code-error").innerText = "Coupon code is required.";
@@ -167,37 +166,54 @@ function formValidate() {
         isValid = false;
     }
 
-    if (!discount || isNaN(discount) || discount <= 0 || discount > minPurchase) {
-        document.getElementById("discount-error").style.display = 'block';
-        document.getElementById("discount-error").innerText = "Enter a valid discount amount.";
-        isValid = false;
-    }
-
     if (!expDate) {
         document.getElementById("expDate-error").style.display = 'block';
         document.getElementById("expDate-error").innerText = "Expiry date is required.";
         isValid = false;
-    } else if (new Date(expDate) < new Date()) {
-        document.getElementById("expDate-error").style.display = 'block';
-        document.getElementById("expDate-error").innerText = "Expiry date must be in the future.";
+    } else {
+        const currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0); 
+        const selectedDate = new Date(expDate);
+        if (selectedDate < currentDate) {
+            document.getElementById("expDate-error").style.display = 'block';
+            document.getElementById("expDate-error").innerText = "Expiry date must be in the future.";
+            isValid = false;
+        }
+    }
+
+    if (!discount || isNaN(discount)) {
+        document.getElementById("discount-error").style.display = 'block';
+        document.getElementById("discount-error").innerText = "Discount amount is required.";
+        isValid = false;
+    } else if (discount <= 0) {
+        document.getElementById("discount-error").style.display = 'block';
+        document.getElementById("discount-error").innerText = "Discount amount must be greater than 0.";
+        isValid = false;
+    } else if (discount >= minPurchase) {
+        document.getElementById("discount-error").style.display = 'block';
+        document.getElementById("discount-error").innerText = "Discount must be less than minimum purchase amount.";
         isValid = false;
     }
 
-    if (!minPurchase || isNaN(minPurchase) || minPurchase < 0) {
+    if (!minPurchase || isNaN(minPurchase)) {
         document.getElementById("minPurchase-error").style.display = 'block';
-        document.getElementById("minPurchase-error").innerText = "Enter a valid minimum purchase amount.";
+        document.getElementById("minPurchase-error").innerText = "Minimum purchase amount is required.";
+        isValid = false;
+    } else if (minPurchase < 0) {
+        document.getElementById("minPurchase-error").style.display = 'block';
+        document.getElementById("minPurchase-error").innerText = "Minimum purchase amount cannot be negative.";
         isValid = false;
     }
 
-    if (usageLimit && (isNaN(usageLimit) || usageLimit < 1)) {
+    if (usageLimit && (isNaN(usageLimit) || usageLimit < 0)) {
         document.getElementById("usageLimit-error").style.display = 'block';
-        document.getElementById("usageLimit-error").innerText = "Enter a valid usage limit.";
+        document.getElementById("usageLimit-error").innerText = "Usage limit must be greater than 0.";
         isValid = false;
     }
 
-    if (perUserLimit && (isNaN(perUserLimit) || perUserLimit < 1)) {
+    if (perUserLimit && (isNaN(perUserLimit) || perUserLimit < 0)) {
         document.getElementById("perUserLimit-error").style.display = 'block';
-        document.getElementById("perUserLimit-error").innerText = "Enter a valid per-user limit.";
+        document.getElementById("perUserLimit-error").innerText = "Per user limit must be greater than 0.";
         isValid = false;
     }
 

@@ -185,12 +185,11 @@
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
             const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked').value;
             const couponCode = document.querySelector("#couponCode").value;
-            const orderTotal = parseFloat("<%= cart.grandTotal %>"); // Get order total
-            const walletBalance = parseFloat("<%= walletBalance %>"); // Replace with actual wallet balance variable
+            const orderTotal = parseFloat("<%= cart.grandTotal %>");
+            const walletBalance = parseFloat("<%= walletBalance %>");
     
             let valid = true;
     
-            // Clear previous error messages
             document.getElementById("codError").textContent = "";
             document.getElementById("walletError").textContent = "";
     
@@ -205,7 +204,7 @@
             }
     
             if (!valid) {
-                return; // Prevent form submission if validation fails
+                return; 
             }
         
             if (paymentMethod === "razorpay") {
@@ -216,7 +215,7 @@
                         body: JSON.stringify({
                             amount: "<%= cart.grandTotal %>",
                             currency: "INR",
-                            retryOrderId: "<%= orderId %>", // Include retryOrderId if available
+                            retryOrderId: "<%= orderId %>", 
                         }),
                     });
         
@@ -264,13 +263,12 @@
                         razorpay.on('payment.failed', async function (response) {
                             alert(`Payment failed: ${response.error.description}`);
                         
-                            // Inform the backend about the failed payment attempt
                             const failureResponse = await fetch("/paymentCapture", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({
                                     razorpay_order_id: response.error.metadata.order_id,
-                                    paymentStatus: "Failed", // Explicitly mark as failed
+                                    paymentStatus: "Failed",
                                     selectedAddress,
                                     couponCode,
                                 }),
@@ -279,7 +277,7 @@
                             const result = await failureResponse.json();
                             if (failureResponse.ok) {
                                 alert("Order saved, but payment failed.");
-                                window.location.href = `/cart`;
+                                window.location.href = `/paymentFailure/${result.orderId}`;
                             } else {
                                 alert(result.message || "Error saving failed order. Please contact support.");
                             }

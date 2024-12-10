@@ -1,0 +1,200 @@
+<%- include("../../views/partials/user/header") %>
+
+<style>
+    .payment-failure {
+        max-width: 800px;
+        margin: 3rem auto;
+        padding: 2.5rem;
+        background: #ffffff;
+        border-radius: 16px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .payment-failure::before {
+        content: '✕';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 1.5rem;
+        width: 50px;
+        height: 50px;
+        background: #dc3545;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: slideDown 0.5s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            transform: translate(-50%, -100%);
+        }
+        to {
+            transform: translate(-50%, 0);
+        }
+    }
+
+    .payment-failure h1 {
+        color: #dc3545;
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 2.5rem 0 1rem;
+        padding-top: 1rem;
+    }
+
+    .payment-failure p {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+
+    .payment-failure .error-details {
+        font-family: monospace;
+        background: #fff8f8;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        display: inline-block;
+        margin: 1.5rem 0;
+        border: 1px dashed #ffcdd2;
+        color: #d32f2f;
+        font-size: 0.95rem;
+    }
+
+    .payment-failure .error-message {
+        background: #fff8f8;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 2rem auto;
+        max-width: 600px;
+        text-align: left;
+        border: 1px solid #ffcdd2;
+    }
+
+    .payment-failure .actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .payment-failure .btn-try-again {
+        background: #dc3545;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .payment-failure .btn-try-again:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+    }
+
+    .payment-failure .btn-cart {
+        background: #6c757d;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .payment-failure .btn-cart:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+
+    @media print {
+        .payment-failure {
+            box-shadow: none;
+            border: 1px solid #ddd;
+        }
+
+        .payment-failure::before {
+            display: none;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .payment-failure {
+            margin: 1rem;
+            padding: 1.5rem;
+        }
+
+        .payment-failure h1 {
+            font-size: 1.75rem;
+        }
+
+        .payment-failure .actions {
+            flex-direction: column;
+        }
+
+        .payment-failure .btn-try-again,
+        .payment-failure .btn-cart {
+            width: 100%;
+            text-align: center;
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .payment-failure > * {
+        animation: fadeInUp 0.5s ease-out forwards;
+        opacity: 0;
+    }
+
+    .payment-failure > *:nth-child(1) { animation-delay: 0.1s; }
+    .payment-failure > *:nth-child(2) { animation-delay: 0.2s; }
+    .payment-failure > *:nth-child(3) { animation-delay: 0.3s; }
+    .payment-failure > *:nth-child(4) { animation-delay: 0.4s; }
+
+    .payment-failure:hover {
+        transform: translateY(-2px);
+        transition: transform 0.3s ease;
+    }
+
+    .payment-failure::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(to right, #dc3545, #c82333);
+    }
+</style>
+
+<div class="payment-failure">
+    <h1>Payment Failed</h1>
+    <p>We're sorry, but your payment could not be processed.</p>
+    <div class="error-details">
+        ORDER ID: <%= order._id %>
+    </div>
+    <div class="error-message">
+        <p><strong>What went wrong?</strong></p>
+        <p>Your payment was declined. This could be due to insufficient funds, incorrect card details, or temporary network issues.</p>
+        <p>Please try again or use a different payment method.</p>
+    </div>
+    <div class="actions">
+        <a href="/checkout" class="btn-try-again">Try Again</a>
+        <a href="/cart" class="btn-cart">Return to Cart</a>
+    </div>
+</div>
+
+<%- include("../../views/partials/user/footer") %>
