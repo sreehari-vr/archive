@@ -79,8 +79,8 @@
 									<a href="/shop">Shop</a>
 									
 								</li>
-								<li><a href="/">About</a></li>
-								<li><a href="/">Contact</a></li>
+								<li><a href="/home">About</a></li>
+								<li><a href="/home">Contact</a></li>
 								
 
 								<li class="cart"><a href="/cart"><i class="icon-shopping-cart"></i> Cart</a></li>
@@ -98,6 +98,79 @@
 					</div>
 				</div>
 			</div>
+
+
+			<ol class="breadcrumb m-0" id="dynamicBreadcrumbs" style="display: none; background-color: rgb(248, 250, 252);">
+				<!-- Breadcrumbs will be inserted here dynamically -->
+			  </ol>
+			  
+			  <script>
+			  function generateBreadcrumbs() {
+				const path = window.location.pathname;
+				const breadcrumbsContainer = document.getElementById('dynamicBreadcrumbs');
+				
+				// Hide breadcrumbs if on home page
+				if (path === '/' || path === '/home') {
+				  breadcrumbsContainer.style.display = 'none';
+				  return;
+				}
+				
+				// Show breadcrumbs for other pages
+				breadcrumbsContainer.style.display = 'flex';
+				
+				const pathSegments = path.split('/').filter(segment => segment);
+				
+				// Clear existing breadcrumbs
+				breadcrumbsContainer.innerHTML = '';
+				
+				// Always add Home as the first item
+				const homeItem = document.createElement('li');
+				homeItem.className = 'breadcrumb-item';
+				const homeLink = document.createElement('a');
+				homeLink.href = '/home';
+				homeLink.textContent = 'Home';
+				homeItem.appendChild(homeLink);
+				breadcrumbsContainer.appendChild(homeItem);
+				
+				// Build current path progressively
+				let currentPath = '';
+				
+				pathSegments.forEach((segment, index) => {
+				  currentPath += `/${segment}`;
+				  
+				  const listItem = document.createElement('li');
+				  listItem.className = 'breadcrumb-item';
+				  
+				  // Make the last item active (non-clickable)
+				  if (index === pathSegments.length - 1) {
+					listItem.classList.add('active');
+					listItem.setAttribute('aria-current', 'page');
+					listItem.textContent = formatBreadcrumb(segment);
+				  } else {
+					const link = document.createElement('a');
+					link.href = currentPath;
+					link.textContent = formatBreadcrumb(segment);
+					listItem.appendChild(link);
+				  }
+				  
+				  breadcrumbsContainer.appendChild(listItem);
+				});
+			  }
+			  
+			  // Format breadcrumb text (capitalize and replace hyphens/underscores)
+			  function formatBreadcrumb(text) {
+				return text
+				  .split(/[-_]/)
+				  .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+				  .join(' ');
+			  }
+			  
+			  // Initialize breadcrumbs on page load
+			  document.addEventListener('DOMContentLoaded', generateBreadcrumbs);
+			  
+			  // Optional: Update breadcrumbs on route change (for SPA)
+			  window.addEventListener('popstate', generateBreadcrumbs);
+			  </script>
 			<script>
 				document.getElementById('searchInput').addEventListener('input', async (event) => {
 					const query = event.target.value.trim();

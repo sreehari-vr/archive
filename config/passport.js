@@ -19,7 +19,8 @@ async (accessToken,refreshToken,profile,done)=>{
             user = new User({
                 name:profile.displayName,
                 email:profile.emails[0].value,
-                googleId:profile.id
+                googleId:profile.id,
+                referralCode: Math.random().toString(36).substring(2, 8).toUpperCase()
             })
             await user.save();
             return done(null,user)

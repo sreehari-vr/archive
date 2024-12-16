@@ -73,19 +73,21 @@ router.post(
   orderController.updateOrderStatus
 );
 
-router.post(
-  "/orders/:orderId/update-payment-status",
-  adminAuth,
-  orderController.updatePaymentStatus
-);
+// router.post(
+//   "/orders/:orderId/update-payment-status",
+//   adminAuth,
+//   orderController.updatePaymentStatus
+// );
 
 router.post('/orders/:orderId/items/:itemId/update-status',adminAuth,
   orderController.updateItemStatus
 ); 
 
-router.post('/orders/:orderId/items/:itemId/update-payment-status',adminAuth,
-  orderController.updateItemPaymentStatus
-);  
+// router.post('/orders/:orderId/items/:itemId/update-payment-status',adminAuth,
+//   orderController.updateItemPaymentStatus
+// );  
+
+
 
 
 router.get("/coupon", adminAuth, couponController.loadCoupon);
@@ -102,5 +104,21 @@ router.get("/report/pdf", adminAuth, adminController.downloadPdfReport);
 router.get("/report/excel", adminAuth, adminController.downloadExcelReport);
 
 router.get("/chart", adminAuth, adminController.chart);
+router.get("/notifications", adminAuth, orderController.notifications);
+router.post('/orderReturnApprove/:orderId',adminAuth,
+  orderController.orderReturnApprove
+); 
+
+router.post('/orderReturnReject/:orderId',adminAuth,
+  orderController.orderReturnReject
+); 
+
+router.post('/itemReturnApprove/:orderId/:itemId',adminAuth,
+  orderController.itemReturnApprove
+); 
+
+router.post('/itemReturnReject/:orderId/:itemId',adminAuth,
+  orderController.itemReturnReject
+); 
 
 module.exports = router;

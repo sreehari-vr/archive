@@ -83,7 +83,7 @@
                     class="form-control" 
                     id="expDate" 
                     name="expDate" 
-                    value="<%=coupon.expiryDate%>"
+                    value="<%= new Date(coupon.expiryDate).toISOString().split('T')[0] %>"
                     required
                   />
                   <div class="invalid-feedback" id="expDate-error">Select a valid expiry date</div>

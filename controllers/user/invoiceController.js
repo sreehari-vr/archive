@@ -36,75 +36,200 @@ const getInvoice = async (req, res) => {
 function generateInvoice(order, outputPath) {
   return new Promise((resolve, reject) => {
     try {
-      const doc = new PDFDocument({ margin: 50 });
+      // Initialize PDF document with better margins
+      const doc = new PDFDocument({ 
+        margin: 50,
+        size: 'A4'
+      });
       const writeStream = fs.createWriteStream(outputPath);
-
       doc.pipe(writeStream);
 
-      doc.rect(20, 20, doc.page.width - 40, doc.page.height - 40).stroke();
-      doc
-        .fontSize(20)
-        .fillColor("#0073e6")
-        .text("ARCHIVE", { align: "center" })
-        .moveDown(0.5);
-      doc
-        .fontSize(12)
-        .fillColor("black")
-        .text("Address: Archive, Kochi, Pin: 686457", { align: "center" });
-      doc.text("Phone: +91-9081969790 | Email: archive@gmail.com", {
-        align: "center",
-      });
+      // Page border with rounded corners
+      doc.roundedRect(20, 20, doc.page.width - 40, doc.page.height - 40, 10).stroke();
 
-      doc
-        .moveDown(1)
-        .fontSize(18)
-        .fillColor("#333333")
-        .text("Invoice", { align: "center", underline: true })
-        .moveDown(1);
+      // Constants for layout
+      const pageWidth = doc.page.width - 100; // Accounting for margins
+      const leftMargin = 50;
+      const rightMargin = doc.page.width - 50;
 
-      doc.fontSize(12).fillColor("black").text("Order Details:").moveDown(0.5);
-      doc.text(`Order ID: ${order._id}`, { indent: 20 });
-      doc.text(
-        `Order Date: ${new Date(order.orderDate).toLocaleDateString()}`,
-        { indent: 20 }
-      );
-      doc.text(`Payment Method: ${order.paymentMethod}`, { indent: 20 });
-      doc.text(`Order Status: ${order.orderStatus}`, { indent: 20 }).moveDown(1);
-      doc.text(`Shipping Address: ${order.address.addressType}`, { indent: 20 });
-      doc.text(`                  ${order.address.name}`, { indent: 20 });
-      doc.text(`                  ${order.address.city}`, { indent: 20 });
-      doc.text(`                  ${order.address.landMark}`, { indent: 20 });
-      doc.text(`                  ${order.address.state}`, { indent: 20 });
-      doc.text(`                  ${order.address.pincode}`, { indent: 20 });
-      doc.text(`                  ${order.address.phone}`, { indent: 20 });
-      doc.text(`                  ${order.address.altPhone}`, { indent: 20 });
+      // Header Section
+      doc.fontSize(24)
+         .font('Helvetica-Bold')
+         .fillColor("#88c8bc")
+         .text("ARCHIVE", { align: "center" })
+         .moveDown(0.3);
 
-      doc.text("Order Items:", { underline: true }).moveDown(0.5);
+      // Company Details
+      doc.fontSize(10)
+         .font('Helvetica')
+         .fillColor("#666666")
+         .text("Address: Archive, Kochi, Pin: 686457", { align: "center" })
+         .text("Phone: +91-9081969790 | Email: archive@gmail.com", { align: "center" })
+         .moveDown(1);
+
+      // Decorative Line
+      doc.moveTo(leftMargin, doc.y)
+         .lineTo(rightMargin, doc.y)
+         .lineWidth(1)
+         .strokeColor("#CCCCCC")
+         .stroke()
+         .moveDown(1);
+
+      // Invoice Title
+      doc.fontSize(20)
+         .font('Helvetica-Bold')
+         .fillColor("#333333")
+         .text("INVOICE", { align: "center" })
+         .moveDown(1);
+
+      // Two-column layout for order details and shipping address
+      const detailsY = doc.y;
+      
+      // Left Column - Order Details
+      doc.fontSize(11)
+         .font('Helvetica-Bold')
+         .fillColor("#444444")
+         .text("Order Details", leftMargin)
+         .moveDown(0.5);
+
+      doc.fontSize(10)
+         .font('Helvetica')
+         .fillColor("#666666")
+         .text(`Order ID: ${order._id}`, leftMargin)
+         .text(`Order Date: ${new Date(order.orderDate).toLocaleDateString()}`, leftMargin)
+         .text(`Payment Method: ${order.paymentMethod}`, leftMargin)
+         .text(`Order Status: ${order.orderStatus}`, leftMargin);
+
+      // Right Column - Shipping Address
+      doc.fontSize(11)
+         .font('Helvetica-Bold')
+         .fillColor("#444444")
+         .text("Shipping Address", doc.page.width / 2, detailsY)
+         .moveDown(0.5);
+
+      const address = order.address;
+      doc.fontSize(10)
+         .font('Helvetica')
+         .fillColor("#666666")
+         .text(`${address.addressType}, ${address.name}`, doc.page.width / 2)
+         .text(`${address.city}, ${address.state}, ${address.pincode}`)
+         .text(`Landmark: ${address.landMark}`)
+         .text(`Phone: ${address.phone}`);
+      
+      if (address.altPhone) {
+        doc.text(`Alt Phone: ${address.altPhone}`);
+      }
+
+      // Move to the lowest Y position from both columns
+      doc.moveDown(2);
+
+      // Order Items Table
+      doc.fontSize(11)
+         .font('Helvetica-Bold')
+         .fillColor("#444444")
+         .text("Order Items", leftMargin)
+         .moveDown(1);
+
+      // Table styling
+      const tableTop = doc.y;
+      const tableWidth = pageWidth;
+      const columnWidths = {
+        no: tableWidth * 0.08,
+        product: tableWidth * 0.42,
+        quantity: tableWidth * 0.15,
+        price: tableWidth * 0.15,
+        subtotal: tableWidth * 0.20
+      };
+
+      // Table Headers with background
+      doc.fillColor("#f6f6f6")
+         .rect(leftMargin, tableTop, tableWidth, 20)
+         .fill();
+
+      doc.fontSize(10)
+         .font('Helvetica-Bold')
+         .fillColor("#333333");
+
+      // Header positions
+      const headerY = tableTop + 5;
+      doc.text("No", leftMargin, headerY)
+         .text("Product", leftMargin + columnWidths.no, headerY)
+         .text("Qty", leftMargin + columnWidths.no + columnWidths.product, headerY)
+         .text("Price", leftMargin + columnWidths.no + columnWidths.product + columnWidths.quantity, headerY)
+         .text("Subtotal", leftMargin + columnWidths.no + columnWidths.product + columnWidths.quantity + columnWidths.price, headerY);
+
+      // Table Rows
+      let currentY = tableTop + 25;
       let totalAmount = 0;
 
       order.items.forEach((item, index) => {
         const subtotal = item.quantity * item.price;
         totalAmount = order.totalAmount;
-        doc.text(
-          `${index + 1}. ${item.productId.productName} - ${item.quantity} x ${
-            item.price
-          } = ${subtotal.toFixed(2)}`
-        );
+
+        // Alternate row background
+        if (index % 2 === 0) {
+          doc.fillColor("#fafafa")
+             .rect(leftMargin, currentY - 5, tableWidth, 20)
+             .fill();
+        }
+
+        doc.fontSize(9)
+           .font('Helvetica')
+           .fillColor("#444444")
+           .text((index + 1).toString(), leftMargin, currentY)
+           .text(item.productId.productName, leftMargin + columnWidths.no, currentY, {
+             width: columnWidths.product - 10,
+             ellipsis: true
+           })
+           .text(item.quantity.toString(), leftMargin + columnWidths.no + columnWidths.product, currentY)
+           .text(`${item.price.toFixed(2)}`, leftMargin + columnWidths.no + columnWidths.product + columnWidths.quantity, currentY)
+           .text(`${subtotal.toFixed(2)}`, leftMargin + columnWidths.no + columnWidths.product + columnWidths.quantity + columnWidths.price, currentY);
+
+        currentY += 20;
       });
 
+      // Total Section with proper alignment
+      doc.moveDown(2);
+      const totalSectionX = rightMargin - 200;
+      const amountColumnX = totalSectionX + 120;
+      
+      doc.fontSize(10)
+         .font('Helvetica-Bold')
+         .fillColor("#333333")
+         .text("Invoice Summary", totalSectionX)
+         .moveDown(0.5);
 
-      doc.moveDown(1);
-      doc
-        .fontSize(12)
-        .text(`Discount: ${order.discount.toFixed(2)}`, { align: "right" });
-      doc
-        .fontSize(14)
-        .fillColor("#0073e6")
-        .text(`Total: ${totalAmount.toFixed(2)}`, { align: "right" });
-      doc
-        .fontSize(8)
-        .text("All values are in INR", { align: "right" });
+      // Summary box with light background
+      const summaryBoxY = doc.y;
+      doc.fillColor("#f9f9f9")
+         .rect(totalSectionX, summaryBoxY, 200, 80)
+         .fill();
 
+      // Labels column (left-aligned)
+      doc.fillColor("#666666")
+         .fontSize(10)
+         .font('Helvetica')
+         .text("Subtotal:", totalSectionX + 10, summaryBoxY + 15)
+         .text("Discount:", totalSectionX + 10, summaryBoxY + 35)
+         .font('Helvetica-Bold')
+         .text("Total Amount:", totalSectionX + 10, summaryBoxY + 55);
+
+      // Amounts column (right-aligned)
+      doc.fontSize(10)
+         .font('Helvetica')
+         .text(`${totalAmount.toFixed(2)}`, amountColumnX, summaryBoxY + 15, { width: 70, align: 'right' })
+         .text(`${order.discount.toFixed(2)}`, amountColumnX, summaryBoxY + 35, { width: 70, align: 'right' })
+         .font('Helvetica-Bold')
+         .text(`${(totalAmount).toFixed(2)}`, amountColumnX, summaryBoxY + 55, { width: 70, align: 'right' });
+
+      // Footer
+      doc.fontSize(8)
+         .font('Helvetica')
+         .fillColor("#999999")
+         .text("Thank you for shopping with Archive!", leftMargin, doc.page.height - 100, { align: 'center' })
+         .text("All prices are in Indian Rupees (INR)", { align: 'center' });
+
+      // Finalize PDF
       doc.end();
       writeStream.on("finish", resolve);
       writeStream.on("error", reject);
@@ -113,5 +238,7 @@ function generateInvoice(order, outputPath) {
     }
   });
 }
+
+
 
 module.exports = { getInvoice };

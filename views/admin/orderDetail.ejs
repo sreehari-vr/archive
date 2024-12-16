@@ -61,40 +61,31 @@
                     <h5 class="card-title"><i class="bi bi-truck me-2"></i>Order Status</h5>
                     <select name="orderStatus" class="form-select status-select mt-2" data-type="order"
                       data-order-id="<%= order._id %>">
-                      <option disabled selected>Update Order Status</option>
+                      <option disabled selected><%= order.orderStatus %></option>
 
-                      <!-- Show 'Pending' only if not Delivered or Returned -->
-                      <% if (order.orderStatus !=='Delivered' && order.orderStatus !=='Returned' ) { %>
-                        <option value="Pending" <%=order.orderStatus==='Pending' ? 'selected' : '' %>>Pending</option>
-                        <% } %>
+                      
 
                           <!-- Show 'Shipped' only if not Delivered or Returned -->
-                          <% if (order.orderStatus !=='Delivered' && order.orderStatus !=='Returned' ) { %>
+                          <% if (order.orderStatus !=='Delivered' && order.orderStatus !=='Returned' && order.orderStatus !=='Return Rejected' && order.orderStatus !=='Return Pending' && order.orderStatus !=='Cancelled') { %>
                             <option value="Shipped" <%=order.orderStatus==='Shipped' ? 'selected' : '' %>>Shipped
                             </option>
                             <% } %>
 
-                              <% if (order.orderStatus !=='Delivered' && order.orderStatus !=='Returned' ) { %>
+                              <% if (order.orderStatus !=='Delivered' && order.orderStatus !=='Returned' && order.orderStatus !=='Return Rejected' && order.orderStatus !=='Return Pending') { %>
                                 <option value="Cancelled" <%=order.orderStatus==='Cancelled' ? 'selected' : '' %>
                                   >Cancelled</option>
                                 <% } %>
 
-                                  <% if (order.orderStatus !=='Cancelled' ) { %>
-                                    <option value="Returned" <%=order.orderStatus==='Returned' ? 'selected' : '' %>
-                                      >Returned</option>
-                                    <% } %>
+                                  
 
-                                      <% if (order.orderStatus !=='Cancelled' && order.orderStatus !=='Returned' ) { %>
+                                      <% if (order.orderStatus !=='Cancelled' && order.orderStatus !=='Returned' && order.orderStatus !=='Return Rejected' && order.orderStatus !=='Return Pending' ) { %>
                                         <option value="Delivered" <%=order.orderStatus==='Delivered' ? 'selected' : ''
                                           %>>Delivered</option>
                                         <% } %>
 
-                                          <!-- Show 'Processing' only if not Delivered or Returned -->
-                                          <% if (order.orderStatus !=='Delivered' && order.orderStatus !=='Returned' ) {
-                                            %>
-                                            <option value="Processing" <%=order.orderStatus==='Processing' ? 'selected'
-                                              : '' %>>Processing</option>
-                                            <% } %>
+                                        
+
+                                          
                     </select>
                   </div>
                 </div>
@@ -105,18 +96,7 @@
                 <div class="card h-100 border-light">
                   <div class="card-body">
                     <h5 class="card-title"><i class="bi bi-wallet2 me-2"></i>Payment Status</h5>
-                    <select name="paymentStatus" class="form-select status-select mt-2" data-type="payment"
-                      data-order-id="<%= order._id %>">
-                      <option disabled selected>Update Payment Status</option>
-                      <option value="Pending" <%=order.paymentStatus==='Pending' ? 'selected' : '' %>>Pending</option>
-                      <option value="Failed" <%=order.paymentStatus==='Failed' ? 'selected' : '' %>>Failed</option>
-                      <option value="Refunded" <%=order.paymentStatus==='Refunded' ? 'selected' : '' %>>Refunded
-                      </option>
-                      <option value="Paid" <%=order.paymentStatus==='Paid' ? 'selected' : '' %>>Paid</option>
-                      <option value="Partially Refunded" <%=order.paymentStatus==='Partially Refunded' ? 'selected' : ''
-                        %>>Partially Refunded</option>
-
-                    </select>
+                    <%= order.paymentStatus %>
                   </div>
                 </div>
               </div>
@@ -213,22 +193,19 @@
                               <td>
                                 <select class="form-select form-select-sm item-status-select"
                                   data-item-id="<%= item._id %>" data-order-id="<%= order._id %>">
-                                  <% if (item.status !=='Delivered' && item.status !=='Returned' ) { %>
-                                    <option value="Pending" <%=item.status==='Pending' ? 'selected' : '' %>>Pending
+                                  <option disabled selected><%= item.orderStatus %></option>
+                                  <% if (item.orderStatus !=='Delivered' && item.orderStatus !=='Returned' && item.orderStatus !=='Return Rejected' && item.orderStatus !=='Return Pending' && item.orderStatus !=='Cancelled') { %>
+                                    <option value="Shipped" <%=item.orderStatus==='Shipped' ? 'selected' : '' %>>Shipped
                                     </option>
-                                    <option value="Processing" <%=item.status==='Processing' ? 'selected' : '' %>
-                                      >Processing</option>
-                                    <option value="Shipped" <%=item.status==='Shipped' ? 'selected' : '' %>>Shipped
-                                    </option>
-                                    <option value="Cancelled" <%=item.status==='Cancelled' ? 'selected' : '' %>
-                                      >Cancelled</option>
                                     <% } %>
-                                      <% if (item.status !=='Cancelled' ) { %>
-                                        <option value="Returned" <%=item.status==='Returned' ? 'selected' : '' %>
-                                          >Returned</option>
-                                        <% } %>
-                                          <% if (item.status !=='Cancelled' && item.status !=='Returned' ) { %>
-                                            <option value="Delivered" <%=item.status==='Delivered' ? 'selected' : '' %>
+
+                                    <% if (item.orderStatus !=='Delivered' && item.orderStatus !=='Returned' && item.orderStatus !=='Return Rejected' && item.orderStatus !=='Return Pending') { %>
+                                      <option value="Cancelled" <%=item.orderStatus==='Cancelled' ? 'selected' : '' %>
+                                        >Cancelled</option>
+                                      <% } %>
+                                  
+                                          <% if (item.orderStatus !=='Cancelled' && item.orderStatus !=='Returned' && item.orderStatus !=='Return Rejected' && item.orderStatus !=='Return Pending') { %>
+                                            <option value="Delivered" <%=item.orderStatus==='Delivered' ? 'selected' : '' %>
                                               >Delivered</option>
                                             <% } %>
                                 </select>
@@ -236,20 +213,7 @@
 
                               <!-- Individual Item Payment Status -->
                               <td>
-                                <select class="form-select form-select-sm item-payment-status-select"
-                                  data-item-id="<%= item._id %>" data-order-id="<%= order._id %>">
-                                  <% if (item.paymentStatus !=='Refunded' ) { %>
-                                    <option value="Pending" <%=item.paymentStatus==='Pending' ? 'selected' : '' %>
-                                      >Pending</option>
-                                    <option value="Failed" <%=item.paymentStatus==='Failed' ? 'selected' : '' %>>Failed
-                                    </option>
-                                    <option value="Paid" <%=item.paymentStatus==='Paid' ? 'selected' : '' %>>Paid
-                                    </option>
-                                    
-                                    <% } %>
-                                      <option value="Refunded" <%=item.paymentStatus==='Refunded' ? 'selected' : '' %>
-                                        >Refunded</option>
-                                </select>
+                                <%= order.paymentStatus %>
                               </td>
 
                             </tr>

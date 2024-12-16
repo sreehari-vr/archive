@@ -224,9 +224,27 @@ function validateForm() {
   let isValid = form.checkValidity();
   form.classList.add('was-validated');
   
+  const productName = document.getElementById('product_name').value.trim();
+  const description = document.getElementById('descriptionid').value.trim();
   const regularPrice = parseFloat(document.getElementById('regularPrice').value);
   const quantity = parseInt(document.getElementById('quantity').value);
   
+  if (!productName || productName.trim().length === 0) {
+    document.getElementById('productName-error').textContent = "Product name cannot start with a space";
+    document.getElementById('product_name').setCustomValidity("Product name cannot start with a space");
+    isValid = false;
+  } else {
+    document.getElementById('product_name').setCustomValidity("");
+  }
+
+  if (!description || description.trim().length === 0) {
+    document.getElementById('description-error').textContent = "Description cannot start with a space";
+    document.getElementById('descriptionid').setCustomValidity("Description cannot start with a space");
+    isValid = false;
+  } else {
+    document.getElementById('descriptionid').setCustomValidity("");
+  }
+
   if (regularPrice < 0) {
     document.getElementById('regularPrice-error').textContent = "Price cannot be negative";
     document.getElementById('regularPrice').setCustomValidity("Price cannot be negative");

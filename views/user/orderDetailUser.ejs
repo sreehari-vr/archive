@@ -74,17 +74,15 @@
                             </span>
                         </div>
                         <div class="col-md-6 text-md-end">
+                          <h3 class="mb-1">
+                            <strong>Original Total:</strong> ₹<%= order.grandTotalAmount %>
+                            <div>
+                                <small class="text-success">Discount: ₹<%= order.discount %></small>
+                            </div>
+                            <strong>Final Total:</strong> ₹<%= order.totalAmount %>
+                        </h3>
+                        
                             <%if(order.orderStatus !== 'Cancelled'){%>
-                                <h3 class="mb-1">
-                                    <% if(order.discount > 0) { %>
-                                        <div>
-                                            <small class="text-success">Discount Applied: ₹<%= order.discount %></small>
-                                        </div>
-                                    <% } %>
-                                    <strong>Total Amount:</strong> ₹<%= order.totalAmount %>
-                                </h3>
-                            <%}%>
-                            <%if(order.orderStatus === 'Delivered'){%>
                                 <button class="btn btn-link" onclick="downloadInvoice('<%= order._id %>')">Download Invoice</button>
                             <%}%>
                         </div>

@@ -227,10 +227,9 @@
   </style>
 
 
-  <main class="main">
 
 
-    <section class="pt-10 pb-10">
+    <section class="pt-5 pb-5>
       <div class="container">
         <div class="row">
           <div class="col-lg-10 m-auto">
@@ -405,7 +404,7 @@
                                     </ul>
                                   </td>
                                   <td style="color:darkmagenta;"><%= order.orderStatus %></td>
-                                  <td>₹<%= order.totalAmount %></td>
+                                  <td>₹<%= order.grandTotalAmount %></td>
                                   <td>
                                     <% if (order.orderStatus === "Cancelled" || order.orderStatus === "Returned") { %>
                                       <a href="/orderDetailUser/<%=order._id%>">Details</a>

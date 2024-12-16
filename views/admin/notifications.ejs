@@ -1,0 +1,154 @@
+<%- include("../../views/partials/admin/header") %>
+
+<body>
+  <div class="container-fluid my-5">
+    <h1 class="mb-4">Return Notifications</h1>
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover mb-0">
+        <thead class="table" style="background-color: #5D87FF; color:black; border: 10px;">
+          <tr>
+            <th>#</th>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Product(s)</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (orders && orders.length > 0) { %>
+            <% orders.forEach((order, orderIndex) => { %>
+              <% 
+                if (order.orderStatus==="Return Pending") { 
+                  const productNames = order.items
+                    .map(item => item.productId.productName || "Unknown Product")
+                    .join("\n");
+              %>
+                <tr>
+                  <td><%= orderIndex + 1 %></td>
+                  <td><%= order._id %></td>
+                  <td><%= order.userId.name || "Unknown Customer" %></td>
+                  <td><%- productNames.replace(/\n/g, "<br>") %></td>
+                  <td><%= order.returnReason %></td>
+                  <td>
+                    <span class="badge bg-warning text-dark"><%= order.orderStatus %></span>
+                  </td>
+                  <td>
+                    <div class="d-flex">
+                      <button 
+                        class="btn btn-success btn-sm me-2"
+                        onclick="handleReturnAction('<%= order._id %>', '', 'approve')">
+                        Approve
+                      </button>
+                      <button 
+                        class="btn btn-danger btn-sm"
+                        onclick="handleReturnAction('<%= order._id %>', '', 'reject')">
+                        Reject
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              <% } %>
+              <% 
+                order.items.forEach((item) => {
+                  if (item.orderStatus === "Return Pending") {
+              %>
+                <tr>
+                  <td><%= orderIndex + 1 %></td>
+                  <td><%= order._id %></td>
+                  <td><%= order.userId.name || "Unknown Customer" %></td>
+                  <td><%= item.productId.productName || "Unknown Product" %></td>
+                  <td><%= item.returnReason %></td>
+                  <td>
+                    <span class="badge bg-warning text-dark"><%= item.orderStatus %></span>
+                  </td>
+                  <td>
+                    <div class="d-flex">
+                      <button 
+                        class="btn btn-success btn-sm me-2"
+                        onclick="handleReturnAction('<%= order._id %>', '<%= item._id %>', 'approve')">
+                        Approve
+                      </button>
+                      <button 
+                        class="btn btn-danger btn-sm"
+                        onclick="handleReturnAction('<%= order._id %>', '<%= item._id %>', 'reject')">
+                        Reject
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              <% } }); %>
+            <% }); %>
+          <% } else { %>
+            <tr>
+              <td colspan="7" class="text-center">No returns found.</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    function handleReturnAction(orderId, itemId, action) {
+      const actionText = action === 'approve' ? 'Approve' : 'Reject';
+      const actionUrl = getActionUrl(orderId, itemId, action);
+
+      Swal.fire({
+        title: `Are you sure you want to ${action} this return?`,
+        text: "This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: action === 'approve' ? '#28a745' : '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: `Yes, ${actionText} it!`
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(actionUrl, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+              if (data.message) {
+                Swal.fire({
+                  title: 'Success!',
+                  text: data.message,
+                  icon: 'success',
+                  confirmButtonColor: '#28a745'
+                }).then(() => {
+                  // Optionally reload the page or update the UI
+                  location.reload();
+                });
+              } else {
+                throw new Error('Unexpected response');
+              }
+            })
+            .catch(error => {
+              Swal.fire({
+                title: 'Error!',
+                text: 'Something went wrong. Please try again.',
+                icon: 'error',
+                confirmButtonColor: '#dc3545'
+              });
+              console.error('Error:', error);
+            });
+        }
+      });
+    }
+
+    function getActionUrl(orderId, itemId, action) {
+      if (action === 'approve') {
+        return itemId 
+          ? `/admin/itemReturnApprove/${orderId}/${itemId}` 
+          : `/admin/orderReturnApprove/${orderId}`;
+      } else {
+        return itemId 
+          ? `/admin/itemReturnReject/${orderId}/${itemId}` 
+          : `/admin/orderReturnReject/${orderId}`;
+      }
+    }
+  </script>
+</body>
+</html>

@@ -51,10 +51,13 @@ const loadHomepage = async (req, res) => {
 const loadDetailPage = async (req, res) => {
   try {
     const productId = req.params.id;
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId).populate('category');
     if (!product) {
       res.status(500).send("Product not found");
     }
+    const categoryOffer = product.category?.offer || 0; // Assuming category has an `offer` field
+    const productOffer = product.productOffer || 0;
+    const bestOffer = Math.max(categoryOffer, productOffer);
 
     const relatedProducts = await Product.find({
       isDeleted: null,
@@ -63,7 +66,7 @@ const loadDetailPage = async (req, res) => {
       _id: { $ne: productId },
     }).limit(4);
 
-    return res.render("productDetail", { product, relatedProducts });
+    return res.render("productDetail", { product, relatedProducts, bestOffer });
   } catch (error) {
     console.log(error);
   }
