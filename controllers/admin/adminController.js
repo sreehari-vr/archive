@@ -8,14 +8,12 @@ const fs = require("fs");
 const bcrypt = require("bcrypt");
 const path = require("path");
 
-
 const loadAdminLogin = async (req, res) => {
   if (req.session.admin) {
     return res.redirect("/admin/adminDash");
   }
   res.render("adminLogin", { message: null });
 };
-
 
 const login = async (req, res) => {
   try {
@@ -27,100 +25,107 @@ const login = async (req, res) => {
     }
 
     if (password.length < 6) {
-      return res.render("adminLogin", { message: "Password must be at least 6 characters long." });
+      return res.render("adminLogin", {
+        message: "Password must be at least 6 characters long.",
+      });
     }
 
     const admin = await User.findOne({ email: email, isAdmin: true });
     if (!admin) {
-      return res.render("adminLogin", { message: "No admin account found with this email." });
+      return res.render("adminLogin", {
+        message: "No admin account found with this email.",
+      });
     }
 
-    const passwordMatch =await bcrypt.compare(password, admin.password);
+    const passwordMatch = await bcrypt.compare(password, admin.password);
     if (!passwordMatch) {
-      return res.render("adminLogin", { message: "Incorrect password. Please try again." });
+      return res.render("adminLogin", {
+        message: "Incorrect password. Please try again.",
+      });
     }
 
     req.session.admin = true;
     return res.redirect("/admin/adminDash");
   } catch (error) {
     console.error("Admin login error:", error);
-    res.render("adminLogin", { message: "An error occurred. Please try again." });
+    res.render("adminLogin", {
+      message: "An error occurred. Please try again.",
+    });
   }
 };
-
 
 const loadAdminDash = async (req, res) => {
   try {
     if (req.session.admin) {
       const topSellingProducts = await Order.aggregate([
-        { $unwind: '$items' },
-        { 
-          $group: { 
-            _id: '$items.productId', 
-            totalSold: { $sum: '$items.quantity' }
-          } 
-        },
-        { $sort: { totalSold: -1 } }, 
-        { $limit: 10 }, 
+        { $unwind: "$items" },
         {
-          $lookup: {
-            from: 'products', 
-            localField: '_id', 
-            foreignField: '_id',
-            as: 'product' 
-          }
-        },
-        { $unwind: '$product' }, 
-        {
-          $project: { 
-            _id: 0,
-            productName: '$product.productName',
-            totalSold: 1
-          }
-        }
-      ]);
-
-      const bestSellingCategories = await Order.aggregate([
-        { $unwind: '$items' },
-        { 
-          $lookup: {
-            from: 'products',
-            localField: 'items.productId',
-            foreignField: '_id',
-            as: 'product'
-          } 
-        },
-        { $unwind: '$product' },
-        { 
-          $lookup: {
-            from: 'categories', 
-            localField: 'product.category', 
-            foreignField: '_id',
-            as: 'category'
-          } 
-        },
-        { $unwind: '$category' },
-        { 
-          $group: { 
-            _id: '$category.name',
-            totalSold: { $sum: '$items.quantity' } 
-          } 
+          $group: {
+            _id: "$items.productId",
+            totalSold: { $sum: "$items.quantity" },
+          },
         },
         { $sort: { totalSold: -1 } },
-        { $limit: 5 }, 
+        { $limit: 10 },
+        {
+          $lookup: {
+            from: "products",
+            localField: "_id",
+            foreignField: "_id",
+            as: "product",
+          },
+        },
+        { $unwind: "$product" },
         {
           $project: {
             _id: 0,
-            categoryName: '$_id', 
-            totalSold: 1
-          }
-        }
+            productName: "$product.productName",
+            totalSold: 1,
+          },
+        },
       ]);
-      
-      
-      
 
-      return res.render("adminDash",{topSellingProducts, bestSellingCategories});
+      const bestSellingCategories = await Order.aggregate([
+        { $unwind: "$items" },
+        {
+          $lookup: {
+            from: "products",
+            localField: "items.productId",
+            foreignField: "_id",
+            as: "product",
+          },
+        },
+        { $unwind: "$product" },
+        {
+          $lookup: {
+            from: "categories",
+            localField: "product.category",
+            foreignField: "_id",
+            as: "category",
+          },
+        },
+        { $unwind: "$category" },
+        {
+          $group: {
+            _id: "$category.name",
+            totalSold: { $sum: "$items.quantity" },
+          },
+        },
+        { $sort: { totalSold: -1 } },
+        { $limit: 5 },
+        {
+          $project: {
+            _id: 0,
+            categoryName: "$_id",
+            totalSold: 1,
+          },
+        },
+      ]);
+
+      return res.render("adminDash", {
+        topSellingProducts,
+        bestSellingCategories,
+      });
     }
   } catch (error) {
     console.error("Error loading admin dashboard:", error);
@@ -183,7 +188,7 @@ const getSalesReport = async (req, res) => {
       };
     }
 
-    const orders = await Order.find(query).populate('items.productId');
+    const orders = await Order.find(query).populate("items.productId");
     const products = await Product.find();
     const carts = await Cart.find();
 
@@ -325,11 +330,27 @@ const downloadPdfReport = async (req, res) => {
     let query = {};
 
     if (filter === "Daily") {
-      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+      const startOfDay = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate()
+      );
+      const endOfDay = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        23,
+        59,
+        59,
+        999
+      );
       query.orderDate = { $gte: startOfDay, $lte: endOfDay };
     } else if (filter === "Weekly") {
-      const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+      const startOfWeek = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() - now.getDay()
+      );
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(endOfWeek.getDate() + 6);
       query.orderDate = { $gte: startOfWeek, $lte: endOfWeek };
@@ -345,13 +366,30 @@ const downloadPdfReport = async (req, res) => {
     const products = await Product.find();
 
     const totalOrders = orders.length;
-    const totalAmount = orders.reduce((sum, order) => sum + order.totalAmount, 0);
-    const totalCouponOffers = orders.reduce((sum, order) => sum + order.discount, 0);
-    const totalOffers = products.reduce((sum, product) => sum + (product.regularPrice - product.salePrice), 0);
-    const totalDelivered = orders.filter(order => order.orderStatus === "Delivered").length;
-    const totalShipped = orders.filter(order => order.orderStatus === "Shipped").length;
-    const totalReturned = orders.filter(order => order.orderStatus === "Returned").length;
-    const totalCancelled = orders.filter(order => order.orderStatus === "Cancelled").length;
+    const totalAmount = orders.reduce(
+      (sum, order) => sum + order.totalAmount,
+      0
+    );
+    const totalCouponOffers = orders.reduce(
+      (sum, order) => sum + order.discount,
+      0
+    );
+    const totalOffers = products.reduce(
+      (sum, product) => sum + (product.regularPrice - product.salePrice),
+      0
+    );
+    const totalDelivered = orders.filter(
+      (order) => order.orderStatus === "Delivered"
+    ).length;
+    const totalShipped = orders.filter(
+      (order) => order.orderStatus === "Shipped"
+    ).length;
+    const totalReturned = orders.filter(
+      (order) => order.orderStatus === "Returned"
+    ).length;
+    const totalCancelled = orders.filter(
+      (order) => order.orderStatus === "Cancelled"
+    ).length;
 
     const doc = new PDFDocument({ margin: 30 });
     const fileName = `Sales_Report_${Date.now()}.pdf`;
@@ -378,8 +416,6 @@ const downloadPdfReport = async (req, res) => {
       .text(`Start Date: ${startDate || "N/A"} | End Date: ${endDate || "N/A"}`)
       .moveDown();
 
-    
-
     const metrics = [
       ["Total Orders", totalOrders],
       ["Total Amount", `Rs. ${totalAmount.toFixed(2)}`],
@@ -404,7 +440,7 @@ const downloadPdfReport = async (req, res) => {
         .text(label, startX + 5, startY + 5);
 
       doc
-        .rect(startX + colWidth, startY, colWidth, rowHeight) 
+        .rect(startX + colWidth, startY, colWidth, rowHeight)
         .stroke()
         .text(value, startX + colWidth + 5, startY + 5);
 
@@ -456,20 +492,18 @@ const chart = async (req, res) => {
 
     const data = {
       orders: orders.length,
-      pending: orders.filter(o => o.orderStatus === "Pending").length,
-      delivered: orders.filter(o => o.orderStatus === "Delivered").length,
-      cancelled: orders.filter(o => o.orderStatus === "Cancelled").length,
-      shipped: orders.filter(o => o.orderStatus === "Shipped").length,
-      returned: orders.filter(o => o.orderStatus === "Returned").length,
+      pending: orders.filter((o) => o.orderStatus === "Pending").length,
+      delivered: orders.filter((o) => o.orderStatus === "Delivered").length,
+      cancelled: orders.filter((o) => o.orderStatus === "Cancelled").length,
+      shipped: orders.filter((o) => o.orderStatus === "Shipped").length,
+      returned: orders.filter((o) => o.orderStatus === "Returned").length,
     };
 
     res.json(data);
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching sales data' });
+    res.status(500).json({ error: "Error fetching sales data" });
   }
 };
-
-
 
 module.exports = {
   loadAdminLogin,
@@ -479,5 +513,5 @@ module.exports = {
   getSalesReport,
   downloadExcelReport,
   downloadPdfReport,
-  chart
+  chart,
 };

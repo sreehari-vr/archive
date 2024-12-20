@@ -1,70 +1,70 @@
 <%- include("../../views/partials/user/header") %>
-<style>
-	.quantity-control {
-		display: inline-flex;
-		align-items: center;
-		gap: 2px;
-	}
-	
-	.quantity-control .quantity-btn {
-		width: 20px;
-		height: 20px;
-		padding: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border: none;
-		background: transparent;
-		color: #333;
-		font-size: 16px;
-		transition: opacity 0.2s;
-		line-height: 1;
-	}
-	
-	.quantity-control .quantity-btn:hover {
-		opacity: 0.7;
-	}
-	
-	.quantity-control .input-number {
-		width: 32px;
-		height: 24px;
-		border: none;
-		padding: 0;
-		margin: 0;
-		font-size: 14px;
-		background: transparent;
-	}
-	
-	.quantity-control .input-number:focus {
-		outline: none;
-		box-shadow: none;
-	}
-	
-	/* Remove number input arrows */
-	.quantity-control .input-number::-webkit-outer-spin-button,
-	.quantity-control .input-number::-webkit-inner-spin-button {
-		-webkit-appearance: none;
-		margin: 0;
-	}
-	
-	
-	
-	@media (max-width: 576px) {
+	<style>
 		.quantity-control {
-			gap: 1px;
+			display: inline-flex;
+			align-items: center;
+			gap: 2px;
 		}
-		
+
 		.quantity-control .quantity-btn {
-			width: 18px;
-			height: 18px;
-			font-size: 14px;
+			width: 20px;
+			height: 20px;
+			padding: 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border: none;
+			background: transparent;
+			color: #333;
+			font-size: 16px;
+			transition: opacity 0.2s;
+			line-height: 1;
 		}
-		
+
+		.quantity-control .quantity-btn:hover {
+			opacity: 0.7;
+		}
+
 		.quantity-control .input-number {
-			width: 28px;
-			font-size: 13px;
+			width: 32px;
+			height: 24px;
+			border: none;
+			padding: 0;
+			margin: 0;
+			font-size: 14px;
+			background: transparent;
 		}
-	}
+
+		.quantity-control .input-number:focus {
+			outline: none;
+			box-shadow: none;
+		}
+
+		/* Remove number input arrows */
+		.quantity-control .input-number::-webkit-outer-spin-button,
+		.quantity-control .input-number::-webkit-inner-spin-button {
+			-webkit-appearance: none;
+			margin: 0;
+		}
+
+
+
+		@media (max-width: 576px) {
+			.quantity-control {
+				gap: 1px;
+			}
+
+			.quantity-control .quantity-btn {
+				width: 18px;
+				height: 18px;
+				font-size: 14px;
+			}
+
+			.quantity-control .input-number {
+				width: 28px;
+				font-size: 13px;
+			}
+		}
 	</style>
 	<div class="sale">
 		<div class="container">
@@ -157,16 +157,11 @@
 									<div class="display-tc d-flex justify-content-center align-items-center">
 										<div class="quantity-control">
 											<button class="btn btn-sm quantity-btn" data-action="decrease">–</button>
-											<input 
-												type="number" 
-												id="quantity-<%= item.productId._id %>" 
-												name="quantity"
-												class="form-control input-number text-center" 
-												value="<%= item.quantity %>" 
-												min="1"
+											<input type="number" id="quantity-<%= item.productId._id %>" name="quantity"
+												class="form-control input-number text-center"
+												value="<%= item.quantity %>" min="1"
 												max="<%= item.productId.quantity <= 10 ? item.productId.quantity : 10 %>"
-												readonly
-											>
+												readonly>
 											<button class="btn btn-sm quantity-btn" data-action="increase">+</button>
 										</div>
 									</div>
@@ -234,7 +229,8 @@
 														</div>
 
 													</form>
-													<button class="btn btn-link p-0 mb-5 ml-3" id="refresh">Remove Coupon</button>
+													<button class="btn btn-link p-0 mb-5 ml-3" id="refresh">Remove
+														Coupon</button>
 
 
 
@@ -447,34 +443,34 @@
 			<script>
 				document.addEventListener("DOMContentLoaded", function () {
 					const quantityButtons = document.querySelectorAll(".quantity-btn");
-					
+
 					quantityButtons.forEach(button => {
-						button.addEventListener("click", function() {
+						button.addEventListener("click", function () {
 							const action = this.dataset.action;
 							const inputContainer = this.closest('.display-tc');
 							const input = inputContainer.querySelector('input[name="quantity"]');
 							const currentValue = parseInt(input.value, 10);
 							const maxStock = parseInt(input.getAttribute("max"), 10) || 10;
 							const minStock = 1;
-							
+
 							let newValue = currentValue;
-							
+
 							if (action === "increase" && currentValue < maxStock) {
 								newValue = currentValue + 1;
 							} else if (action === "decrease" && currentValue > minStock) {
 								newValue = currentValue - 1;
 							}
-							
+
 							if (newValue !== currentValue) {
 								input.value = newValue;
-								
+
 								const inputEvent = new Event('input', {
 									bubbles: true,
 									cancelable: true,
 								});
 								input.dispatchEvent(inputEvent);
 							}
-							
+
 							if (newValue === maxStock && action === "increase") {
 								Swal.fire("Warning!", "Quantity exceeds available stock.", "warning");
 							} else if (newValue === minStock && action === "decrease") {
@@ -482,140 +478,140 @@
 							}
 						});
 					});
-					
+
 				});
-				</script>
+			</script>
 
 			<script>
 				document.getElementById("refresh").addEventListener("click", async function (event) {
 					event.preventDefault();
-				
+
 					const couponCodeInput = document.getElementById("couponCodeInput");
 					couponCodeInput.value = "";
-				
+
 					const couponCodeInputHidden = document.getElementById("couponCodeInputHidden");
 					if (couponCodeInputHidden) couponCodeInputHidden.value = "";
-				
+
 					const subTotalElement = document.querySelector("#subtotal");
 					const subTotal = parseFloat(subTotalElement.textContent.replace("₹", ""));
-				
+
 					const discountElement = document.querySelector("#discount");
 					const grandTotalElement = document.querySelector("#grandTotal");
-				
+
 					discountElement.textContent = "₹0.00";
 					grandTotalElement.textContent = `₹${subTotal.toFixed(2)}`;
-				
+
 					Swal.fire("Coupon Removed!", "The coupon has been removed successfully.", "success");
 				});
-				
-			  </script>
 
-			  <script>
-				// Add this script after your existing scripts
-document.addEventListener("DOMContentLoaded", function () {
-    // Initialize state management
-    const CartState = {
-        saveQuantities() {
-            const quantities = {};
-            document.querySelectorAll("input[name='quantity']").forEach(input => {
-                const productId = input.id.split("-")[1];
-                quantities[productId] = input.value;
-            });
-            localStorage.setItem('cartQuantities', JSON.stringify(quantities));
-        },
+			</script>
 
-        saveCouponState() {
-            const couponData = {
-                code: document.getElementById("couponCodeInput")?.value || "",
-                discount: document.querySelector("#discount")?.textContent || "₹0.00",
-                grandTotal: document.querySelector("#grandTotal")?.textContent || ""
-            };
-            localStorage.setItem('cartCouponState', JSON.stringify(couponData));
-        },
+			<script>
 
-        restoreQuantities() {
-            const savedQuantities = JSON.parse(localStorage.getItem('cartQuantities')) || {};
-            Object.entries(savedQuantities).forEach(([productId, quantity]) => {
-                const input = document.getElementById(`quantity-${productId}`);
-                if (input) {
-                    input.value = quantity;
-                    // Trigger recalculation
-                    input.dispatchEvent(new Event('input', { bubbles: true }));
-                }
-            });
-        },
+				document.addEventListener("DOMContentLoaded", function () {
 
-        async restoreCouponState() {
-            const savedCouponState = JSON.parse(localStorage.getItem('cartCouponState'));
-            if (!savedCouponState || !savedCouponState.code) return;
+					const CartState = {
+						saveQuantities() {
+							const quantities = {};
+							document.querySelectorAll("input[name='quantity']").forEach(input => {
+								const productId = input.id.split("-")[1];
+								quantities[productId] = input.value;
+							});
+							localStorage.setItem('cartQuantities', JSON.stringify(quantities));
+						},
 
-            const couponInput = document.getElementById("couponCodeInput");
-            if (couponInput) {
-                couponInput.value = savedCouponState.code;
-                // Reapply coupon
-                const applyCouponBtn = document.getElementById("applyCouponBtn");
-                if (applyCouponBtn) {
-                    applyCouponBtn.click();
-                }
-            }
-        },
+						saveCouponState() {
+							const couponData = {
+								code: document.getElementById("couponCodeInput")?.value || "",
+								discount: document.querySelector("#discount")?.textContent || "₹0.00",
+								grandTotal: document.querySelector("#grandTotal")?.textContent || ""
+							};
+							localStorage.setItem('cartCouponState', JSON.stringify(couponData));
+						},
 
-        clearState() {
-            localStorage.removeItem('cartQuantities');
-            localStorage.removeItem('cartCouponState');
-        }
-    };
+						restoreQuantities() {
+							const savedQuantities = JSON.parse(localStorage.getItem('cartQuantities')) || {};
+							Object.entries(savedQuantities).forEach(([productId, quantity]) => {
+								const input = document.getElementById(`quantity-${productId}`);
+								if (input) {
+									input.value = quantity;
 
-    // Save state when quantities change
-    document.querySelectorAll("input[name='quantity']").forEach(input => {
-        input.addEventListener("input", () => {
-            CartState.saveQuantities();
-        });
-    });
+									input.dispatchEvent(new Event('input', { bubbles: true }));
+								}
+							});
+						},
 
-    // Save state when coupon is applied
-    const applyCouponBtn = document.getElementById("applyCouponBtn");
-    if (applyCouponBtn) {
-        applyCouponBtn.addEventListener("click", () => {
-            CartState.saveCouponState();
-        });
-    }
+						async restoreCouponState() {
+							const savedCouponState = JSON.parse(localStorage.getItem('cartCouponState'));
+							if (!savedCouponState || !savedCouponState.code) return;
 
-    // Save state when coupon is removed
-    const refreshBtn = document.getElementById("refresh");
-    if (refreshBtn) {
-        refreshBtn.addEventListener("click", () => {
-            CartState.clearState();
-        });
-    }
+							const couponInput = document.getElementById("couponCodeInput");
+							if (couponInput) {
+								couponInput.value = savedCouponState.code;
 
-    // Save state before unload
-    window.addEventListener("beforeunload", () => {
-        CartState.saveQuantities();
-        CartState.saveCouponState();
-    });
+								const applyCouponBtn = document.getElementById("applyCouponBtn");
+								if (applyCouponBtn) {
+									applyCouponBtn.click();
+								}
+							}
+						},
 
-    // Restore state on page load
-    CartState.restoreQuantities();
-    CartState.restoreCouponState();
+						clearState() {
+							localStorage.removeItem('cartQuantities');
+							localStorage.removeItem('cartCouponState');
+						}
+					};
 
-    // Clear state when cart is emptied or checkout is completed
-    const checkoutForm = document.getElementById("checkoutForm");
-    if (checkoutForm) {
-        checkoutForm.addEventListener("submit", () => {
-            CartState.clearState();
-        });
-    }
 
-    // Clear state when items are removed
-    document.querySelectorAll(".closed").forEach(btn => {
-        btn.addEventListener("click", () => {
-            setTimeout(() => CartState.saveQuantities(), 100);
-        });
-    });
-});
-			  </script>
-			  
-				
-			  
+					document.querySelectorAll("input[name='quantity']").forEach(input => {
+						input.addEventListener("input", () => {
+							CartState.saveQuantities();
+						});
+					});
+
+
+					const applyCouponBtn = document.getElementById("applyCouponBtn");
+					if (applyCouponBtn) {
+						applyCouponBtn.addEventListener("click", () => {
+							CartState.saveCouponState();
+						});
+					}
+
+
+					const refreshBtn = document.getElementById("refresh");
+					if (refreshBtn) {
+						refreshBtn.addEventListener("click", () => {
+							CartState.clearState();
+						});
+					}
+
+
+					window.addEventListener("beforeunload", () => {
+						CartState.saveQuantities();
+						CartState.saveCouponState();
+					});
+
+
+					CartState.restoreQuantities();
+					CartState.restoreCouponState();
+
+
+					const checkoutForm = document.getElementById("checkoutForm");
+					if (checkoutForm) {
+						checkoutForm.addEventListener("submit", () => {
+							CartState.clearState();
+						});
+					}
+
+
+					document.querySelectorAll(".closed").forEach(btn => {
+						btn.addEventListener("click", () => {
+							setTimeout(() => CartState.saveQuantities(), 100);
+						});
+					});
+				});
+			</script>
+
+
+
 			<%- include("../../views/partials/user/footer") %>

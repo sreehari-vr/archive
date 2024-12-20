@@ -19,7 +19,7 @@ const loadLanding = async (req, res) => {
       category: { $in: categories.map((category) => category._id) },
     });
     productData = productData.sort((a, b) => b.createdAt - a.createdAt);
-      return res.render("landing", { product: productData });
+    return res.render("landing", { product: productData });
   } catch (error) {
     console.log("Home page not found", error);
     res.status(500).send("Server error");
@@ -51,11 +51,11 @@ const loadHomepage = async (req, res) => {
 const loadDetailPage = async (req, res) => {
   try {
     const productId = req.params.id;
-    const product = await Product.findById(productId).populate('category');
+    const product = await Product.findById(productId).populate("category");
     if (!product) {
       res.status(500).send("Product not found");
     }
-    const categoryOffer = product.category?.offer || 0; // Assuming category has an `offer` field
+    const categoryOffer = product.category?.offer || 0; 
     const productOffer = product.productOffer || 0;
     const bestOffer = Math.max(categoryOffer, productOffer);
 
@@ -152,11 +152,21 @@ const signup = async (req, res) => {
       return res.json("email-error");
     }
 
-    const referralCode = `${name.slice(0, 3).toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    const referralCode = `${name.slice(0, 3).toUpperCase()}-${Math.random()
+      .toString(36)
+      .substring(2, 8)
+      .toUpperCase()}`;
 
     req.session.userOtp = otp;
-    req.session.userData = { name, email, phone, password, referralCode, referrerId: referrer ? referrer._id : null };
-    console.log(req.session.userData)
+    req.session.userData = {
+      name,
+      email,
+      phone,
+      password,
+      referralCode,
+      referrerId: referrer ? referrer._id : null,
+    };
+    console.log(req.session.userData);
     res.render("verify-otp");
     console.log("OTP Send", otp);
   } catch (error) {
@@ -190,7 +200,6 @@ const verifyOtp = async (req, res) => {
         phone: userData.phone,
         password: passwordHash,
         referralCode: userData.referralCode,
-        
       });
       await newUser.save();
 
@@ -203,7 +212,12 @@ const verifyOtp = async (req, res) => {
       if (userData.referrerId) {
         await addMoneyToWallet(newUser._id, 21, "Credit", "Referral bonus");
 
-        await addMoneyToWallet(userData.referrerId, 101, "Credit", "Referred a new user");
+        await addMoneyToWallet(
+          userData.referrerId,
+          101,
+          "Credit",
+          "Referred a new user"
+        );
       }
 
       req.session.userId = newUser._id;
@@ -322,7 +336,7 @@ const renderUserProfile = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    const { page = 1, limit = 5 } = req.query; 
+    const { page = 1, limit = 5 } = req.query;
     const skip = (page - 1) * limit;
 
     const totalOrders = await Order.countDocuments({ userId: id });
@@ -350,7 +364,6 @@ const renderUserProfile = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
-
 
 const loadChangeEmail = async (req, res) => {
   try {
@@ -427,12 +440,10 @@ const updateEmail = async (req, res) => {
       .json({ success: true, message: "Email updated successfully!" });
   } catch (error) {
     console.error("Error updating email:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "An error occurred while updating the email.",
-      });
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while updating the email.",
+    });
   }
 };
 
@@ -472,12 +483,10 @@ const changePassword = async (req, res) => {
     }
 
     if (newPassword === currentPassword) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "New password must be different from the current password",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "New password must be different from the current password",
+      });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -489,12 +498,10 @@ const changePassword = async (req, res) => {
       .json({ success: true, message: "Password changed successfully" });
   } catch (error) {
     console.error("Error updating password:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "An error occurred while changing the password",
-      });
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while changing the password",
+    });
   }
 };
 
@@ -656,7 +663,7 @@ const loadCheckout = async (req, res) => {
     const wallet = await Wallet.findOne({ userId: id });
     const addressCount = userAddress ? userAddress.address.length : 0;
     const maxCount = 3;
-    const orderId = req.query.orderId || ''; 
+    const orderId = req.query.orderId || "";
 
     const subTotalToAdd = parseFloat(subtotal);
     const grandTotalToAdd = parseFloat(grandTotal);
@@ -689,7 +696,7 @@ const loadCheckout = async (req, res) => {
       cart,
       couponCode,
       orderId,
-      walletBalance: wallet ? wallet.balance : 0
+      walletBalance: wallet ? wallet.balance : 0,
     });
   } catch (error) {
     console.error("Error in loadCheckout:", error);
@@ -699,11 +706,11 @@ const loadCheckout = async (req, res) => {
 
 const loadShop = async (req, res) => {
   try {
-    const { sort, filter, page = 1 } = req.query; 
+    const { sort, filter, page = 1 } = req.query;
     const categories = await category.find({ isActive: true });
 
     let filterCategory = filter || "all";
-    const limit = 12; 
+    const limit = 12;
     const skip = (page - 1) * limit;
 
     let productQuery = {
@@ -720,7 +727,7 @@ const loadShop = async (req, res) => {
       productQuery.quantity = { $gt: 0 };
     }
 
-    let sortOrder = { createdAt: -1 }; 
+    let sortOrder = { createdAt: -1 };
     switch (sort) {
       case "price-asc":
         sortOrder = { salePrice: 1 };
@@ -735,7 +742,7 @@ const loadShop = async (req, res) => {
         sortOrder = { productName: -1 };
         break;
       default:
-        break; 
+        break;
     }
 
     const productData = await Product.find(productQuery)
@@ -759,8 +766,6 @@ const loadShop = async (req, res) => {
     console.error(error);
   }
 };
-
-
 
 const loadForgotPassword = async (req, res) => {
   try {
@@ -841,40 +846,33 @@ const newPassword = async (req, res) => {
   }
 };
 
-
 const searchProducts = async (req, res) => {
   try {
-    const { query } = req.query; 
+    const { query } = req.query;
     if (!query) {
-      return res.redirect('/shop'); 
+      return res.redirect("/shop");
     }
 
-    const regex = new RegExp(query, 'i'); 
+    const regex = new RegExp(query, "i");
     const products = await Product.find({
-      $or: [
-        { productName: regex },
-        { description: regex },
-      ],
+      $or: [{ productName: regex }, { description: regex }],
       isActive: true,
       deletedAt: null,
-    }).limit(20); 
+    }).limit(20);
 
-    res.render('shop', {
+    res.render("shop", {
       product: products,
       sort: null,
       categories: [],
-      filterCategory: 'all',
+      filterCategory: "all",
       currentPage: 1,
-      totalPages: 1, 
+      totalPages: 1,
     });
   } catch (error) {
-    console.error('Error fetching search results:', error);
-    res.status(500).send('Internal Server Error');
+    console.error("Error fetching search results:", error);
+    res.status(500).send("Internal Server Error");
   }
 };
-
-
-
 
 module.exports = {
   loadHomepage,
@@ -906,5 +904,5 @@ module.exports = {
   verifyForgotPassOtp,
   newPassword,
   loadLanding,
-  searchProducts
+  searchProducts,
 };

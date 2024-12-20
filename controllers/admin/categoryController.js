@@ -13,9 +13,9 @@ const categoryInfo = async (req, res) => {
       ...(search && {
         $or: [
           { name: { $regex: new RegExp(search, "i") } },
-          { description: { $regex: new RegExp(search, "i") } }
-        ]
-      })
+          { description: { $regex: new RegExp(search, "i") } },
+        ],
+      }),
     };
 
     const totalCategories = await Category.countDocuments(searchQuery);
@@ -31,11 +31,11 @@ const categoryInfo = async (req, res) => {
       data: categoryData,
       totalPages: totalPages,
       currentPage: page,
-      search 
+      search,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -53,7 +53,7 @@ const check = async (req, res) => {
     }
 
     const existingCategory = await Category.findOne({
-      name: { $regex: new RegExp(`^${name}$`, 'i') },
+      name: { $regex: new RegExp(`^${name}$`, "i") },
     });
 
     if (existingCategory) {
@@ -79,7 +79,7 @@ const updateCategory = async (req, res) => {
 
   try {
     const existCategory = await Category.findOne({
-      name: { $regex: new RegExp(`^${name}$`, 'i') },
+      name: { $regex: new RegExp(`^${name}$`, "i") },
     });
 
     if (existCategory && existCategory._id.toString() !== id) {
