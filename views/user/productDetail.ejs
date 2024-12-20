@@ -3,8 +3,8 @@
     <style>
         .zoom-container {
             position: relative;
-            width: 550px;
-            height: 550px;
+            width: 400px;
+            height: 400px;
             overflow: hidden;
             border: 1px solid #ccc;
             border-radius: 8px;
@@ -22,7 +22,7 @@
             <div class="row row-pb-lg product-detail-wrap">
                 <div class="col-sm-8">
                     <div class="zoom-container" onmousemove="zoomIn(event)" onmouseleave="resetZoom()">
-                        <img id="zoomable-image" alt="zoomable-image" class="rounded-lg" height="550" width="550"
+                        <img id="zoomable-image" alt="zoomable-image" class="rounded-lg" height="400px" width="400px"
                             src="<%= product.productImage && product.productImage.length ? '/' + product.productImage[0].replace(/\\/g, '/') : 'images/no_productImage.png' %>" />
                     </div>
 

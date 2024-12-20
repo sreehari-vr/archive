@@ -1,5 +1,71 @@
 <%- include("../../views/partials/user/header") %>
-
+<style>
+	.quantity-control {
+		display: inline-flex;
+		align-items: center;
+		gap: 2px;
+	}
+	
+	.quantity-control .quantity-btn {
+		width: 20px;
+		height: 20px;
+		padding: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: none;
+		background: transparent;
+		color: #333;
+		font-size: 16px;
+		transition: opacity 0.2s;
+		line-height: 1;
+	}
+	
+	.quantity-control .quantity-btn:hover {
+		opacity: 0.7;
+	}
+	
+	.quantity-control .input-number {
+		width: 32px;
+		height: 24px;
+		border: none;
+		padding: 0;
+		margin: 0;
+		font-size: 14px;
+		background: transparent;
+	}
+	
+	.quantity-control .input-number:focus {
+		outline: none;
+		box-shadow: none;
+	}
+	
+	/* Remove number input arrows */
+	.quantity-control .input-number::-webkit-outer-spin-button,
+	.quantity-control .input-number::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+	
+	
+	
+	@media (max-width: 576px) {
+		.quantity-control {
+			gap: 1px;
+		}
+		
+		.quantity-control .quantity-btn {
+			width: 18px;
+			height: 18px;
+			font-size: 14px;
+		}
+		
+		.quantity-control .input-number {
+			width: 28px;
+			font-size: 13px;
+		}
+	}
+	</style>
 	<div class="sale">
 		<div class="container">
 			<div class="row">
@@ -70,7 +136,7 @@
 					<% if(cart && cart.items.length> 0) { %>
 						<% cart.items.forEach(item=> { %>
 							<div class="product-cart d-flex">
-								<div class="one-forth">
+								<div class="one-forth ">
 									<div class="product-img mr-3">
 										<img src="<%= item.productId.productImage[0].replace(/\\/g, '/') %>"
 											alt="<%= item.productId.productName %>" style="height: 6rem;">
@@ -89,13 +155,20 @@
 								</div>
 								<div class="one-eight text-center">
 									<div class="display-tc d-flex justify-content-center align-items-center">
-										<button class="btn btn-outline-secondary btn-sm quantity-btn" data-action="decrease">-</button>
-										<input type="number" id="quantity-<%= item.productId._id %>" name="quantity"
-											class="form-control input-number text-center mx-2" style="width: 60px"
-											value="<%= item.quantity %>" min="1" 
-											max="<%= item.productId.quantity <= 10 ? item.productId.quantity : 10 %>"
-											readonly>
-										<button class="btn btn-outline-secondary btn-sm quantity-btn" data-action="increase">+</button>
+										<div class="quantity-control">
+											<button class="btn btn-sm quantity-btn" data-action="decrease">–</button>
+											<input 
+												type="number" 
+												id="quantity-<%= item.productId._id %>" 
+												name="quantity"
+												class="form-control input-number text-center" 
+												value="<%= item.quantity %>" 
+												min="1"
+												max="<%= item.productId.quantity <= 10 ? item.productId.quantity : 10 %>"
+												readonly
+											>
+											<button class="btn btn-sm quantity-btn" data-action="increase">+</button>
+										</div>
 									</div>
 								</div>
 								<div class="one-eight text-center">
@@ -437,6 +510,111 @@
 				
 			  </script>
 
+			  <script>
+				// Add this script after your existing scripts
+document.addEventListener("DOMContentLoaded", function () {
+    // Initialize state management
+    const CartState = {
+        saveQuantities() {
+            const quantities = {};
+            document.querySelectorAll("input[name='quantity']").forEach(input => {
+                const productId = input.id.split("-")[1];
+                quantities[productId] = input.value;
+            });
+            localStorage.setItem('cartQuantities', JSON.stringify(quantities));
+        },
+
+        saveCouponState() {
+            const couponData = {
+                code: document.getElementById("couponCodeInput")?.value || "",
+                discount: document.querySelector("#discount")?.textContent || "₹0.00",
+                grandTotal: document.querySelector("#grandTotal")?.textContent || ""
+            };
+            localStorage.setItem('cartCouponState', JSON.stringify(couponData));
+        },
+
+        restoreQuantities() {
+            const savedQuantities = JSON.parse(localStorage.getItem('cartQuantities')) || {};
+            Object.entries(savedQuantities).forEach(([productId, quantity]) => {
+                const input = document.getElementById(`quantity-${productId}`);
+                if (input) {
+                    input.value = quantity;
+                    // Trigger recalculation
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
+        },
+
+        async restoreCouponState() {
+            const savedCouponState = JSON.parse(localStorage.getItem('cartCouponState'));
+            if (!savedCouponState || !savedCouponState.code) return;
+
+            const couponInput = document.getElementById("couponCodeInput");
+            if (couponInput) {
+                couponInput.value = savedCouponState.code;
+                // Reapply coupon
+                const applyCouponBtn = document.getElementById("applyCouponBtn");
+                if (applyCouponBtn) {
+                    applyCouponBtn.click();
+                }
+            }
+        },
+
+        clearState() {
+            localStorage.removeItem('cartQuantities');
+            localStorage.removeItem('cartCouponState');
+        }
+    };
+
+    // Save state when quantities change
+    document.querySelectorAll("input[name='quantity']").forEach(input => {
+        input.addEventListener("input", () => {
+            CartState.saveQuantities();
+        });
+    });
+
+    // Save state when coupon is applied
+    const applyCouponBtn = document.getElementById("applyCouponBtn");
+    if (applyCouponBtn) {
+        applyCouponBtn.addEventListener("click", () => {
+            CartState.saveCouponState();
+        });
+    }
+
+    // Save state when coupon is removed
+    const refreshBtn = document.getElementById("refresh");
+    if (refreshBtn) {
+        refreshBtn.addEventListener("click", () => {
+            CartState.clearState();
+        });
+    }
+
+    // Save state before unload
+    window.addEventListener("beforeunload", () => {
+        CartState.saveQuantities();
+        CartState.saveCouponState();
+    });
+
+    // Restore state on page load
+    CartState.restoreQuantities();
+    CartState.restoreCouponState();
+
+    // Clear state when cart is emptied or checkout is completed
+    const checkoutForm = document.getElementById("checkoutForm");
+    if (checkoutForm) {
+        checkoutForm.addEventListener("submit", () => {
+            CartState.clearState();
+        });
+    }
+
+    // Clear state when items are removed
+    document.querySelectorAll(".closed").forEach(btn => {
+        btn.addEventListener("click", () => {
+            setTimeout(() => CartState.saveQuantities(), 100);
+        });
+    });
+});
+			  </script>
 			  
 				
 			  

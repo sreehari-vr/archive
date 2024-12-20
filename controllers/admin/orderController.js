@@ -528,10 +528,10 @@ const updateItemStatus = async (req, res) => {
         }
 
         // Restore product quantity
-        const Product = await product.findById(item.productId._id);
-        if (Product) {
-          Product.quantity += item.quantity;
-          await Product.save();
+        const product = await Product.findById(item.productId._id);
+        if (product) {
+          product.quantity += item.quantity;
+          await product.save();
         }
 
         // Recalculate order totals

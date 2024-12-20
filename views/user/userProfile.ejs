@@ -1,282 +1,103 @@
 <%- include("../../views/partials/user/header") %>
-  <style>
-    .main {
+<style>
+  /* Custom Overrides */
+  body {
       background-color: #f8f9fa;
-      min-height: 100vh;
-      padding: 30px 0;
-    }
+  }
 
-    .dashboard-container {
+  .dashboard-container {
       background: white;
       border-radius: 20px;
       box-shadow: 0 0 40px rgba(0, 0, 0, 0.05);
       padding: 25px;
       margin-top: 20px;
-    }
+  }
 
-    .dashboard-menu {
-      background: white;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    }
-
-    .dashboard-menu .nav-link {
-      font-weight: 600;
+  .dashboard-menu .nav-link {
       color: #4a5568;
       background: white;
-      padding: 15px 20px;
-      margin-bottom: 12px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      transition: all 0.3s ease;
       border: 1px solid #f0f0f0;
-    }
+      border-radius: 12px;
+      transition: all 0.3s ease;
+  }
 
-    .dashboard-menu .nav-link i {
-      margin-right: 12px;
-      font-size: 1.2em;
-      opacity: 0.8;
-    }
-
-    .dashboard-menu .nav-link:hover {
+  .dashboard-menu .nav-link:hover {
       background: #f8f9ff;
       color: #88c8bc;
       transform: translateX(5px);
-      box-shadow: 0 4px 15px rgba(136, 200, 188, 0.15);
-    }
+  }
 
-    .dashboard-menu .nav-link.active {
-      background: #88c8bc;
-      color: white;
-      box-shadow: 0 8px 20px rgba(136, 200, 188, 0.3);
-    }
+  .dashboard-menu .nav-link.active {
+      background: #88c8bc !important;
+      color: white !important;
+  }
 
-    .card {
-      border: none;
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-      transition: transform 0.3s ease;
-      margin-bottom: 25px;
-      overflow: hidden;
-    }
+  .btn-success {
+      background-color: #88c8bc !important;
+      border-color: #88c8bc !important;
+  }
 
-    .card:hover {
-      transform: translateY(-5px);
-    }
+  .btn-success:hover {
+      background: linear-gradient(135deg, #b86c6b 0%, #020f0c 100%) !important;
+  }
 
-    .card-header {
-      background: #88c8bc;
-      color: white;
-      padding: 20px;
-      border-bottom: none;
-      font-weight: 600;
-    }
-
-    .card-body {
-      padding: 25px;
-    }
-
-    .profile-card {
-      text-align: center;
-      padding: 30px;
-    }
-
-    .profile-card .profile-image {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      margin: 0 auto 20px;
-      border: 5px solid rgba(136, 200, 188, 0.2);
-      padding: 5px;
-    }
-
-    .profile-info h5 {
-      color: #2d3748;
-      margin-bottom: 10px;
-      font-weight: 600;
-    }
-
-    .profile-info p {
-      color: #718096;
-      margin-bottom: 8px;
-    }
-
-    .btn-success {
-      background: #88c8bc;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
-
-    .btn-success:hover {
-      background: linear-gradient(135deg, #b86c6b 0%, #020f0c 100%);
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(136, 200, 188, 0.3);
-    }
-
-    .table {
-      margin-bottom: 0;
-    }
-
-    .table thead th {
+  .table thead th {
       background-color: #f8f9fa;
       border-bottom: 2px solid #88c8bc;
       color: #4a5568;
-      font-weight: 600;
-      padding: 15px;
-    }
+  }
 
-    .table tbody td {
-      padding: 15px;
-      vertical-align: middle;
-      color: #718096;
-    }
-
-    .table tbody tr:hover {
-      background-color: #f8f9ff;
-    }
-
-    .wallet-section {
-      text-align: center;
-      padding: 30px;
-    }
-
-    .wallet-amount {
-      font-size: 2.5em;
-      color: #2d3748;
-      font-weight: 700;
-      margin: 20px 0;
-    }
-
-    .breadcrumb {
-      background: transparent;
-      padding: 0;
-      margin-bottom: 30px;
-    }
-
-    .breadcrumb-item a {
+  .edt-btn {
       color: #88c8bc;
-      font-weight: 500;
-    }
+      text-decoration: none;
+  }
 
-    @media (max-width: 768px) {
-      .dashboard-menu {
-        margin-bottom: 20px;
-      }
-
-      .card {
-        margin-bottom: 20px;
-      }
-
-      .profile-card {
-        padding: 20px;
-      }
-    }
-
-    .tab-pane {
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.3s ease;
-    }
-
-    .tab-pane.show.active {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .form-control {
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
-      padding: 12px;
-      transition: all 0.3s ease;
-    }
-
-    .form-control:focus {
-      border-color: #88c8bc;
-      box-shadow: 0 0 0 3px rgba(136, 200, 188, 0.2);
-    }
-
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: #f1f1f1;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #88c8bc;
-      border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: #6bb87d;
-    }
-
-    .edt-btn {
-      color: #88c8bc;
-    }
-
-    .dlt-btn {
+  .dlt-btn {
       color: #d12727;
-    }
-  </style>
-
-
-
-
-    <section class="pt-5 pb-5>
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-10 m-auto">
-            <div class="row">
-              <div class="col-md-4">
-                <div class="dashboard-menu">
-                  <ul class="nav flex-column" role="tablist">
-                    <li class="nav-item">
-                      <a class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" href="#dashboard" role="tab"
-                        aria-controls="dashboard" aria-selected="false">
-                        <i class="fi-rs-settings-sliders mr-10"></i>Dashboard
+      text-decoration: none;
+  }
+</style>
+</head>
+<body>
+<section class="container py-5">
+  <div class="row">
+      <div class="col-md-4">
+          <div class="dashboard-menu bg-white rounded shadow-sm p-3">
+              <ul class="nav flex-column" role="tablist">
+                  <li class="nav-item mb-2">
+                      <a class="nav-link active d-flex align-items-center" id="dashboard-tab" data-bs-toggle="tab" href="#dashboard">
+                          <i class="fi-rs-settings-sliders me-2"></i>Dashboard
                       </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" id="address-tab" data-bs-toggle="tab" href="#address" role="tab"
-                        aria-controls="address" aria-selected="true">
-                        <i class="fi-rs-marker mr-10"></i>My Address
+                  </li>
+                  <li class="nav-item mb-2">
+                      <a class="nav-link d-flex align-items-center" id="address-tab" data-bs-toggle="tab" href="#address">
+                          <i class="fi-rs-marker me-2"></i>My Address
                       </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" id="orders-tab" data-bs-toggle="tab" href="#orders" role="tab"
-                        aria-controls="orders" aria-selected="false">
-                        <i class="fi-rs-shopping-bag mr-10"></i>Orders
+                  </li>
+                  <li class="nav-item mb-2">
+                      <a class="nav-link d-flex align-items-center" id="orders-tab" data-bs-toggle="tab" href="#orders">
+                          <i class="fi-rs-shopping-bag me-2"></i>Orders
                       </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" id="track-orders-tab" data-bs-toggle="tab" href="#track-orders" role="tab"
-                        aria-controls="track-orders" aria-selected="false">
-                        <i class="fi-rs-shopping-cart-check mr-10"></i>Wallet Status
+                  </li>
+                  <li class="nav-item mb-2">
+                      <a class="nav-link d-flex align-items-center" id="track-orders-tab" data-bs-toggle="tab" href="#track-orders">
+                          <i class="fi-rs-shopping-cart-check me-2"></i>Wallet Status
                       </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" id="track-orders-tab" data-bs-toggle="tab" href="#wallet-history" role="tab"
-                        aria-controls="track-orders" aria-selected="false">
-                        <i class="fi-rs-shopping-cart-check mr-10"></i>Wallet History
+                  </li>
+                  <li class="nav-item mb-2">
+                      <a class="nav-link d-flex align-items-center" id="wallet-history-tab" data-bs-toggle="tab" href="#wallet-history">
+                          <i class="fi-rs-shopping-cart-check me-2"></i>Wallet History
                       </a>
-                    </li>
-                    
-                    <li class="nav-item">
+                  </li>
+                  <li class="nav-item">
                       <a class="nav-link" href="/logout">
-                        <i class="fi-rs-sign-out mr-10"></i>Logout
+                          <i class="fi-rs-sign-out me-2"></i>Logout
                       </a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-              <div class="col-md-8">
+                  </li>
+              </ul>
+          </div>
+      </div>
+      <div class="col-md-8">
                 <div class="tab-content dashboard-content">
 
 
@@ -311,172 +132,147 @@
                   </div>
 
 
-                  <div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="address-tab">
+                  <div class="tab-pane fade" id="address" role="tabpanel">
                     <div class="row">
-                      <% if (address && address.length> 0) { %>
-                        <% address.forEach((addr, index)=> { %>
-                          <div class="col-lg-12 m-3">
-                            <div class="card mb-3 mb-lg-0">
-                              <div class="card-header">
-                                <h5 class="mb-0">Address <%= index + 1 %>
-                                </h5>
-                              </div>
-
-                              <div class="card-body">
-                                <ul>
-                                  <li>
-                                    <p>Type: <%= addr.addressType %>
-                                    </p>
-                                    <p>Name: <%= addr.name %>
-                                    </p>
-                                    <p>City: <%= addr.city %>
-                                    </p>
-                                    <p>Land mark: <%= addr.landMark %>
-                                    </p>
-                                    <p>State: <%= addr.state %>
-                                    </p>
-                                    <p>Pincode: <%= addr.pincode %>
-                                    </p>
-                                    <p>Phone: <%= addr.phone %>
-                                    </p>
-                                    <p>Alternate phone: <%= addr.altPhone %>
-                                    </p>
-
-
-                                  </li>
-                                </ul>
-                                <div class="d-flex justify-content-between">
-                                  <a href="/editAddress/<%= addr._id %>" class="btn-small edt-btn">Edit</a>
-                                  <div class="d-flex justify-content-between">
-                                    <a href="/deleteAddress/<%= addr._id %>" class="btn-small dlt-btn"
-                                      id="delete-<%= addr._id %>">Delete</a>
-                                  </div>
+                        <% if (address && address.length> 0) { %>
+                            <% address.forEach((addr, index)=> { %>
+                                <div class="col-12 mb-3">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Address <%= index + 1 %></h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <p><strong>Type:</strong> <%= addr.addressType %></p>
+                                                    <p><strong>Name:</strong> <%= addr.name %></p>
+                                                    <p><strong>City:</strong> <%= addr.city %></p>
+                                                    <p><strong>Landmark:</strong> <%= addr.landMark %></p>
+                                                    <p><strong>State:</strong> <%= addr.state %></p>
+                                                    <p><strong>Pincode:</strong> <%= addr.pincode %></p>
+                                                    <p><strong>Phone:</strong> <%= addr.phone %></p>
+                                                    <p><strong>Alternate Phone:</strong> <%= addr.altPhone %></p>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex justify-content-between mt-3">
+                                                <a href="/editAddress/<%= addr._id %>" class="btn btn-sm btn-outline-primary me-2">Edit</a>
+                                                <a href="/deleteAddress/<%= addr._id %>" class="btn btn-sm btn-outline-danger delete-address">Delete</a>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                              </div>
+                            <% }) %>
+                        <% } else { %>
+                            <div class="col-12">
+                                <p class="text-center">No addresses available.</p>
                             </div>
-                          </div>
-                          <% }) %>
-                            <% } else { %>
-                              <p class="col-lg-12">No addresses available.</p>
-                              <% } %>
+                        <% } %>
                     </div>
 
                     <% if (address && address.length < maxCount) { %>
-                      <div class="mt-3">
-                        <a href="/addAddress">
-                          <button class="btn btn-primary w-70">Add address</button>
-                        </a>
-                      </div>
-                      <% } %>
-                  </div>
+                        <div class="text-center mt-3">
+                            <a href="/addAddress" class="btn btn-primary">
+                                <i class="fi-rs-plus me-2"></i>Add New Address
+                            </a>
+                        </div>
+                    <% } %>
+                </div>
 
-
-
-                  <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
-                    <div class="card" style="width: 800px;">
-                      <div class="card-header">
-                        <h5 class="mb-0">Your Orders</h5>
-                      </div>
-                      <div class="card-body">
-                        <div class="table-responsive">
-                          <table class="table">
-                            <thead>
-                              <tr>
-                                <th>Order Id</th>
-                                <th>Products</th>
-                                <th>Status</th>
-                                <th>Total</th>
-                                <th>Actions</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <% orders.forEach(order => { %>
-                                <tr>
-                                  <td><%= order._id %></td>
-                                  <td>
-                                    <ul>
-                                      <% order.items.forEach(item => { %>
-                                        <li><%= item.productId?.productName %></li>
-                                        <li style="background-color: #88c8bc; color:#000">
-                                          <i>Qty: <%= item.quantity %></i>
-                                        </li><br>
-                                      <% }) %>
+                <!-- Orders Tab with Responsive Table -->
+                <div class="tab-pane fade" id="orders" role="tabpanel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Your Orders</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-responsive-stack">
+                                    <thead>
+                                        <tr>
+                                            <th class="d-none d-md-table-cell">Order Id</th>
+                                            <th>Products</th>
+                                            <th>Status</th>
+                                            <th>Total</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% orders.forEach(order => { %>
+                                            <tr>
+                                                <td class="d-none d-md-table-cell" data-label="Order ID"><%= order._id %></td>
+                                                <td data-label="Products">
+                                                    <ul class="list-unstyled">
+                                                        <% order.items.forEach(item => { %>
+                                                            <li><%= item.productId?.productName %></li>
+                                                            <li class="text-success">
+                                                                <small>Qty: <%= item.quantity %></small>
+                                                            </li>
+                                                        <% }) %>
+                                                    </ul>
+                                                </td>
+                                                <td data-label="Status" style="color:darkmagenta;"><%= order.orderStatus %></td>
+                                                <td data-label="Total">₹<%= order.grandTotalAmount %></td>
+                                                <td data-label="Actions">
+                                                    <div class="d-flex flex-column">
+                                                        <% if (order.orderStatus === "Cancelled" || order.orderStatus === "Returned") { %>
+                                                            <a href="/orderDetailUser/<%=order._id%>" class="btn btn-sm btn-outline-info mb-1">Details</a>
+                                                        <% } else if (order.orderStatus === "Delivered") { %>
+                                                            <button class="btn btn-sm btn-outline-warning return-order-btn mb-1" data-order-id="<%= order._id %>">Return</button>
+                                                            <a href="/orderDetailUser/<%=order._id%>" class="btn btn-sm btn-outline-info">Details</a>
+                                                        <% } else if (order.paymentStatus === "Failed" && order.paymentMethod === "razorpay") { %>
+                                                            <button class="btn btn-sm btn-outline-primary retry-btn mb-1" data-order-id="<%= order._id %>">Retry Payment</button>
+                                                            <a href="/orderDetailUser/<%=order._id%>" class="btn btn-sm btn-outline-info">Details</a>
+                                                        <% } else { %>
+                                                            <button class="btn btn-sm btn-outline-danger cancel-btn mb-1" data-order-id="<%= order._id %>">Cancel</button>
+                                                            <a href="/orderDetailUser/<%=order._id%>" class="btn btn-sm btn-outline-info">Details</a>
+                                                        <% } %>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+              
+                            <!-- Responsive Pagination -->
+                            <div class="d-flex justify-content-center mt-3">
+                                <nav aria-label="Order navigation">
+                                    <ul class="pagination flex-wrap">
+                                        <% if (currentPage > 1) { %>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+                                                    <span aria-hidden="true">&laquo;</span>
+                                                </a>
+                                            </li>
+                                        <% } else { %>
+                                            <li class="page-item disabled">
+                                                <span class="page-link">&laquo;</span>
+                                            </li>
+                                        <% } %>
+              
+                                        <% for (let i = 1; i <= totalPages; i++) { %>
+                                            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                                            </li>
+                                        <% } %>
+              
+                                        <% if (currentPage < totalPages) { %>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                                                    <span aria-hidden="true">&raquo;</span>
+                                                </a>
+                                            </li>
+                                        <% } else { %>
+                                            <li class="page-item disabled">
+                                                <span class="page-link">&raquo;</span>
+                                            </li>
+                                        <% } %>
                                     </ul>
-                                  </td>
-                                  <td style="color:darkmagenta;"><%= order.orderStatus %></td>
-                                  <td>₹<%= order.grandTotalAmount %></td>
-                                  <td>
-                                    <% if (order.orderStatus === "Cancelled" || order.orderStatus === "Returned") { %>
-                                      <a href="/orderDetailUser/<%=order._id%>">Details</a>
-                                    <% } else if (order.orderStatus === "Delivered") { %>
-                                      <button class="btn return-order-btn" data-order-id="<%= order._id %>">Return</button>
-                                      <a href="/orderDetailUser/<%=order._id%>">Details</a>
-                                    <% } else if (order.paymentStatus === "Failed" && order.paymentMethod === "razorpay") { %>
-                                      <button class="btn retry-btn" data-order-id="<%= order._id %>">Retry Payment</button>
-                                      <a href="/orderDetailUser/<%=order._id%>">Details</a>
-                                    <% } else { %>
-                                      <button class="btn cancel-btn" data-order-id="<%= order._id %>">Cancel</button>
-                                      <a href="/orderDetailUser/<%=order._id%>">Details</a>
-                                    <% } %>
-                                  </td>
-                                </tr>
-                              <% }) %>
-                            </tbody>
-                          </table>
+                                </nav>
+                            </div>
                         </div>
-                  
-                        <!-- Pagination -->
-                        <div class="d-flex justify-content-center mt-3">
-                          <nav aria-label="Order navigation">
-                            <ul class="pagination">
-                              <!-- Previous Button -->
-                              <% if (currentPage > 1) { %>
-                                <li class="page-item">
-                                  <a 
-                                    class="page-link" 
-                                    href="?page=<%= currentPage - 1 %>" 
-                                    aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                  </a>
-                                </li>
-                              <% } else { %>
-                                <li class="page-item disabled">
-                                  <span class="page-link">&laquo;</span>
-                                </li>
-                              <% } %>
-                  
-                              <!-- Page Numbers -->
-                              <% for (let i = 1; i <= totalPages; i++) { %>
-                                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                                  <a 
-                                    class="page-link" 
-                                    href="?page=<%= i %>">
-                                    <%= i %>
-                                  </a>
-                                </li>
-                              <% } %>
-                  
-                              <!-- Next Button -->
-                              <% if (currentPage < totalPages) { %>
-                                <li class="page-item">
-                                  <a 
-                                    class="page-link" 
-                                    href="?page=<%= currentPage + 1 %>" 
-                                    aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                  </a>
-                                </li>
-                              <% } else { %>
-                                <li class="page-item disabled">
-                                  <span class="page-link">&raquo;</span>
-                                </li>
-                              <% } %>
-                            </ul>
-                          </nav>
-                        </div>
-                      </div>
                     </div>
-                  </div>
+                </div>
                   
                   
 
