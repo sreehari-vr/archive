@@ -1,7 +1,7 @@
 const user = require("../../models/userSchema");
 const Coupon = require("../../models/couponSchema");
 const Cart = require("../../models/cartSchema");
-
+const product = require("../../models/productSchema");
 
 const cartLoad = async (req, res) => {
   const userId = req.session.user;
@@ -75,8 +75,8 @@ const cartAdd = async (req, res) => {
       
     } else {
       // Create new cart
-      const product = await Product.findById(productId);
-      const subTotal = product.salePrice * quantityToAdd;
+      const Product = await product.findById(productId);
+      const subTotal = Product.salePrice * quantityToAdd;
       
       cart = new Cart({
         userId,
@@ -100,20 +100,101 @@ const cartAdd = async (req, res) => {
 const removeFromCart = async (req, res) => {
   const userId = req.session.user;
   const productId = req.params.id;
+  
   try {
-    const userCart = await Cart.findOne({ userId });
-    const removingProduct = userCart.items.find(
-      (id) => id.productId.toString() === productId
-    );
-    await Cart.updateOne(
-      { userId },
-      { $pull: { items: { _id: removingProduct } } }
-    );
-    res.json({ success: true, message: "Product removed successfully" });
+    // Find cart and populate product details
+    const cart = await Cart.findOne({ userId }).populate("items.productId");
+    
+    if (!cart) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Cart not found" 
+      });
+    }
 
-    res.redirect("/cart");
+    // Find and remove the product
+    const removingProductIndex = cart.items.findIndex(
+      item => item.productId._id.toString() === productId
+    );
+
+    if (removingProductIndex === -1) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Product not found in cart" 
+      });
+    }
+
+    // Remove the item
+    cart.items.splice(removingProductIndex, 1);
+
+    // Recalculate subtotal
+    let subTotal = 0;
+    cart.items.forEach(item => {
+      subTotal += item.productId.salePrice * item.quantity;
+    });
+    
+    cart.subTotal = subTotal;
+
+    // Check if coupon is still valid after removal
+    if (cart.appliedCouponCode) {
+      const appliedCoupon = await Coupon.findOne({ 
+        code: cart.appliedCouponCode,
+        isActive: true,
+        deletedAt: null
+      });
+
+      if (!appliedCoupon || subTotal < appliedCoupon.minPurchase) {
+        // Clear coupon if subtotal is less than minimum purchase
+        cart.discount = 0;
+        cart.appliedCouponCode = null;
+        cart.grandTotal = subTotal;
+        
+        await cart.save();
+        return res.json({
+          success: true,
+          couponRemoved: true,
+          message: "Product removed and coupon cleared as minimum purchase requirement not met",
+          cart: {
+            subTotal: cart.subTotal,
+            discount: 0,
+            grandTotal: cart.subTotal,
+            items: cart.items.length,
+            appliedCouponCode: null
+          }
+        });
+      } else {
+        // Recalculate discount if coupon is still valid
+        const discountAmount = Math.min(
+          appliedCoupon.discount,
+          appliedCoupon.maxDiscount || appliedCoupon.discount
+        );
+        cart.discount = discountAmount;
+        cart.grandTotal = subTotal - discountAmount;
+      }
+    } else {
+      cart.grandTotal = subTotal;
+    }
+
+    await cart.save();
+
+    res.json({
+      success: true,
+      message: "Product removed successfully",
+      cart: {
+        subTotal: cart.subTotal,
+        discount: cart.discount,
+        grandTotal: cart.grandTotal,
+        items: cart.items.length,
+        appliedCouponCode: cart.appliedCouponCode
+      }
+    });
+
   } catch (error) {
-    console.error(error);
+    console.error("Error removing from cart:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Server error" 
+    });
   }
 };
 

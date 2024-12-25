@@ -55,6 +55,7 @@ const placeOrder = async (req, res) => {
       discount,
       paymentFailed,
     } = req.body;
+    
 
     const userAddresses = await Address.findOne({ userId });
     const address = userAddresses.address.find(

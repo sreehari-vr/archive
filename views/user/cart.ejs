@@ -425,35 +425,61 @@
 					const removeButtons = document.querySelectorAll(".closed");
 					removeButtons.forEach((btn) => {
 						btn.addEventListener("click", async (event) => {
-							event.preventDefault();
-
-							const productRow = btn.closest(".product-cart");
-							const productId = productRow.querySelector("input[name='quantity']").id.split("-")[1];
-
-							try {
-								const response = await fetch(`/cart/remove/${productId}`, {
-									method: "GET",
-								});
-
-								const data = await response.json();
-
-								if (response.ok && data.success) {
-									productRow.remove();
-
-									const minPurchase = parseFloat(document.querySelector("#cart-summary").dataset.minPurchase) || 0;
-
-									await recalculateTotals(minPurchase);
-
-									Swal.fire("Removed!", "Product removed successfully!", "success");
-								} else {
-									Swal.fire("Error!", data.message || "Failed to remove product.", "error");
+						  event.preventDefault();
+					  
+						  const productRow = btn.closest(".product-cart");
+						  const productId = productRow.querySelector("input[name='quantity']").id.split("-")[1];
+					  
+						  try {
+							const response = await fetch(`/cart/remove/${productId}`, {
+							  method: "GET",
+							});
+					  
+							const data = await response.json();
+					  
+							if (response.ok && data.success) {
+							  // Remove the product row
+							  productRow.remove();
+					  
+							  // Update cart totals
+							  document.querySelector("#subtotal").textContent = `₹${data.cart.subTotal.toFixed(2)}`;
+							  document.querySelector("#discount").textContent = `₹${data.cart.discount.toFixed(2)}`;
+							  document.querySelector("#grandTotal").textContent = `₹${data.cart.grandTotal.toFixed(2)}`;
+					  
+							  // Handle coupon removal if applicable
+							  if (data.couponRemoved) {
+								document.querySelector("#couponCodeInput").value = "";
+								const hiddenCouponInput = document.querySelector("#couponCodeInputHidden");
+								if (hiddenCouponInput) {
+								  hiddenCouponInput.value = "";
 								}
-							} catch (error) {
-								console.error("Error removing product:", error);
-								Swal.fire("Error!", "An error occurred while removing the product.", "error");
+								
+								Swal.fire({
+								  title: "Coupon Removed",
+								  text: "Coupon removed as minimum purchase requirement is no longer met",
+								  icon: "info",
+								  toast: true,
+								  position: 'top-end',
+								  showConfirmButton: false,
+								  timer: 3000
+								});
+							  } else {
+								Swal.fire("Success!", "Product removed successfully!", "success");
+							  }
+					  
+							  // If cart is empty, refresh the page to show empty cart message
+							  if (data.cart.items === 0) {
+								location.reload();
+							  }
+							} else {
+							  Swal.fire("Error!", data.message || "Failed to remove product.", "error");
 							}
+						  } catch (error) {
+							console.error("Error removing product:", error);
+							Swal.fire("Error!", "An error occurred while removing the product.", "error");
+						  }
 						});
-					});
+					  });
 
 					checkoutForm.addEventListener("submit", () => {
 						const subtotal = parseFloat(document.querySelector("#subtotal").textContent.replace("₹", ""));
