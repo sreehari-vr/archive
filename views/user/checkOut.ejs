@@ -102,6 +102,7 @@
                                                         </div>
                                                         <% } %>
                                     </div>
+                                    <p class="addressError" id="addressError" style="color: red;"></p>
                                 </div>
 
                                 <div class="cart-details mt-4">
@@ -130,6 +131,8 @@
                                     <input type="hidden" name="discount" id="discount" value="<%= cart.discount %>">
 
                                     <div class="col-md-12 text-center">
+                                        <div id="stockError" style="color: red; display: none;"></div>
+
                                         <button type="submit" class="btn btn-success w-100 h-5">
                                             <h1>Place order</h1>
                                         </button>
@@ -182,8 +185,27 @@
         document.querySelector("#checkoutForm").addEventListener("submit", async (e) => {
             e.preventDefault();
         
+
+            const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+    if (!selectedAddress) {
+        // Create error message if not already exists
+        let addressError = document.getElementById('addressError');
+        if (!addressError) {
+            addressError = document.createElement('p');
+            addressError.id = 'addressError';
+            addressError.style.color = 'red';
+            document.querySelector('.address-section').appendChild(addressError);
+        }
+        addressError.textContent = 'Please select a delivery address';
+        // Scroll to address section
+        document.querySelector('.address-section').scrollIntoView({ behavior: 'smooth' });
+        return;
+    }
+
+    
+
+    
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-            const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked').value;
             const couponCode = document.querySelector("#couponCode").value;
             const orderTotal = parseFloat("<%= cart.grandTotal %>");
             const walletBalance = parseFloat("<%= walletBalance %>");
@@ -273,6 +295,12 @@
                                     couponCode,
                                 }),
                             });
+
+
+
+
+                           
+                            
                         
                             const result = await failureResponse.json();
                             if (failureResponse.ok) {

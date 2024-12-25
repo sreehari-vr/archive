@@ -1,0 +1,140 @@
+<%- include("../../views/partials/user/header") %>
+<style>
+    .coupons-container {
+        margin: 2rem 0;
+        padding: 1rem;
+    }
+    
+    .coupon-card {
+        border: 2px dashed #e0e0e0;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        position: relative;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+    
+    .coupon-card:hover {
+        border-color: #88c8bc;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .coupon-code {
+        background: #fff;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        border: 1px solid #dee2e6;
+        font-family: monospace;
+        font-size: 1.1em;
+        margin-right: 1rem;
+        display: inline-block;
+    }
+    
+    .copy-coupon-btn {
+        padding: 0.5rem 1rem;
+        background: #88c8bc;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    
+    .copy-coupon-btn:hover {
+        background: #88c8bc;
+    }
+    
+    .coupon-details {
+        margin-top: 0.5rem;
+        color: #6c757d;
+    }
+    
+    .coupon-expiry {
+        color: #dc3545;
+        font-size: 0.9em;
+        margin-top: 0.25rem;
+    }
+    
+    .min-purchase {
+        font-weight: bold;
+        color: #28a745;
+    }
+</style>
+<div class="coupons-container">
+    <div class="row">
+        <div class="col-12">
+            <h4 class="mb-4">Available Coupons</h4>
+            <% if(coupon && coupon.length > 0) { %>
+                <% coupon.forEach(cpn => { %>
+                    <div class="coupon-card">
+                        <div class="d-flex align-items-center flex-wrap">
+                            <span class="coupon-code"><%= cpn.code %></span>
+                            <button class="copy-coupon-btn" data-coupon="<%= cpn.code %>">
+                                Copy Code
+                            </button>
+                        </div>
+                        <div class="coupon-details">
+                            <div><%= cpn.description %></div>
+                            <div class="min-purchase">
+                                Minimum Purchase: ₹<%= cpn.minPurchase.toFixed(2) %>
+                            </div>
+                            <% if(cpn.maxDiscount) { %>
+                                <div>Maximum Discount: ₹<%= cpn.maxDiscount.toFixed(2) %></div>
+                            <% } %>
+                            <div class="coupon-expiry">
+                                Expires: <%= cpn.expiryDate.toLocaleDateString('en-IN', {
+                                    day: 'numeric',
+                                    month: 'short',
+                                    year: 'numeric'
+                                }) %>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="alert alert-info">No coupons available at the moment.</div>
+            <% } %>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    // Add this script in your cart page
+document.addEventListener("DOMContentLoaded", function() {
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            Swal.fire({
+                title: 'Copied!',
+                text: 'Coupon code copied to clipboard',
+                icon: 'success',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        }).catch(function() {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Failed to copy coupon code',
+                icon: 'error',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        });
+    }
+
+    // Add click event listeners to all copy buttons
+    document.querySelectorAll('.copy-coupon-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const couponCode = this.getAttribute('data-coupon');
+            copyToClipboard(couponCode);
+        });
+    });
+});
+</script>
+<%- include("../../views/partials/user/footer") %>

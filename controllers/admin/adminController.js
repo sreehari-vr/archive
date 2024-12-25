@@ -325,32 +325,15 @@ const downloadExcelReport = async (req, res) => {
 const downloadPdfReport = async (req, res) => {
   try {
     const { filter, startDate, endDate } = req.query;
-
     const now = new Date();
     let query = {};
 
     if (filter === "Daily") {
-      const startOfDay = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate()
-      );
-      const endOfDay = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        23,
-        59,
-        59,
-        999
-      );
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
       query.orderDate = { $gte: startOfDay, $lte: endOfDay };
     } else if (filter === "Weekly") {
-      const startOfWeek = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate() - now.getDay()
-      );
+      const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(endOfWeek.getDate() + 6);
       query.orderDate = { $gte: startOfWeek, $lte: endOfWeek };
@@ -362,100 +345,137 @@ const downloadPdfReport = async (req, res) => {
       query.orderDate = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
 
-    const orders = await Order.find(query);
+    const orders = await Order.find(query).populate('items.productId');
     const products = await Product.find();
 
+    // Calculate metrics
     const totalOrders = orders.length;
-    const totalAmount = orders.reduce(
-      (sum, order) => sum + order.totalAmount,
-      0
-    );
-    const totalCouponOffers = orders.reduce(
-      (sum, order) => sum + order.discount,
-      0
-    );
-    const totalOffers = products.reduce(
-      (sum, product) => sum + (product.regularPrice - product.salePrice),
-      0
-    );
-    const totalDelivered = orders.filter(
-      (order) => order.orderStatus === "Delivered"
-    ).length;
-    const totalShipped = orders.filter(
-      (order) => order.orderStatus === "Shipped"
-    ).length;
-    const totalReturned = orders.filter(
-      (order) => order.orderStatus === "Returned"
-    ).length;
-    const totalCancelled = orders.filter(
-      (order) => order.orderStatus === "Cancelled"
-    ).length;
+    const totalAmount = orders.reduce((sum, order) => sum + order.totalAmount, 0);
+    const totalCouponOffers = orders.reduce((sum, order) => sum + (order.discount || 0), 0);
+    const totalOffers = products.reduce((sum, product) => sum + (product.regularPrice - product.salePrice), 0);
+    
+    const orderStatusCounts = {
+      delivered: orders.filter(order => order.orderStatus === "Delivered").length,
+      shipped: orders.filter(order => order.orderStatus === "Shipped").length,
+      returned: orders.filter(order => order.orderStatus === "Returned").length,
+      cancelled: orders.filter(order => order.orderStatus === "Cancelled").length,
+      processing: orders.filter(order => order.orderStatus === "Processing").length
+    };
 
-    const doc = new PDFDocument({ margin: 30 });
-    const fileName = `Sales_Report_${Date.now()}.pdf`;
-    const reportDir = path.join(__dirname, "reports");
-
-    if (!fs.existsSync(reportDir)) {
-      fs.mkdirSync(reportDir, { recursive: true });
-    }
-
-    const filePath = path.join(reportDir, fileName);
-
-    doc.pipe(fs.createWriteStream(filePath));
-    doc.pipe(res);
-
-    doc
-      .fontSize(20)
-      .text("Sales Report", { align: "center", underline: true })
-      .moveDown(1.5);
-
-    doc
-      .fontSize(12)
-      .fillColor("gray")
-      .text(`Filter: ${filter}`)
-      .text(`Start Date: ${startDate || "N/A"} | End Date: ${endDate || "N/A"}`)
-      .moveDown();
-
-    const metrics = [
-      ["Total Orders", totalOrders],
-      ["Total Amount", `Rs. ${totalAmount.toFixed(2)}`],
-      ["Total Discounts", `Rs. ${totalOffers.toFixed(2)}`],
-      ["Total Coupon Deduction", `Rs. ${totalCouponOffers.toFixed(2)}`],
-      ["Total Delivered", totalDelivered],
-      ["Total Cancelled", totalCancelled],
-      ["Total Shipped", totalShipped],
-      ["Total Returned", totalReturned],
-    ];
-
-    const startX = doc.x;
-    let startY = doc.y;
-    const rowHeight = 20;
-    const colWidth = 250;
-
-    metrics.forEach(([label, value], i) => {
-      doc
-        .fontSize(12)
-        .rect(startX, startY, colWidth, rowHeight)
-        .stroke()
-        .text(label, startX + 5, startY + 5);
-
-      doc
-        .rect(startX + colWidth, startY, colWidth, rowHeight)
-        .stroke()
-        .text(value, startX + colWidth + 5, startY + 5);
-
-      startY += rowHeight;
+    // Create PDF document
+    const doc = new PDFDocument({
+      margin: 50,
+      size: 'A4'
     });
 
+    // Set up response headers
+    const fileName = `Sales_Report_${Date.now()}.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+
+    // Pipe the PDF to the response
+    doc.pipe(res);
+
+  
+    // Add company details
+    doc.fontSize(10)
+       .text('Archive', 50, 70)
+       .text('Kochi, Kerala')
+       .text('Phone: (+91) 6238089989')
+       .text('Email: archive@gmail.com');
+
+    // Add report title
+    doc.fontSize(24)
+       .text('Sales Report', 50, 170, { align: 'center' })
+       .moveDown(0.5);
+
+    // Add report period
+    doc.fontSize(12)
+       .fillColor('#666666')
+       .text(`Report Period: ${filter}`, { align: 'center' })
+       .text(`Generated on: ${new Date().toLocaleDateString()}`, { align: 'center' })
+       .moveDown(2);
+
+    // Add summary section
+    doc.fontSize(16)
+       .fillColor('#000000')
+       .text('Summary', 50, 280)
+       .moveDown(0.5);
+
+    // Create summary table
+    const summaryData = [
+      ['Total Orders', totalOrders, 'Total Amount', `INR. ${totalAmount.toFixed(2)}`],
+      ['Total Discounts', `INR. ${totalOffers.toFixed(2)}`, 'Coupon Discounts', `INR. ${totalCouponOffers.toFixed(2)}`]
+    ];
+
+    let yPos = doc.y + 10;
+    summaryData.forEach(row => {
+      doc.fontSize(10)
+         .text(row[0], 50, yPos)
+         .text(row[1].toString(), 150, yPos)
+         .text(row[2], 300, yPos)
+         .text(row[3].toString(), 400, yPos);
+      yPos += 20;
+    });
+
+    // Add order status section
+    doc.fontSize(16)
+       .text('Order Status Breakdown', 50, yPos + 30)
+       .moveDown(0.5);
+
+    // Create status table
+    const statusTableTop = doc.y + 10;
+    const statusData = [
+      ['Status', 'Count', 'Percentage'],
+      ['Delivered', orderStatusCounts.delivered, ((orderStatusCounts.delivered / totalOrders) * 100).toFixed(1) + '%'],
+      ['Shipped', orderStatusCounts.shipped, ((orderStatusCounts.shipped / totalOrders) * 100).toFixed(1) + '%'],
+      ['Processing', orderStatusCounts.processing, ((orderStatusCounts.processing / totalOrders) * 100).toFixed(1) + '%'],
+      ['Returned', orderStatusCounts.returned, ((orderStatusCounts.returned / totalOrders) * 100).toFixed(1) + '%'],
+      ['Cancelled', orderStatusCounts.cancelled, ((orderStatusCounts.cancelled / totalOrders) * 100).toFixed(1) + '%']
+    ];
+
+    // Draw status table
+    const colWidths = [150, 100, 100];
+    let currentTop = statusTableTop;
+
+    statusData.forEach((row, rowIndex) => {
+      // Draw background for header row
+      if (rowIndex === 0) {
+        doc.fillColor('#f0f0f0')
+           .rect(50, currentTop - 5, sum(colWidths), 25)
+           .fill();
+      }
+
+      // Draw cell borders and text
+      let leftPos = 50;
+      row.forEach((cell, colIndex) => {
+        doc.strokeColor('#cccccc')
+           .lineWidth(1)
+           .rect(leftPos, currentTop - 5, colWidths[colIndex], 25)
+           .stroke();
+
+        doc.fillColor('#000000')
+           .fontSize(10)
+           .text(cell, leftPos + 5, currentTop);
+
+        leftPos += colWidths[colIndex];
+      });
+
+      currentTop += 25;
+    });
+
+
+    // Finalize the PDF
     doc.end();
 
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Error generating PDF report");
+    console.error('Error generating PDF report:', error);
+    res.status(500).send('Error generating PDF report');
   }
 };
+
+// Helper function to sum array values
+const sum = arr => arr.reduce((a, b) => a + b, 0);
 
 const chart = async (req, res) => {
   try {
@@ -492,7 +512,7 @@ const chart = async (req, res) => {
 
     const data = {
       orders: orders.length,
-      pending: orders.filter((o) => o.orderStatus === "Pending").length,
+      processing: orders.filter((o) => o.orderStatus === "Processing").length,
       delivered: orders.filter((o) => o.orderStatus === "Delivered").length,
       cancelled: orders.filter((o) => o.orderStatus === "Cancelled").length,
       shipped: orders.filter((o) => o.orderStatus === "Shipped").length,

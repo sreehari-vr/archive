@@ -174,7 +174,7 @@ const placeOrder = async (req, res) => {
         }
       }
 
-      await Cart.findOneAndUpdate({ userId }, { items: [] });
+      await Cart.findOneAndUpdate({ userId }, { items: [], subTotal:0, discount:0, grandTotal:0, appliedCouponCode:null });
 
       if (paymentMethod === "wallet") {
         let wallet = await Wallet.findOne({ userId });

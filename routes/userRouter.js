@@ -37,6 +37,9 @@ router.get("/productDetail/:id", userController.loadDetailPage);
 router.get("/logout", userController.logout);
 router.get("/userProfile", userAuth, userController.renderUserProfile);
 router.get("/shop", userController.loadShop);
+router.post('/cart/update-quantity', userAuth, cartController.updateQuantity);
+router.post('/cart/remove-coupon', userAuth, cartController.removeCoupon);
+router.get('/coupons', userAuth, cartController.coupons);
 
 router.get("/changePassword", userAuth, userController.loadChangePass);
 router.post("/changePassword", userAuth, userController.changePassword);

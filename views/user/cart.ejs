@@ -68,26 +68,28 @@
 	</style>
 	<div class="sale">
 		<div class="container">
-			<div class="row">
-				<div class="col-sm-8 offset-sm-2 text-center">
-					<div class="row">
-						<div class="owl-carousel2">
-							<div class="item">
-								<div class="col">
-									<h3><a href="#">₹15 off (Almost) Everything! Use Code: SUPERDEAL15</a></h3>
-								</div>
-							</div>
-							<div class="item">
-								<div class="col">
-									<h3><a href="#">₹300 off Use Code: FLASHSALE300</a></h3>
-								</div>
-							</div>
-						</div>
+		  <div class="row">
+			<div class="col-sm-8 offset-sm-2 text-center">
+			  <div class="row">
+				<div class="owl-carousel2">
+				  <% coupon.forEach(coupon => { %>
+					<div class="item">
+					  <div class="col">
+						<h3>
+						  <a href="#">
+							<%= coupon.description %> 
+							Use Code: <%= coupon.code %>
+						  </a>
+						</h3>
+					  </div>
 					</div>
+				  <% }); %>
 				</div>
+			  </div>
 			</div>
+		  </div>
 		</div>
-	</div>
+	  </div>
 	</nav>
 
 
@@ -193,19 +195,16 @@
 																<div class="sub">
 																	<p><span>Subtotal</span> <span id="subtotal"
 																			name="subtotal">₹<%=
-																				cart.items.reduce((total, item)=> total
-																				+ (item.productId.salePrice *
-																				item.quantity), 0).toFixed(2) %></span>
+																				cart.subTotal.toFixed(2) %></span>
 																	</p>
 																	<p><span>Discount</span> <span id="discount"
-																			name="discount">₹0.00</span></p>
+																			name="discount">₹<%=
+																			cart.discount.toFixed(2) %></span></p>
 																</div>
 																<div class="grand-total">
 																	<p><span><strong>Grand total:</strong></span> <span
 																			id="grandTotal" name="grandTotal">₹<%=
-																				cart.items.reduce((total, item)=> total
-																				+ (item.productId.salePrice *
-																				item.quantity), 0).toFixed(2) %></span>
+																				cart.grandTotal.toFixed(2) %></span>
 																	</p>
 																</div>
 																<div id="cart-summary"
@@ -231,8 +230,12 @@
 													</form>
 													<button class="btn btn-link p-0 mb-5 ml-3" id="refresh">Remove
 														Coupon</button>
-
-
+														
+                                                      <a href="/coupons">
+														<button class="btn btn-link p-0 mb-5 ml-3" id="coupons">Available
+															Coupons</button>
+													  </a>
+														
 
 
 													<form id="checkoutForm" action="/checkout" method="POST">
@@ -286,6 +289,38 @@
 					const applyCouponBtn = document.getElementById("applyCouponBtn");
 					const couponCodeInput = document.getElementById("couponCodeInput");
 					const checkoutForm = document.getElementById("checkoutForm");
+
+					async function updateQuantity(productId, newQuantity) {
+						try {
+						  const response = await fetch('/cart/update-quantity', {
+							method: 'POST',
+							headers: {
+							  'Content-Type': 'application/json',
+							},
+							body: JSON.stringify({
+							  productId,
+							  quantity: newQuantity
+							})
+						  });
+					  
+						  const data = await response.json();
+						  if (response.ok && data.success) {
+							// Update UI with new totals
+							document.querySelector("#subtotal").textContent = `₹${data.cart.subTotal.toFixed(2)}`;
+							document.querySelector("#discount").textContent = `₹${data.cart.discount.toFixed(2)}`;
+							document.querySelector("#grandTotal").textContent = `₹${data.cart.grandTotal.toFixed(2)}`;
+							
+							// If coupon was removed due to minimum purchase requirement
+							if (!data.cart.appliedCouponCode) {
+							  document.querySelector("#couponCodeInput").value = "";
+							  Swal.fire("Info", "Coupon removed as requirements are no longer met", "info");
+							}
+						  }
+						} catch (error) {
+						  console.error('Error updating quantity:', error);
+						  Swal.fire("Error!", "Failed to update quantity", "error");
+						}
+					  }
 
 					async function recalculateTotals(minPurchase = 0) {
 						let subTotal = 0;
@@ -441,176 +476,144 @@
 			</script>
 
 			<script>
-				document.addEventListener("DOMContentLoaded", function () {
-					const quantityButtons = document.querySelectorAll(".quantity-btn");
-
-					quantityButtons.forEach(button => {
-						button.addEventListener("click", function () {
-							const action = this.dataset.action;
-							const inputContainer = this.closest('.display-tc');
-							const input = inputContainer.querySelector('input[name="quantity"]');
-							const currentValue = parseInt(input.value, 10);
-							const maxStock = parseInt(input.getAttribute("max"), 10) || 10;
-							const minStock = 1;
-
-							let newValue = currentValue;
-
-							if (action === "increase" && currentValue < maxStock) {
-								newValue = currentValue + 1;
-							} else if (action === "decrease" && currentValue > minStock) {
-								newValue = currentValue - 1;
-							}
-
-							if (newValue !== currentValue) {
-								input.value = newValue;
-
-								const inputEvent = new Event('input', {
-									bubbles: true,
-									cancelable: true,
-								});
-								input.dispatchEvent(inputEvent);
-							}
-
-							if (newValue === maxStock && action === "increase") {
-								Swal.fire("Warning!", "Quantity exceeds available stock.", "warning");
-							} else if (newValue === minStock && action === "decrease") {
-								Swal.fire("Warning!", "Quantity cannot be less than 1.", "warning");
-							}
-						});
-					});
-
+// Frontend JavaScript - Replace the existing quantity control event listeners
+document.addEventListener("DOMContentLoaded", function () {
+	const quantityButtons = document.querySelectorAll(".quantity-btn");
+  
+	quantityButtons.forEach(button => {
+	  button.addEventListener("click", async function () {
+		const action = this.dataset.action;
+		const inputContainer = this.closest('.display-tc');
+		const input = inputContainer.querySelector('input[name="quantity"]');
+		const productId = input.id.split("-")[1];
+		const currentValue = parseInt(input.value, 10);
+		const maxStock = parseInt(input.getAttribute("max"), 10) || 10;
+		const minStock = 1;
+  
+		let newValue = currentValue;
+  
+		if (action === "increase" && currentValue < maxStock) {
+		  newValue = currentValue + 1;
+		} else if (action === "decrease" && currentValue > minStock) {
+		  newValue = currentValue - 1;
+		}
+  
+		if (newValue !== currentValue) {
+		  // Update input value
+		  input.value = newValue;
+  
+		  try {
+			const response = await fetch('/cart/update-quantity', {
+			  method: 'POST',
+			  headers: {
+				'Content-Type': 'application/json',
+			  },
+			  body: JSON.stringify({
+				productId,
+				quantity: newValue
+			  })
+			});
+  
+			const data = await response.json();
+			
+			if (response.ok && data.success) {
+			  // Update product total price
+			  const priceElement = inputContainer.closest('.product-cart').querySelector('.price');
+			  const productPrice = parseFloat(priceElement.dataset.price);
+			  const totalElement = inputContainer.closest('.product-cart').querySelector('.total-price');
+			  totalElement.textContent = `₹${(newValue * productPrice).toFixed(2)}`;
+  
+			  // Update cart totals
+			  document.querySelector("#subtotal").textContent = `₹${data.cart.subTotal.toFixed(2)}`;
+			  document.querySelector("#discount").textContent = `₹${data.cart.discount.toFixed(2)}`;
+			  document.querySelector("#grandTotal").textContent = `₹${data.cart.grandTotal.toFixed(2)}`;
+  
+			  // Handle coupon removal
+			  if (data.couponRemoved) {
+				const couponInput = document.querySelector("#couponCodeInput");
+				if (couponInput) {
+				  couponInput.value = "";
+				}
+				
+				// Clear hidden coupon input if it exists
+				const hiddenCouponInput = document.querySelector("#couponCodeInputHidden");
+				if (hiddenCouponInput) {
+				  hiddenCouponInput.value = "";
+				}
+  
+				// Show notification about coupon removal
+				Swal.fire({
+				  title: "Coupon Removed",
+				  text: data.message,
+				  icon: "info",
+				  toast: true,
+				  position: 'top-end',
+				  showConfirmButton: false,
+				  timer: 3000
 				});
+			  }
+			} else {
+			  // Revert input value if update failed
+			  input.value = currentValue;
+			  Swal.fire("Error", "Failed to update quantity", "error");
+			}
+		  } catch (error) {
+			console.error('Error updating quantity:', error);
+			input.value = currentValue;
+			Swal.fire("Error", "Failed to update quantity", "error");
+		  }
+		}
+  
+		// Show min/max warnings
+		if (newValue === maxStock && action === "increase") {
+		  Swal.fire("Warning!", "Quantity exceeds available stock.", "warning");
+		} 
+	  });
+	});
+  });
 			</script>
 
 			<script>
-				document.getElementById("refresh").addEventListener("click", async function (event) {
-					event.preventDefault();
-
-					const couponCodeInput = document.getElementById("couponCodeInput");
-					couponCodeInput.value = "";
-
-					const couponCodeInputHidden = document.getElementById("couponCodeInputHidden");
-					if (couponCodeInputHidden) couponCodeInputHidden.value = "";
-
-					const subTotalElement = document.querySelector("#subtotal");
-					const subTotal = parseFloat(subTotalElement.textContent.replace("₹", ""));
-
-					const discountElement = document.querySelector("#discount");
-					const grandTotalElement = document.querySelector("#grandTotal");
-
-					discountElement.textContent = "₹0.00";
-					grandTotalElement.textContent = `₹${subTotal.toFixed(2)}`;
-
-					Swal.fire("Coupon Removed!", "The coupon has been removed successfully.", "success");
-				});
-
+				// Add this to your existing JavaScript
+document.getElementById("refresh").addEventListener("click", async function (event) {
+	event.preventDefault();
+	
+	try {
+	  const response = await fetch("/cart/remove-coupon", {
+		method: "POST",
+		headers: {
+		  "Content-Type": "application/json"
+		}
+	  });
+	  
+	  const data = await response.json();
+	  
+	  if (response.ok && data.success) {
+		// Clear coupon input
+		const couponCodeInput = document.getElementById("couponCodeInput");
+		couponCodeInput.value = "";
+		
+		// Update display values
+		document.querySelector("#discount").textContent = "₹0.00";
+		document.querySelector("#grandTotal").textContent = 
+		  `₹${data.newGrandTotal.toFixed(2)}`;
+		
+		// Clear hidden input if it exists
+		const couponCodeInputHidden = document.getElementById("couponCodeInputHidden");
+		if (couponCodeInputHidden) couponCodeInputHidden.value = "";
+		
+		Swal.fire("Success!", "Coupon removed successfully!", "success");
+	  } else {
+		Swal.fire("Error!", data.message || "Failed to remove coupon.", "error");
+	  }
+	} catch (error) {
+	  console.error("Error removing coupon:", error);
+	  Swal.fire("Error!", "Failed to remove coupon.", "error");
+	}
+  });
 			</script>
 
-			<script>
-
-				document.addEventListener("DOMContentLoaded", function () {
-
-					const CartState = {
-						saveQuantities() {
-							const quantities = {};
-							document.querySelectorAll("input[name='quantity']").forEach(input => {
-								const productId = input.id.split("-")[1];
-								quantities[productId] = input.value;
-							});
-							localStorage.setItem('cartQuantities', JSON.stringify(quantities));
-						},
-
-						saveCouponState() {
-							const couponData = {
-								code: document.getElementById("couponCodeInput")?.value || "",
-								discount: document.querySelector("#discount")?.textContent || "₹0.00",
-								grandTotal: document.querySelector("#grandTotal")?.textContent || ""
-							};
-							localStorage.setItem('cartCouponState', JSON.stringify(couponData));
-						},
-
-						restoreQuantities() {
-							const savedQuantities = JSON.parse(localStorage.getItem('cartQuantities')) || {};
-							Object.entries(savedQuantities).forEach(([productId, quantity]) => {
-								const input = document.getElementById(`quantity-${productId}`);
-								if (input) {
-									input.value = quantity;
-
-									input.dispatchEvent(new Event('input', { bubbles: true }));
-								}
-							});
-						},
-
-						async restoreCouponState() {
-							const savedCouponState = JSON.parse(localStorage.getItem('cartCouponState'));
-							if (!savedCouponState || !savedCouponState.code) return;
-
-							const couponInput = document.getElementById("couponCodeInput");
-							if (couponInput) {
-								couponInput.value = savedCouponState.code;
-
-								const applyCouponBtn = document.getElementById("applyCouponBtn");
-								if (applyCouponBtn) {
-									applyCouponBtn.click();
-								}
-							}
-						},
-
-						clearState() {
-							localStorage.removeItem('cartQuantities');
-							localStorage.removeItem('cartCouponState');
-						}
-					};
-
-
-					document.querySelectorAll("input[name='quantity']").forEach(input => {
-						input.addEventListener("input", () => {
-							CartState.saveQuantities();
-						});
-					});
-
-
-					const applyCouponBtn = document.getElementById("applyCouponBtn");
-					if (applyCouponBtn) {
-						applyCouponBtn.addEventListener("click", () => {
-							CartState.saveCouponState();
-						});
-					}
-
-
-					const refreshBtn = document.getElementById("refresh");
-					if (refreshBtn) {
-						refreshBtn.addEventListener("click", () => {
-							CartState.clearState();
-						});
-					}
-
-
-					window.addEventListener("beforeunload", () => {
-						CartState.saveQuantities();
-						CartState.saveCouponState();
-					});
-
-
-					CartState.restoreQuantities();
-					CartState.restoreCouponState();
-
-
-					const checkoutForm = document.getElementById("checkoutForm");
-					if (checkoutForm) {
-						checkoutForm.addEventListener("submit", () => {
-							CartState.clearState();
-						});
-					}
-
-
-					document.querySelectorAll(".closed").forEach(btn => {
-						btn.addEventListener("click", () => {
-							setTimeout(() => CartState.saveQuantities(), 100);
-						});
-					});
-				});
-			</script>
+			
 
 
 

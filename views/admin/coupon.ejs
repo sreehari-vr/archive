@@ -68,7 +68,7 @@
                   <td><%= i + 1 %></td>
                   <td><span class="fw-bold text-primary"><%= coupon[i].code %></span></td>
                   <td><small class="text-muted"><%= coupon[i].description %></small></td>
-                  <td><span class="badge bg-warning text-dark"><%= coupon[i].discount %>%</span></td>
+                  <td><span class="badge bg-warning text-dark">₹<%= coupon[i].discount %></span></td>
                   <td><%= coupon[i].expiryDate.toDateString() %></td>
                   <td>₹<%= coupon[i].minPurchase %></td>
                   <td><%= coupon[i].usageLimit %></td>
@@ -128,7 +128,7 @@
           <div class="row g-2 mb-3">
             <div class="col-6">
               <div class="small text-muted">Discount</div>
-              <div class="fw-bold text-warning"><%= coupon[i].discount %>%</div>
+              <div class="fw-bold text-warning">₹<%= coupon[i].discount %></div>
             </div>
             <div class="col-6">
               <div class="small text-muted">Min Purchase</div>

@@ -209,7 +209,6 @@ function generateInvoice(order, outputPath) {
       doc.fillColor("#666666")
          .fontSize(10)
          .font('Helvetica')
-         .text("Subtotal:", totalSectionX + 10, summaryBoxY + 15)
          .text("Discount:", totalSectionX + 10, summaryBoxY + 35)
          .font('Helvetica-Bold')
          .text("Total Amount:", totalSectionX + 10, summaryBoxY + 55);
@@ -217,7 +216,6 @@ function generateInvoice(order, outputPath) {
       // Amounts column (right-aligned)
       doc.fontSize(10)
          .font('Helvetica')
-         .text(`${totalAmount.toFixed(2)}`, amountColumnX, summaryBoxY + 15, { width: 70, align: 'right' })
          .text(`${order.discount.toFixed(2)}`, amountColumnX, summaryBoxY + 35, { width: 70, align: 'right' })
          .font('Helvetica-Bold')
          .text(`${(totalAmount).toFixed(2)}`, amountColumnX, summaryBoxY + 55, { width: 70, align: 'right' });

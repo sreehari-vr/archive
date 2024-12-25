@@ -349,13 +349,18 @@ const renderUserProfile = async (req, res) => {
     const addressCount = userAddress ? userAddress.address.length : 0;
     const maxCount = 3;
 
+    const sortedWallet = wallet ? {
+      ...wallet.toObject(),
+      transactionHistory: wallet.transactionHistory.sort((a, b) => b.date - a.date)
+    } : { balance: 0, transactionHistory: [] };
+
     return res.render("userProfile", {
       data,
       address: userAddress ? userAddress.address : [],
       addressCount,
       maxCount,
       orders,
-      wallet: wallet || { balance: 0, transactionHistory: [] },
+      wallet: sortedWallet,
       currentPage: parseInt(page),
       totalPages: Math.ceil(totalOrders / limit),
     });

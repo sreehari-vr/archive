@@ -136,7 +136,7 @@
     myChart = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: ['Orders', 'Pending', 'Delivered', 'Cancelled', 'Shipped', 'Returned'],
+        labels: ['Orders', 'Processing', 'Delivered', 'Cancelled', 'Shipped', 'Returned'],
         datasets: [{
           label: 'Metrics',
           data: data,
@@ -193,7 +193,7 @@
       const response = await fetch(`/admin/chart?filter=${filter}&startDate=${startDate}&endDate=${endDate}`);
       const data = await response.json();
       
-      createChart([data.orders, data.pending, data.delivered, data.cancelled, data.shipped, data.returned]);
+      createChart([data.orders, data.processing, data.delivered, data.cancelled, data.shipped, data.returned]);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
