@@ -201,259 +201,134 @@
 
 <script>
   let croppers = {};
-  let croppedFiles = {};
-  let imagesToDelete = []; // Global variable to track images for deletion
-  
-  // Initialize croppers for each image input
-  [1, 2, 3, 4].forEach(index => {
-    const inputElement = document.getElementById(`input${index}`);
-    const imgViewElement = document.getElementById(`imgView${index}`);
-    const cropContainer = document.getElementById(`cropContainer${index}`);
-    const croppedImgElement = document.getElementById(`croppedImg${index}`);
-  
-    inputElement.addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          // Destroy existing cropper if it exists
-          if (croppers[index]) {
-            croppers[index].destroy();
-          }
-  
-          // Show and set image sources
-          imgViewElement.src = event.target.result;
-          imgViewElement.style.display = 'block';
-          croppedImgElement.src = event.target.result;
-          croppedImgElement.style.display = 'block';
-          cropContainer.style.display = 'block';
-  
-          // Initialize new cropper
-          croppers[index] = new Cropper(croppedImgElement, {
-            aspectRatio: 1,
-            viewMode: 1,
-            autoCropArea: 1,
-          });
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-  });
-  
-  // Function to handle image deletion
-  function deleteImage(imagePath, index) {
-    // Remove the image element from the DOM
-    const imageContainer = event.target.closest('.col-md-3');
-    if (imageContainer) {
-      imageContainer.remove();
-    }
-  
-    // Add the image path to the list of images to be deleted
-    imagesToDelete.push(imagePath);
-  
-    // Optional: Log for debugging
-    console.log('Images to delete:', imagesToDelete);
-  }
-  
-  // Crop image function
-  function cropImage(index) {
-    const cropper = croppers[index];
-    const croppedImgElement = document.getElementById(`croppedImg${index}`);
-    const imgViewElement = document.getElementById(`imgView${index}`);
-  
-    if (cropper) {
-      cropper.getCroppedCanvas().toBlob((blob) => {
-        const file = new File([blob], `croppedImage${index}.png`, {
-          type: "image/png",
-        });
-        
-        imgViewElement.src = URL.createObjectURL(blob);
-        croppedImgElement.src = URL.createObjectURL(blob);
-        croppedFiles[index] = file;
-  
-        cropper.destroy();
-        delete croppers[index];
-      }, "image/png");
-    }
-  }
-  
-  // Form validation function
-  function validateForm() {
-    const form = document.querySelector('form');
-    let isValid = form.checkValidity();
-    form.classList.add('was-validated');
-    
-    // Get form values
-    const productName = document.getElementById('product_name').value.trim();
-    const description = document.getElementById('descriptionid').value.trim();
-    const regularPrice = parseFloat(document.getElementById('regularPrice').value);
-    const quantity = parseInt(document.getElementById('quantity').value);
-    const offer = parseFloat(document.getElementById('offer').value);
-    
-    // Reset custom error messages
-    document.getElementById('productName-error').textContent = "Product name is required";
-    document.getElementById('description-error').textContent = "Description is required";
-    document.getElementById('regularPrice-error').textContent = "Enter a valid price";
-    document.getElementById('quantity-error').textContent = "Enter a valid quantity";
-    document.getElementById('offer-error').textContent = "Enter a valid offer percentage";
+let croppedFiles = {};
+let imagesToDelete = [];
 
-    // Inside validateForm function, update the product name validation:
-if (!productName || productName.trim().length === 0) {
-  document.getElementById('productName-error').textContent = "Product name cannot be empty or contain only spaces";
-  document.getElementById('product_name').setCustomValidity("Product name cannot be empty or contain only spaces");
-  isValid = false;
-} else if (!/^[a-zA-Z][a-zA-Z0-9\s]*$/.test(productName)) {
-  document.getElementById('productName-error').textContent = "Product name must start with a letter and can only contain letters, numbers and spaces";
-  document.getElementById('product_name').setCustomValidity("Product name must start with a letter and can only contain letters, numbers and spaces");
-  isValid = false;
-} else {
-  document.getElementById('product_name').setCustomValidity("");
-}
-    
-    // Validate description first character
-    if (!/^[a-zA-Z]/.test(description)) {
-      document.getElementById('description-error').textContent = "Description must start with a letter";
-      document.getElementById('descriptionid').setCustomValidity("Description must start with a letter");
-      isValid = false;
-    } else {
-      document.getElementById('descriptionid').setCustomValidity("");
-    }
-    
-    // Validate regular price
-    if (regularPrice < 0) {
-      document.getElementById('regularPrice-error').textContent = "Price cannot be negative";
-      document.getElementById('regularPrice').setCustomValidity("Price cannot be negative");
-      isValid = false;
-    } else {
-      document.getElementById('regularPrice').setCustomValidity("");
-    }
-    
-    // Validate quantity
-    if (quantity < 0) {
-      document.getElementById('quantity-error').textContent = "Quantity cannot be negative";
-      document.getElementById('quantity').setCustomValidity("Quantity cannot be negative");
-      isValid = false;
-    } else {
-      document.getElementById('quantity').setCustomValidity("");
-    }
-    
-    // Validate offer
-    if (offer < 0 || offer > 100) {
-      document.getElementById('offer-error').textContent = "Offer must be between 0 and 100";
-      document.getElementById('offer').setCustomValidity("Offer must be between 0 and 100");
-      isValid = false;
-    } else {
-      document.getElementById('offer').setCustomValidity("");
-    }
-    
-    return isValid;
-  }
-  
-  // Product edit function
-  function editProduct(event) {
-    event.preventDefault();
-    
-    // Validate form
-    if (!validateForm()) {
-      return;
-    }
-  
-    // Create FormData
-    const formData = new FormData();
-    const productId = document.getElementById('Updateid').value;
-    
-    // Append form fields
-    formData.append('id', productId);
-    formData.append('productName', document.getElementById('product_name').value);
-    formData.append('description', document.getElementById('descriptionid').value);
-    formData.append('regularPrice', document.getElementById('regularPrice').value);
-    formData.append('quantity', document.getElementById('quantity').value);
-    formData.append('category', document.getElementById('category').value);
-    formData.append('offer', document.getElementById('offer').value);
-  
-    // Log FormData contents for debugging
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
-    }
-  
-    // Append cropped images
-    Object.keys(croppedFiles).forEach(index => {
-      formData.append('images', croppedFiles[index]);
-      console.log(`Appended cropped image ${index}`);
-    });
-  
-    // Append images to delete
-    imagesToDelete.forEach(image => {
-      formData.append('imagesToDelete', image);
-      console.log(`Marked image for deletion: ${image}`);
-    });
-  
-    // Fetch request to update product
-    fetch('/admin/updateProduct', {
-      method: 'POST',
-      body: formData
-    })
-    .then(response => {
-      console.log('Response status:', response.status);
-      return response.json();
-    })
-    .then(data => {
-      console.log('Full response:', data);
-      if (data.success) {
-        Swal.fire({
-          icon: "success",
-          title: "Successfully Updated",
-          text: "Product Updated",
-          timer: 1500
-        }).then(() => {
-          window.location.href = "/admin/products";
-        });
-      } else {
-        console.error('Update failed:', data.error);
-        // Handle specific error cases
-        if (data.error === "Product name already exists") {
-          document.getElementById('productName-error').textContent = "Product name already exists";
-          document.getElementById('product_name').setCustomValidity("Product name already exists");
-          document.querySelector('form').classList.add('was-validated');
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Not Updated",
-            text: data.error || "Product not Updated",
-          });
+[1, 2, 3, 4].forEach(index => {
+  const inputElement = document.getElementById(`input${index}`);
+  const imgViewElement = document.getElementById(`imgView${index}`);
+  const cropContainer = document.getElementById(`cropContainer${index}`);
+  const croppedImgElement = document.getElementById(`croppedImg${index}`);
+
+  inputElement.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        if (croppers[index]) {
+          croppers[index].destroy();
         }
-      }
-    })
-    .catch(error => {
-      console.error("Full error:", error);
+        imgViewElement.src = event.target.result;
+        imgViewElement.style.display = 'block';
+        croppedImgElement.src = event.target.result;
+        croppedImgElement.style.display = 'block';
+        cropContainer.style.display = 'block';
+
+        croppers[index] = new Cropper(croppedImgElement, {
+          aspectRatio: 1,
+          viewMode: 1,
+          autoCropArea: 1,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+});
+
+function deleteImage(imagePath, index) {
+  const imageContainer = event.target.closest('.col-md-3');
+  if (imageContainer) {
+    imageContainer.remove();
+  }
+  imagesToDelete.push(imagePath);
+}
+
+function cropImage(index) {
+  const cropper = croppers[index];
+  const croppedImgElement = document.getElementById(`croppedImg${index}`);
+  const imgViewElement = document.getElementById(`imgView${index}`);
+
+  if (cropper) {
+    cropper.getCroppedCanvas().toBlob((blob) => {
+      const file = new File([blob], `croppedImage${index}.png`, {
+        type: "image/png",
+      });
+      
+      imgViewElement.src = URL.createObjectURL(blob);
+      croppedImgElement.src = URL.createObjectURL(blob);
+      croppedFiles[index] = file;
+
+      cropper.destroy();
+      delete croppers[index];
+    }, "image/png");
+  }
+}
+
+function editProduct(event) {
+  event.preventDefault();
+  
+  const formData = new FormData();
+  const productId = document.getElementById('Updateid').value;
+  
+  formData.append('id', productId);
+  formData.append('productName', document.getElementById('product_name').value);
+  formData.append('description', document.getElementById('descriptionid').value);
+  formData.append('regularPrice', document.getElementById('regularPrice').value);
+  formData.append('quantity', document.getElementById('quantity').value);
+  formData.append('category', document.getElementById('category').value);
+  formData.append('offer', document.getElementById('offer').value);
+
+  Object.keys(croppedFiles).forEach(index => {
+    formData.append('images', croppedFiles[index]);
+  });
+
+  imagesToDelete.forEach(image => {
+    formData.append('imagesToDelete', image);
+  });
+
+  fetch('/admin/updateProduct', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      Swal.fire({
+        icon: "success",
+        title: "Successfully Updated",
+        text: "Product Updated",
+        timer: 1500
+      }).then(() => {
+        window.location.href = "/admin/products";
+      });
+    } else {
       Swal.fire({
         icon: "error",
-        title: "Error occurred",
-        text: "Something went wrong",
+        title: "Not Updated",
+        text: data.error || "Product not Updated",
       });
+    }
+  })
+  .catch(error => {
+    console.error("Error:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error occurred",
+      text: "Something went wrong",
     });
-  }
-  
-  // Reset form state on page load
-  document.addEventListener('DOMContentLoaded', () => {
-    // Clear any existing form state
-    croppedFiles = {};
-    imagesToDelete = [];
-    croppers = {};
   });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  croppedFiles = {};
+  imagesToDelete = [];
+  croppers = {};
 
   document.getElementById('product_name').addEventListener('input', function(e) {
-    // Remove spaces from the beginning as they're typed
     if (this.value.startsWith(' ')) {
-        this.value = this.value.trimStart();
+      this.value = this.value.trimStart();
     }
-    
-    // Also prevent submitting if only spaces
-    if (this.value.trim().length === 0) {
-        this.setCustomValidity("Product name cannot be empty or contain only spaces");
-    } else {
-        this.setCustomValidity("");
-    }
+  });
 });
 </script>
 

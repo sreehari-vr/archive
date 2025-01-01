@@ -4,6 +4,7 @@ const User = mongoose.model("user");
 const Product = mongoose.model("product");
 const Coupon = require("../../models/couponSchema");
 const Wallet = require("../../models/walletSchema");
+const HTTP_STATUS_CODES = require("../../utils/httpStatusCodes");
 
 const listOrders = async (req, res) => {
   try {
@@ -66,7 +67,7 @@ const listOrders = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in listOrders:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
   }
 };
 
@@ -76,11 +77,11 @@ const viewOrder = async (req, res) => {
     const order = await Order.findById(id)
       .populate("userId items.productId")
       .exec();
-    if (!order) return res.status(404).json({ error: "Order not found" });
+    if (!order) return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ error: "Order not found" });
     res.render("orderDetail", { order });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
   }
 };
 
@@ -92,7 +93,7 @@ const notifications = async (req, res) => {
     res.render("notifications", { orders });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
   }
 };
 
@@ -111,7 +112,7 @@ const orderReturnApprove = async (req, res) => {
     );
 
     if (!updatedOrder) {
-      return res.status(404).json({
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({
         error: "Order not found",
         message: "Unable to find the specified order.",
       });
@@ -136,14 +137,14 @@ const orderReturnApprove = async (req, res) => {
       await wallet.save();
     }
 
-    res.status(200).json({
+    res.status(HTTP_STATUS_CODES.OK).json({
       success: true,
       message: "Order return approved successfully!",
       order: updatedOrder,
     });
   } catch (error) {
     console.error("Error approving order return:", error);
-    res.status(500).json({
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
       error: "Internal server error",
       message: "Failed to process the return. Please try again later.",
@@ -161,20 +162,20 @@ const orderReturnReject = async (req, res) => {
     );
 
     if (!updatedOrder) {
-      return res.status(404).json({
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({
         error: "Order not found",
         message: "Unable to find the specified order.",
       });
     }
 
-    res.status(200).json({
+    res.status(HTTP_STATUS_CODES.OK).json({
       success: true,
       message: "Order return rejected successfully!",
       order: updatedOrder,
     });
   } catch (error) {
     console.error("Error rejecting order return:", error);
-    res.status(500).json({
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
       error: "Internal server error",
       message: "Failed to process the return. Please try again later.",
@@ -214,12 +215,12 @@ const itemReturnApprove = async (req, res) => {
     );
 
     if (!order) {
-      return res.status(404).send("Order not found");
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).send("Order not found");
     }
 
     const item = order.items.find((item) => String(item._id) === itemId);
     if (!item || item.orderStatus !== "Return Pending") {
-      return res.status(400).send("Invalid item or return not eligible.");
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).send("Invalid item or return not eligible.");
     }
 
     item.orderStatus = "Returned";
@@ -275,14 +276,14 @@ const itemReturnApprove = async (req, res) => {
 
     await order.save();
 
-    res.status(200).json({
+    res.status(HTTP_STATUS_CODES.OK).json({
       success: true,
       message: `Item return approved successfully for item ID ${itemId}`,
       order: order,
     });
   } catch (error) {
     console.error("Error approving item return:", error);
-    res.status(500).send("Error processing return approval");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send("Error processing return approval");
   }
 };
 
@@ -301,20 +302,20 @@ const itemReturnReject = async (req, res) => {
     );
 
     if (!updatedOrder) {
-      return res.status(404).json({
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({
         error: "Order or item not found",
         message: "Unable to find the specified order or item.",
       });
     }
 
-    res.status(200).json({
+    res.status(HTTP_STATUS_CODES.OK).json({
       success: true,
       message: `Item return rejected successfully for item ID ${itemId}!`,
       order: updatedOrder,
     });
   } catch (error) {
     console.error("Error rejecting item return:", error);
-    res.status(500).json({
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
       error: "Internal server error",
       message: "Failed to process the item return. Please try again later.",
@@ -330,7 +331,7 @@ const updateOrderStatus = async (req, res) => {
     const order = await Order.findById(orderId);
 
     if (!order) {
-      return res.status(404).json({ error: "Order not found" });
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ error: "Order not found" });
     }
 
     const userId = order.userId;
@@ -422,39 +423,17 @@ const updateOrderStatus = async (req, res) => {
     return res.json({ success: true, message: "Order status updated", order });
   } catch (error) {
     console.error("Error updating order status:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
   }
 };
 
-// const updatePaymentStatus = async (req, res) => {
-//   const { orderId } = req.params;
-//   const { status } = req.body;
-
-//   try {
-//     const order = await Order.findByIdAndUpdate(
-//       orderId,
-//       { paymentStatus: status },
-//       { new: true }
-//     );
-
-//     if (!order) return res.status(404).json({ error: "Order not found" });
-//     return res.json({
-//       success: true,
-//       message: "Payment status updated",
-//       order,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     return res.status(500).json({ error: "Internal server error" });
-//   }
-// };
 
 const updateItemStatus = async (req, res) => {
   const { orderId, itemId } = req.params;
   const { status } = req.body;
 
   if (!status) {
-    return res.status(400).json({ error: "Status is required" });
+    return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ error: "Status is required" });
   }
 
   if (
@@ -467,7 +446,7 @@ const updateItemStatus = async (req, res) => {
       "Processing",
     ].includes(status)
   ) {
-    return res.status(400).json({ error: "Invalid status value" });
+    return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ error: "Invalid status value" });
   }
 
   try {
@@ -475,12 +454,12 @@ const updateItemStatus = async (req, res) => {
       "items.productId"
     );
     if (!order) {
-      return res.status(404).json({ error: "Order not found" });
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ error: "Order not found" });
     }
 
     const item = order.items.find((item) => String(item._id) === itemId);
     if (!item) {
-      return res.status(404).json({ error: "Item not found in order" });
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ error: "Item not found in order" });
     }
 
     const userId = order.userId;
@@ -567,39 +546,16 @@ const updateItemStatus = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating item status:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
   }
 };
 
-// const updateItemPaymentStatus = async (req, res) => {
-
-//   const { orderId, itemId } = req.params;
-//   const { paymentStatus } = req.body;
-
-//   try {
-//     const order = await Order.findById(orderId);
-//     const item = order.items.id(itemId);
-
-//     if (!item) return res.status(404).json({ error: "Item not found" });
-
-//     item.paymentStatus = paymentStatus;
-//     await order.save();
-
-//     res.json({ message: "Item payment status updated successfully" });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-
-// };
 
 module.exports = {
   listOrders,
   viewOrder,
   updateOrderStatus,
-  // updatePaymentStatus,
   updateItemStatus,
-  // updateItemPaymentStatus,
   notifications,
   orderReturnApprove,
   orderReturnReject,

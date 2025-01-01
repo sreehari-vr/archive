@@ -1,6 +1,10 @@
 <%- include("../../views/partials/user/header") %>
 <style>
+
     .coupons-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         margin: 2rem 0;
         padding: 1rem;
     }
@@ -61,6 +65,7 @@
         font-weight: bold;
         color: #28a745;
     }
+    
 </style>
 <div class="coupons-container">
     <div class="row">
@@ -96,8 +101,13 @@
             <% } else { %>
                 <div class="alert alert-info">No coupons available at the moment.</div>
             <% } %>
+            <a href="/cart" class="btn btn-secondary back">
+                Back
+            </a>
         </div>
+        
     </div>
+    
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

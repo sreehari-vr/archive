@@ -21,7 +21,7 @@
         <div class="container">
             <div class="row row-pb-lg product-detail-wrap">
                 <div class="col-sm-8">
-                    <div class="zoom-container" onmousemove="zoomIn(event)" onmouseleave="resetZoom()">
+                    <div class="zoom-container mr-5" onmousemove="zoomIn(event)" onmouseleave="resetZoom()">
                         <img id="zoomable-image" alt="zoomable-image" class="rounded-lg" height="400px" width="400px"
                             src="<%= product.productImage && product.productImage.length ? '/' + product.productImage[0].replace(/\\/g, '/') : 'images/no_productImage.png' %>" />
                     </div>
@@ -123,18 +123,9 @@
                                         <h2><a href="/product/<%= relatedProduct._id %>">
                                                 <%= relatedProduct.productName %>
                                             </a></h2>
+                                            <p><%= relatedProduct.description %></p>
                                         <span class="price">₹<%= relatedProduct.salePrice %></span>
                                     </div>
-                                    <% if (relatedProduct.quantity> 0) { %>
-                                        <p class="text-center">
-                                            <a href="#" class="btn btn-primary btn-sm add-to-cart"
-                                                data-product-id="<%= relatedProduct._id %>">
-                                                <i class="icon-shopping-cart"></i> Add to Cart
-                                            </a>
-                                        </p>
-                                        <% } else { %>
-                                            <p class="text-center text-danger">Out of Stock</p>
-                                            <% } %>
                                 </div>
                             </div>
                             <% }); %>

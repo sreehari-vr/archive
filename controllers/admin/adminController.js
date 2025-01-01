@@ -7,13 +7,14 @@ const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const bcrypt = require("bcrypt");
 const path = require("path");
+const HTTP_STATUS_CODES = require("../../utils/httpStatusCodes");
+
 
 const loadAdminLogin = async (req, res) => {
   if (req.session.admin) {
     return res.redirect("/admin/adminDash");
   }
-  res.render("adminLogin", { message: null });
-};
+  res.status(HTTP_STATUS_CODES.OK).render("adminLogin", { message: null });};
 
 const login = async (req, res) => {
   try {
@@ -234,7 +235,7 @@ const getSalesReport = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error fetching sales report");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send("Error fetching sales report");
   }
 };
 
@@ -318,7 +319,7 @@ const downloadExcelReport = async (req, res) => {
     res.end();
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error generating Excel report");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send("Error generating Excel report");
   }
 };
 
@@ -470,7 +471,7 @@ const downloadPdfReport = async (req, res) => {
 
   } catch (error) {
     console.error('Error generating PDF report:', error);
-    res.status(500).send('Error generating PDF report');
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send('Error generating PDF report');
   }
 };
 
@@ -521,7 +522,7 @@ const chart = async (req, res) => {
 
     res.json(data);
   } catch (error) {
-    res.status(500).json({ error: "Error fetching sales data" });
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Error fetching sales data" });
   }
 };
 

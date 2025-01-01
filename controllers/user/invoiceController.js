@@ -2,6 +2,7 @@ const path = require("path");
 const fs = require("fs");
 const PDFDocument = require("pdfkit");
 const Order = require("../../models/orderSchema"); 
+const HTTP_STATUS_CODES = require("../../utils/httpStatusCodes");
 
 const getInvoice = async (req, res) => {
   try {
@@ -9,7 +10,7 @@ const getInvoice = async (req, res) => {
     console.log(req.query)
     const order = await Order.findOne({ _id:orderId }).populate("items.productId");
     if (!order) {
-      return res.status(400).json({ success: false, error: "Order not found" });
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ success: false, error: "Order not found" });
     }
 
     const invoiceDir = path.join(__dirname, "../../invoices");
@@ -24,12 +25,12 @@ const getInvoice = async (req, res) => {
     res.download(invoicePath, `Invoice_${orderId}.pdf`, (err) => {
       if (err) {
         console.error("Error sending the file:", err);
-        res.status(500).send("Could not download the file");
+        res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send("Could not download the file");
       }
     });
   } catch (error) {
     console.error("Error generating invoice:", error);
-    res.status(500).send("Internal server error");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send("Internal server error");
   }
 };
 

@@ -1,4 +1,6 @@
 const Coupon = require("../../models/couponSchema");
+const HTTP_STATUS_CODES = require("../../utils/httpStatusCodes");
+
 
 const loadCoupon = async (req, res) => {
   try {
@@ -34,7 +36,7 @@ const loadCoupon = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send('Server Error');
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send('Server Error');
   }
 };
 
@@ -53,7 +55,6 @@ const addCoupon = async (req, res) => {
       code,
       description,
       discount,
-      maxDiscount,
       expDate,
       minPurchase,
       usageLimit,
@@ -63,49 +64,49 @@ const addCoupon = async (req, res) => {
 
     const existingCoupon = await Coupon.findOne({ code: code.toUpperCase() });
     if (existingCoupon) {
-      return res.status(400).json({ 
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
         success: false, 
         error: "Coupon code already exists" 
       });
     }
 
     if (discount <= 0) {
-      return res.status(400).json({
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
         error: "Discount amount must be greater than 0"
       });
     }
 
     if (minPurchase < 0) {
-      return res.status(400).json({
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
         error: "Minimum purchase amount cannot be negative"
       });
     }
 
     if (usageLimit && usageLimit <= 0) {
-      return res.status(400).json({
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
         error: "Usage limit must be greater than 0"
       });
     }
 
     if (perUserLimit && perUserLimit < 0) {
-      return res.status(400).json({
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        error: "Per user limit must be greater than 0"
+        error: "Per user limit can't be negative."
       });
     }
 
     if (discount >= minPurchase) {
-      return res.status(400).json({
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
         error: "Discount amount must be less than minimum purchase amount"
       });
     }
 
     if (!expDate) {
-      return res.status(400).json({
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
         error: "Expiry date is required"
       });
@@ -115,7 +116,6 @@ const addCoupon = async (req, res) => {
       code,
       description,
       discount,
-      maxDiscount,
       expiryDate: expDate,
       minPurchase,
       usageLimit,
@@ -123,7 +123,7 @@ const addCoupon = async (req, res) => {
     });
     await newCoupon.save();
 
-    return res.status(200).json({ success: true, message: "Coupon added" });
+    return res.status(HTTP_STATUS_CODES.OK).json({ success: true, message: "Coupon added" });
   } catch (error) {
     console.error(error);
   }
@@ -136,7 +136,7 @@ const inactivateCoupon = async (req, res) => {
     res.redirect("/admin/coupon");
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
   }
 };
 
@@ -147,7 +147,7 @@ const activateCoupon = async (req, res) => {
     res.redirect("/admin/coupon");
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
   }
 };
 
@@ -158,7 +158,7 @@ const softDeleteCoupon = async (req, res) => {
     res.redirect("/admin/coupon");
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
   }
 };
 
@@ -169,7 +169,7 @@ const loadUpdateCoupon = async (req, res) => {
     res.render("updateCoupon", { coupon });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
   }
 };
 
@@ -180,7 +180,6 @@ const updateCoupon = async (req, res) => {
       code,
       description,
       discount,
-      maxDiscount,
       expDate,
       minPurchase,
       usageLimit,
@@ -189,7 +188,7 @@ const updateCoupon = async (req, res) => {
 
     const coupon = await Coupon.findById(id);
     if (!coupon) {
-      return res.status(404).json({ error: "Coupon not found." });
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ error: "Coupon not found." });
     }
     const existingCoupon = await Coupon.findOne({
       code: code.toUpperCase(),
@@ -197,9 +196,51 @@ const updateCoupon = async (req, res) => {
     });
 
     if (existingCoupon) {
-      return res.status(400).json({ 
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
         success: false,
         error: "Coupon code already exists" 
+      });
+    }
+
+    if (discount <= 0) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+        success: false,
+        error: "Discount amount must be greater than 0"
+      });
+    }
+
+    if (minPurchase < 0) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+        success: false,
+        error: "Minimum purchase amount cannot be negative"
+      });
+    }
+
+    if (usageLimit && usageLimit <= 0) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+        success: false,
+        error: "Usage limit must be greater than 0"
+      });
+    }
+
+    if (perUserLimit && perUserLimit < 0) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+        success: false,
+        error: "Per user limit can't be negative."
+      });
+    }
+
+    if (discount >= minPurchase) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+        success: false,
+        error: "Discount amount must be less than minimum purchase amount"
+      });
+    }
+
+    if (!expDate) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+        success: false,
+        error: "Expiry date is required"
       });
     }
 
@@ -209,12 +250,11 @@ const updateCoupon = async (req, res) => {
     coupon.expiryDate = expDate;
     coupon.minPurchase = minPurchase;
     coupon.usageLimit = usageLimit;
-    coupon.maxDiscount = maxDiscount;
     coupon.perUserLimit = perUserLimit;
 
     await coupon.save()
 
-    res.status(200).json({
+    res.status(HTTP_STATUS_CODES.OK).json({
         success: true,
         message: "Coupon updated successfully.",
         updatedCoupon: coupon,
@@ -222,7 +262,7 @@ const updateCoupon = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
   }
 };
 

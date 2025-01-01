@@ -6,6 +6,7 @@ const path = require("path");
 const sharp = require("sharp");
 const multer = require("multer");
 const category = require("../../models/categorySchema");
+const HTTP_STATUS_CODES = require("../../utils/httpStatusCodes");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -87,12 +88,13 @@ const getAddProduct = async (req, res) => {
     const statusOptions = ["Available", "Out of stock"];
     res.render("addProducts", { categories, statusOptions });
   } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
     console.log(error);
   }
 };
 
 const addProducts = async (req, res) => {
+  let images = [];
   try {
     const {
       productName,
@@ -103,83 +105,135 @@ const addProducts = async (req, res) => {
       offer,
     } = req.body;
 
-    const existProduct = await Product.findOne({ productName });
-    if (existProduct) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Product name already exists" });
+    // Input validation
+    if (!productName || productName.trim().length === 0) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
+        success: false, 
+        error: "Product name cannot be empty or contain only spaces" 
+      });
     }
 
-    const images = [];
-    if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
-        const originalImagePath = file.path;
-        
-        const uniqueFilename = `${Date.now()}-${Math.random().toString(36).substring(2)}-${path.parse(file.filename).name}${path.extname(file.filename)}`;
-        const resizedImagePath = path.join("uploads", uniqueFilename);
+    if (!/^[a-zA-Z][a-zA-Z0-9\s]*$/.test(productName)) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
+        success: false, 
+        error: "Product name must start with a letter and can only contain letters, numbers and spaces" 
+      });
+    }
 
-        try {
-          await sharp(originalImagePath)
-            .resize({ height: 440, width: 440 })
-            .toFile(resizedImagePath);
+    if (!description || !/^[a-zA-Z]/.test(description)) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
+        success: false, 
+        error: "Description must start with a letter" 
+      });
+    }
 
-          if (fs.existsSync(originalImagePath)) {
-            fs.unlinkSync(originalImagePath);
-          }
+    if (!regularPrice || regularPrice < 0) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
+        success: false, 
+        error: "Price cannot be negative" 
+      });
+    }
 
-          images.push(resizedImagePath.replace(/\\/g, "/"));
-        } catch (error) {
-          if (fs.existsSync(resizedImagePath)) {
-            fs.unlinkSync(resizedImagePath);
-          }
-          console.error("Error processing image:", error);
-          continue;
+    if (!quantity || quantity < 0) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
+        success: false, 
+        error: "Quantity cannot be negative" 
+      });
+    }
+
+    if (!offer || offer < 0 || offer > 100) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
+        success: false, 
+        error: "Offer must be between 0 and 100" 
+      });
+    }
+
+    // Check for existing product
+    const existProduct = await Product.findOne({
+      productName: { $regex: new RegExp(`^${productName.trim()}$`, 'i') }
+    });
+    if (existProduct) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
+        success: false, 
+        error: "Product name already exists" 
+      });
+    }
+
+    // Image processing
+    if (!req.files || req.files.length === 0) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
+        success: false, 
+        error: "Product must have at least one image" 
+      });
+    }
+
+    for (const file of req.files) {
+      const originalImagePath = file.path;
+      const uniqueFilename = `${Date.now()}-${path.parse(file.filename).name}-resized${path.extname(file.filename)}`;
+      const resizedImagePath = path.join("uploads", uniqueFilename);
+
+      try {
+        await sharp(originalImagePath)
+          .resize({ height: 440, width: 440 })
+          .toFile(resizedImagePath);
+
+        if (fs.existsSync(originalImagePath)) {
+          fs.unlinkSync(originalImagePath);
         }
+
+        images.push(resizedImagePath.replace(/\\/g, "/"));
+      } catch (error) {
+        if (fs.existsSync(resizedImagePath)) {
+          fs.unlinkSync(resizedImagePath);
+        }
+        throw new Error("Error processing image: " + error.message);
       }
     }
 
+    // Category validation and offer calculation
     const categoryDetails = await Category.findById(category);
     if (!categoryDetails) {
-      images.forEach(imagePath => {
-        const fullPath = path.join(__dirname, "../../", imagePath);
-        if (fs.existsSync(fullPath)) {
-          fs.unlinkSync(fullPath);
-        }
-      });
-      return res.status(404).json({ success: false, error: "Category not found" });
+      cleanupImages(images);
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ success: false, error: "Category not found" });
     }
 
     const categoryOffer = categoryDetails.offer || 0;
     const applicableOffer = Math.max(Number(offer), Number(categoryOffer));
     const salePrice = regularPrice - (regularPrice * applicableOffer) / 100;
 
+    // Create and save product
     const newProduct = new Product({
-      productName,
+      productName: productName.trim(),
       description,
       category,
       regularPrice,
       salePrice,
       quantity,
       productImage: images,
-      createdAt: new Date(),
       offer,
+      createdAt: new Date()
     });
 
     await newProduct.save();
-    return res.status(200).json({ success: true, message: "Product added" });
+    return res.status(HTTP_STATUS_CODES.OK).json({ success: true, message: "Product added" });
+
   } catch (error) {
-    if (images && images.length > 0) {
-      images.forEach(imagePath => {
-        const fullPath = path.join(__dirname, "../../", imagePath);
-        if (fs.existsSync(fullPath)) {
-          fs.unlinkSync(fullPath);
-        }
-      });
-    }
+    cleanupImages(images);
     console.error("Error in addProducts:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
   }
 };
+
+function cleanupImages(images) {
+  if (images && images.length > 0) {
+    images.forEach(imagePath => {
+      const fullPath = path.join(__dirname, "../../", imagePath);
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+      }
+    });
+  }
+}
 
 const updateProduct = async (req, res) => {
   try {
@@ -193,9 +247,75 @@ const updateProduct = async (req, res) => {
       offer,
     } = req.body;
 
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ success: false, error: "Product not found" });
+    }
+
+    // Input validation
+    if (!productName || productName.trim().length === 0) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
+        success: false, 
+        error: "Product name cannot be empty or contain only spaces" 
+      });
+    }
+
+    if (!/^[a-zA-Z][a-zA-Z0-9\s]*$/.test(productName)) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
+        success: false, 
+        error: "Product name must start with a letter and can only contain letters, numbers and spaces" 
+      });
+    }
+
+    if (!description || !/^[a-zA-Z]/.test(description)) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
+        success: false, 
+        error: "Description must start with a letter" 
+      });
+    }
+
+    if (!regularPrice || regularPrice < 0) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
+        success: false, 
+        error: "Price cannot be negative" 
+      });
+    }
+
+    if (!quantity || quantity < 0) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
+        success: false, 
+        error: "Quantity cannot be negative" 
+      });
+    }
+
+    if (!offer || offer < 0 || offer > 100) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
+        success: false, 
+        error: "Offer must be between 0 and 100" 
+      });
+    }
+
+    const imagesToDelete = Array.isArray(req.body.imagesToDelete)
+      ? req.body.imagesToDelete
+      : req.body.imagesToDelete
+      ? [req.body.imagesToDelete]
+      : [];
+
+    // Check if removing images would leave product with no images
+    const currentImages = product.productImage.filter(
+      (image) => !imagesToDelete.includes(image)
+    );
+    
+    if (currentImages.length === 0 && (!req.files || req.files.length === 0)) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
+        success: false, 
+        error: "Product must have at least one image" 
+      });
+    }
+
     const categoryDetails = await Category.findById(category);
     if (!categoryDetails) {
-      return res.status(404).json({ success: false, error: "Category not found" });
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ success: false, error: "Category not found" });
     }
 
     const categoryOffer = categoryDetails.offer || 0;
@@ -203,15 +323,19 @@ const updateProduct = async (req, res) => {
     const salePrice = regularPrice - (regularPrice * applicableOffer) / 100;
 
     const existProduct = await Product.findOne({
-      productName,
+      productName: { $regex: new RegExp(`^${productName.trim()}$`, 'i') },
       _id: { $ne: id },
     });
+    
     if (existProduct) {
-      return res.status(400).json({ success: false, error: "Product name already exists" });
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
+        success: false, 
+        error: "Product name already exists" 
+      });
     }
 
     const updatedProduct = {
-      productName,
+      productName: productName.trim(),
       description,
       regularPrice,
       salePrice,
@@ -220,22 +344,8 @@ const updateProduct = async (req, res) => {
       offer,
     };
 
-    const imagesToDelete = Array.isArray(req.body.imagesToDelete)
-      ? req.body.imagesToDelete
-      : req.body.imagesToDelete
-      ? [req.body.imagesToDelete]
-      : [];
-
     if (imagesToDelete.length > 0) {
-      const product = await Product.findById(id);
-
-      if (!product) {
-        return res.status(404).json({ success: false, error: "Product not found" });
-      }
-
-      product.productImage = product.productImage.filter(
-        (image) => !imagesToDelete.includes(image)
-      );
+      product.productImage = currentImages;
 
       for (const imagePath of imagesToDelete) {
         const fullPath = path.join(__dirname, "../../", imagePath);
@@ -251,7 +361,6 @@ const updateProduct = async (req, res) => {
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         const originalImagePath = file.path;
-
         const uniqueFilename = `${Date.now()}-${path.parse(file.filename).name}-resized${path.extname(file.filename)}`;
         const resizedImagePath = path.join("uploads", uniqueFilename);
 
@@ -268,19 +377,18 @@ const updateProduct = async (req, res) => {
     await Product.findByIdAndUpdate(
       id,
       {
-        $set: updatedProduct, 
-        $push: { productImage: { $each: newImages } }, 
+        $set: updatedProduct,
+        $push: { productImage: { $each: newImages } },
       },
       { new: true }
     );
 
-    res.status(200).json({ success: true, message: "Product updated" });
+    res.status(HTTP_STATUS_CODES.OK).json({ success: true, message: "Product updated" });
   } catch (error) {
     console.error("Error in updateProduct:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
   }
 };
-
 
 
 const renderUpdateProductForm = async (req, res) => {
@@ -290,13 +398,13 @@ const renderUpdateProductForm = async (req, res) => {
     console.log("Fetched Product Data for Rendering:", productData);
 
     if (!productData) {
-      return res.status(400).json({ error: "Product not found" });
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ error: "Product not found" });
     }
     const categories = await Category.find({ deletedAt: null });
     return res.render("updateProduct", { data: productData, categories });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
   }
 };
 
@@ -307,7 +415,7 @@ const unlistProduct = async (req, res) => {
     res.redirect("/admin/products");
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
   }
 };
 
@@ -318,7 +426,7 @@ const listProduct = async (req, res) => {
     res.redirect("/admin/products");
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
   }
 };
 
@@ -329,7 +437,7 @@ const softDeleteProduct = async (req, res) => {
     res.redirect("/admin/products");
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
   }
 };
 

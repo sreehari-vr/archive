@@ -575,6 +575,22 @@
   }
 </script>
 
+<script>
+  // Check for deleteSuccess query parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("deleteSuccess") === "true") {
+    Swal.fire({
+      icon: "success",
+      title: "Address deleted successfully!",
+      showConfirmButton: false,
+      timer: 2000,
+    }).then(() => {
+      // Remove the query parameter from the URL
+      const newUrl = window.location.href.split("?")[0];
+      window.history.replaceState({}, document.title, newUrl);
+    });
+  }
+</script>
 
   </main>
   <%- include("../../views/partials/user/footer") %>

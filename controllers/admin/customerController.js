@@ -1,4 +1,5 @@
 const User = require("../../models/userSchema");
+const HTTP_STATUS_CODES = require("../../utils/httpStatusCodes");
 
 const customerInfo = async (req, res) => {
   try {
@@ -41,12 +42,12 @@ const unblockCustomer = async (req, res) => {
     const id = req.query.id;
     await User.updateOne({ _id: id }, { $set: { isBlocked: false } });
     res
-      .status(200)
+      .status(HTTP_STATUS_CODES.OK)
       .json({ success: true, message: "User unblocked successfully." });
   } catch (error) {
     console.error("Error unblocking user:", error);
     res
-      .status(500)
+      .status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
       .json({ success: false, message: "Failed to unblock user." });
   }
 };
@@ -56,11 +57,11 @@ const blockCustomer = async (req, res) => {
     const id = req.query.id;
     await User.updateOne({ _id: id }, { $set: { isBlocked: true } });
     res
-      .status(200)
+      .status(HTTP_STATUS_CODES.OK)
       .json({ success: true, message: "User blocked successfully." });
   } catch (error) {
     console.error("Error blocking user:", error);
-    res.status(500).json({ success: false, message: "Failed to block user." });
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to block user." });
   }
 };
 

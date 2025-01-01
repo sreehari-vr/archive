@@ -163,175 +163,184 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 <script>
-let croppers = {};
-let croppedFiles = {};
-
-[1, 2, 3, 4].forEach(index => {
-  const inputElement = document.getElementById(`input${index}`);
-  const imgViewElement = document.getElementById(`imgView${index}`);
-  const cropContainer = document.getElementById(`cropContainer${index}`);
-  const croppedImgElement = document.getElementById(`croppedImg${index}`);
-
-  inputElement.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        if (croppers[index]) {
-          croppers[index].destroy();
-        }
-
-        imgViewElement.src = event.target.result;
-        imgViewElement.style.display = 'block';
-        croppedImgElement.src = event.target.result;
-        croppedImgElement.style.display = 'block';
-        cropContainer.style.display = 'block';
-
-        croppers[index] = new Cropper(croppedImgElement, {
-          aspectRatio: 1,
-          viewMode: 1,
-          autoCropArea: 1,
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-});
-
-function cropImage(index) {
-  const cropper = croppers[index];
-  const croppedImgElement = document.getElementById(`croppedImg${index}`);
-  const imgViewElement = document.getElementById(`imgView${index}`);
-
-  if (cropper) {
-    cropper.getCroppedCanvas().toBlob((blob) => {
-      const file = new File([blob], `croppedImage${index}.png`, {
-        type: "image/png",
-      });
-      
-      imgViewElement.src = URL.createObjectURL(blob);
-      croppedImgElement.src = URL.createObjectURL(blob);
-      croppedFiles[index] = file;
-
-      cropper.destroy();
-      delete croppers[index];
-    }, "image/png");
-  }
-}
-
-function validateForm() {
-  const form = document.querySelector('form');
-  let isValid = form.checkValidity();
-  form.classList.add('was-validated');
+  let croppers = {};
+  let croppedFiles = {};
   
-  const productName = document.getElementById('product_name').value.trim();
-  const description = document.getElementById('descriptionid').value.trim();
-  const regularPrice = parseFloat(document.getElementById('regularPrice').value);
-  const quantity = parseInt(document.getElementById('quantity').value);
+  [1, 2, 3, 4].forEach(index => {
+    const inputElement = document.getElementById(`input${index}`);
+    const imgViewElement = document.getElementById(`imgView${index}`);
+    const cropContainer = document.getElementById(`cropContainer${index}`);
+    const croppedImgElement = document.getElementById(`croppedImg${index}`);
   
-  if (!productName || productName.trim().length === 0) {
-    document.getElementById('productName-error').textContent = "Product name cannot start with a space";
-    document.getElementById('product_name').setCustomValidity("Product name cannot start with a space");
-    isValid = false;
-  } else {
-    document.getElementById('product_name').setCustomValidity("");
-  }
-
-  if (!description || description.trim().length === 0) {
-    document.getElementById('description-error').textContent = "Description cannot start with a space";
-    document.getElementById('descriptionid').setCustomValidity("Description cannot start with a space");
-    isValid = false;
-  } else {
-    document.getElementById('descriptionid').setCustomValidity("");
-  }
-
-  if (regularPrice < 0) {
-    document.getElementById('regularPrice-error').textContent = "Price cannot be negative";
-    document.getElementById('regularPrice').setCustomValidity("Price cannot be negative");
-    isValid = false;
-  } else {
-    document.getElementById('regularPrice').setCustomValidity("");
-  }
+    inputElement.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          if (croppers[index]) {
+            croppers[index].destroy();
+          }
   
-  if (quantity < 0) {
-    document.getElementById('quantity-error').textContent = "Quantity cannot be negative";
-    document.getElementById('quantity').setCustomValidity("Quantity cannot be negative");
-    isValid = false;
-  } else {
-    document.getElementById('quantity').setCustomValidity("");
-  }
+          imgViewElement.src = event.target.result;
+          imgViewElement.style.display = 'block';
+          croppedImgElement.src = event.target.result;
+          croppedImgElement.style.display = 'block';
+          cropContainer.style.display = 'block';
   
-  if (!Object.keys(croppedFiles).length) {
-    Swal.fire({
-      icon: "error",
-      title: "Image Required",
-      text: "Please upload at least one image.",
-    });
-    return false;
-  }
-  
-  return isValid;
-}
-
-function addProduct(event) {
-  event.preventDefault();
-  
-  if (!validateForm()) {
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('productName', document.getElementById('product_name').value);
-  formData.append('description', document.getElementById('descriptionid').value);
-  formData.append('regularPrice', document.getElementById('regularPrice').value);
-  formData.append('quantity', document.getElementById('quantity').value);
-  formData.append('category', document.getElementById('category').value);
-  formData.append('offer', document.getElementById('offer').value);
-
-  Object.keys(croppedFiles).forEach(index => {
-    formData.append('images', croppedFiles[index]);
-  });
-
-  $.ajax({
-    method: "POST",
-    url: "/admin/addProduct",
-    data: formData,
-    contentType: false,
-    processData: false,
-    success: function(response) {
-      if (response.success) {
-        Swal.fire({
-          icon: "success",
-          title: "Successfully Added",
-          text: "Product Added",
-          timer: 1500
-        }).then(() => {
-          window.location.href = "/admin/products";
-        });
-      } else {
-        if (response.error === "Product name already exists") {
-          document.getElementById('productName-error').textContent = "Product name already exists";
-          document.getElementById('product_name').setCustomValidity("Product name already exists");
-          document.querySelector('form').classList.add('was-validated');
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Not Added",
-            text: response.error || "Product not Added",
+          croppers[index] = new Cropper(croppedImgElement, {
+            aspectRatio: 1,
+            viewMode: 1,
+            autoCropArea: 1,
           });
-        }
+        };
+        reader.readAsDataURL(file);
       }
-    },
-    error: function(error) {
-      console.error("error response:", error);
+    });
+  });
+  
+  function cropImage(index) {
+    const cropper = croppers[index];
+    const croppedImgElement = document.getElementById(`croppedImg${index}`);
+    const imgViewElement = document.getElementById(`imgView${index}`);
+  
+    if (cropper) {
+      cropper.getCroppedCanvas().toBlob((blob) => {
+        const file = new File([blob], `croppedImage${index}.png`, {
+          type: "image/png",
+        });
+        
+        imgViewElement.src = URL.createObjectURL(blob);
+        croppedImgElement.src = URL.createObjectURL(blob);
+        croppedFiles[index] = file;
+  
+        cropper.destroy();
+        delete croppers[index];
+      }, "image/png");
+    }
+  }
+  
+  function validateForm() {
+    const form = document.querySelector('form');
+    let isValid = form.checkValidity();
+    form.classList.add('was-validated');
+    
+    const productName = document.getElementById('product_name').value.trim();
+    const description = document.getElementById('descriptionid').value.trim();
+    const regularPrice = parseFloat(document.getElementById('regularPrice').value);
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const offer = parseInt(document.getElementById('offer').value);
+    
+    if (!productName || !/^[a-zA-Z][a-zA-Z0-9\s]*$/.test(productName)) {
+      document.getElementById('productName-error').textContent = "Product name must start with a letter and contain only letters, numbers and spaces";
+      document.getElementById('product_name').setCustomValidity("Invalid product name");
+      isValid = false;
+    } else {
+      document.getElementById('product_name').setCustomValidity("");
+    }
+  
+    if (!description || !/^[a-zA-Z]/.test(description)) {
+      document.getElementById('description-error').textContent = "Description must start with a letter";
+      document.getElementById('descriptionid').setCustomValidity("Invalid description");
+      isValid = false;
+    } else {
+      document.getElementById('descriptionid').setCustomValidity("");
+    }
+  
+    if (!regularPrice || regularPrice < 0) {
+      document.getElementById('regularPrice-error').textContent = "Price cannot be negative";
+      document.getElementById('regularPrice').setCustomValidity("Invalid price");
+      isValid = false;
+    } else {
+      document.getElementById('regularPrice').setCustomValidity("");
+    }
+    
+    if (!quantity || quantity < 0) {
+      document.getElementById('quantity-error').textContent = "Quantity cannot be negative";
+      document.getElementById('quantity').setCustomValidity("Invalid quantity");
+      isValid = false;
+    } else {
+      document.getElementById('quantity').setCustomValidity("");
+    }
+  
+    if (!offer || offer < 0 || offer > 100) {
+      document.getElementById('offer-error').textContent = "Offer must be between 0 and 100";
+      document.getElementById('offer').setCustomValidity("Invalid offer");
+      isValid = false;
+    } else {
+      document.getElementById('offer').setCustomValidity("");
+    }
+    
+    if (!Object.keys(croppedFiles).length) {
       Swal.fire({
         icon: "error",
-        title: "Error occurred",
-        text: error.responseJSON?.error || "Something went wrong",
+        title: "Image Required",
+        text: "Please upload at least one image.",
       });
-    },
-  });
-}
-</script>
+      return false;
+    }
+    
+    return isValid;
+  }
+  
+  function addProduct(event) {
+    event.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append('productName', document.getElementById('product_name').value);
+    formData.append('description', document.getElementById('descriptionid').value);
+    formData.append('regularPrice', document.getElementById('regularPrice').value);
+    formData.append('quantity', document.getElementById('quantity').value);
+    formData.append('category', document.getElementById('category').value);
+    formData.append('offer', document.getElementById('offer').value);
+  
+    Object.keys(croppedFiles).forEach(index => {
+      formData.append('images', croppedFiles[index]);
+    });
+  
+    $.ajax({
+      method: "POST",
+      url: "/admin/addProduct",
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function(response) {
+        if (response.success) {
+          Swal.fire({
+            icon: "success",
+            title: "Successfully Added",
+            text: "Product Added",
+            timer: 1500
+          }).then(() => {
+            window.location.href = "/admin/products";
+          });
+        } else {
+          if (response.error === "Product name already exists") {
+            document.getElementById('productName-error').textContent = "Product name already exists";
+            document.getElementById('product_name').setCustomValidity("Product name already exists");
+            document.querySelector('form').classList.add('was-validated');
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "Not Added",
+              text: response.error || "Product not Added",
+            });
+          }
+        }
+      },
+      error: function(error) {
+        console.error("error response:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error occurred",
+          text: error.responseJSON?.error || "Something went wrong",
+        });
+      },
+    });
+  }
+  </script>
 
 <%- include("../../views/partials/admin/footer") %>

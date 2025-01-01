@@ -99,13 +99,18 @@
     document.getElementById("otpInput").addEventListener("input", () => {
       const otpInput = document.getElementById("otpInput");
       const verifyBtn = document.querySelector(".verify-btn");
-
+    
+      // Allow only numeric input
       otpInput.value = otpInput.value.replace(/[^0-9]/g, "");
-
-      if (otpInput.value.length !== 6) {
+    
+      // Enable the verify button if the input length is exactly 6
+      if (otpInput.value.length === 6) {
+        verifyBtn.disabled = false;
+      } else {
         verifyBtn.disabled = true;
       }
     });
+    
 
 
 

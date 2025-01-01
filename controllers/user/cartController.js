@@ -2,6 +2,8 @@ const user = require("../../models/userSchema");
 const Coupon = require("../../models/couponSchema");
 const Cart = require("../../models/cartSchema");
 const product = require("../../models/productSchema");
+const HTTP_STATUS_CODES = require("../../utils/httpStatusCodes");
+
 
 const cartLoad = async (req, res) => {
   const userId = req.session.user;
@@ -12,7 +14,7 @@ const cartLoad = async (req, res) => {
     res.render("cart", { cart, coupon });
   } catch (error) {
     console.log("page not loading:", error);
-    res.status(500).send("Server error");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send("Server error");
   }
 };
 
@@ -93,7 +95,7 @@ const cartAdd = async (req, res) => {
     
   } catch (error) {
     console.error("Error adding to cart:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: "Server error" });
   }
 };
 
@@ -106,7 +108,7 @@ const removeFromCart = async (req, res) => {
     const cart = await Cart.findOne({ userId }).populate("items.productId");
     
     if (!cart) {
-      return res.status(404).json({ 
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ 
         success: false, 
         message: "Cart not found" 
       });
@@ -118,7 +120,7 @@ const removeFromCart = async (req, res) => {
     );
 
     if (removingProductIndex === -1) {
-      return res.status(404).json({ 
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ 
         success: false, 
         message: "Product not found in cart" 
       });
@@ -191,7 +193,7 @@ const removeFromCart = async (req, res) => {
 
   } catch (error) {
     console.error("Error removing from cart:", error);
-    res.status(500).json({ 
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ 
       success: false, 
       message: "Server error" 
     });
@@ -206,7 +208,7 @@ const updateQuantity = async (req, res) => {
     // Find cart and validate
     const cart = await Cart.findOne({ userId });
     if (!cart) {
-      return res.status(404).json({ 
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ 
         success: false, 
         message: "Cart not found" 
       });
@@ -217,7 +219,7 @@ const updateQuantity = async (req, res) => {
       item => item.productId.toString() === productId
     );
     if (itemIndex === -1) {
-      return res.status(404).json({ 
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ 
         success: false, 
         message: "Product not found in cart" 
       });
@@ -289,7 +291,7 @@ const updateQuantity = async (req, res) => {
 
   } catch (error) {
     console.error("Error updating quantity:", error);
-    res.status(500).json({ 
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ 
       success: false, 
       message: "Server error" 
     });
@@ -303,12 +305,12 @@ const applyCoupon = async (req, res) => {
     const cart = await Cart.findOne({ userId }).populate("items.productId");
 
     if (!cart) {
-      return res.status(404).json({ success: false, message: "Cart not found" });
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ success: false, message: "Cart not found" });
     }
 
     const coupon = await Coupon.findOne({ code: couponCode, isActive: true });
     if (!coupon) {
-      return res.status(400).json({ success: false, message: "Invalid or expired coupon." });
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ success: false, message: "Invalid or expired coupon." });
     }
 
     // Validate coupon usage
@@ -319,14 +321,14 @@ const applyCoupon = async (req, res) => {
     const userUseCount = userCouponUsage ? userCouponUsage.useCount : 0;
 
     if (userUseCount >= coupon.perUserLimit) {
-      return res.status(400).json({
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
         message: "Coupon usage limit exceeded for this user."
       });
     }
 
     if (coupon.usageLimit !== 0 && coupon.usedCount >= coupon.usageLimit) {
-      return res.status(400).json({
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
         message: "Coupon usage limit exceeded globally."
       });
@@ -339,14 +341,14 @@ const applyCoupon = async (req, res) => {
     });
 
     if (calculatedSubTotal < coupon.minPurchase) {
-      return res.status(400).json({
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
         message: "Minimum purchase requirement not met."
       });
     }
 
     if (coupon.expiryDate < new Date()) {
-      return res.status(400).json({ success: false, message: "Coupon has expired." });
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ success: false, message: "Coupon has expired." });
     }
 
     const discountAmount = Math.min(
@@ -371,7 +373,7 @@ const applyCoupon = async (req, res) => {
     });
   } catch (error) {
     console.error("Error applying coupon:", error);
-    res.status(500).json({ success: false, message: "Server error." });
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: "Server error." });
   }
 };
 
@@ -382,7 +384,7 @@ const removeCoupon = async (req, res) => {
     const cart = await Cart.findOne({ userId });
     
     if (!cart) {
-      return res.status(404).json({ success: false, message: "Cart not found" });
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ success: false, message: "Cart not found" });
     }
 
     // Clear all coupon-related fields
@@ -399,7 +401,7 @@ const removeCoupon = async (req, res) => {
     });
   } catch (error) {
     console.error("Error removing coupon:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: "Server error" });
   }
 };
 
@@ -409,7 +411,7 @@ const coupons = async (req, res) => {
     res.render("coupons", { coupon });
   } catch (error) {
     console.log("page not loading:", error);
-    res.status(500).send("Server error");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send("Server error");
   }
 }
 

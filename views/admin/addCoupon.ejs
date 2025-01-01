@@ -213,7 +213,7 @@
 
     if (perUserLimit && (isNaN(perUserLimit) || perUserLimit < 0)) {
         document.getElementById("perUserLimit-error").style.display = 'block';
-        document.getElementById("perUserLimit-error").innerText = "Per user limit must be greater than 0.";
+        document.getElementById("perUserLimit-error").innerText = "Per user limit can't be negative.";
         isValid = false;
     }
 

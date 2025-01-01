@@ -6,6 +6,7 @@ const Order = require("../../models/orderSchema");
 const Coupon = require("../../models/couponSchema");
 const Wallet = require("../../models/walletSchema");
 const Razorpay = require("razorpay");
+const HTTP_STATUS_CODES = require("../../utils/httpStatusCodes");
 
 const calculateProportionalDiscounts = (items, totalDiscount) => {
   const totalOrderValue = items.reduce(
@@ -56,25 +57,26 @@ const placeOrder = async (req, res) => {
       paymentFailed,
     } = req.body;
     
+    console.log(req.body)
 
     const userAddresses = await Address.findOne({ userId });
     const address = userAddresses.address.find(
       (addr) => addr._id.toString() === selectedAddress
     );
     if (!address) {
-      return res.status(400).send("Invalid address selected.");
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).send("Invalid address selected.");
     }
 
     const cart = await Cart.findOne({ userId }).populate("items.productId");
     if (!cart || cart.items.length === 0) {
-      return res.status(400).send("Your cart is empty.");
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).send("Your cart is empty.");
     }
 
     for (const item of cart.items) {
       const Product = await product.findById(item.productId._id);
       if (!Product || Product.quantity < item.quantity) {
         return res
-          .status(400)
+          .status(HTTP_STATUS_CODES.BAD_REQUEST)
           .send(`Not enough stock for product: ${item.productId.productName}`);
       }
     }
@@ -190,7 +192,7 @@ const placeOrder = async (req, res) => {
 
         if (wallet.balance < totalAmount) {
           return res
-            .status(400)
+            .status(HTTP_STATUS_CODES.BAD_REQUEST)
             .json({ success: false, message: "Insufficient wallet balance." });
         }
 
@@ -217,7 +219,8 @@ const placeOrder = async (req, res) => {
     }
   } catch (error) {
     console.error("Error placing order:", error);
-    res.status(500).send("Error placing order.");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+    .send("Error placing order.");
   }
 };
 
@@ -226,12 +229,13 @@ const orderConfirmation = async (req, res) => {
     const order = await Order.findById(req.params.id).populate(
       "items.productId"
     );
-    if (!order) return res.status(404).send("Order not found");
+    if (!order) return res.status(HTTP_STATUS_CODES.NOT_FOUND).send("Order not found");
 
     res.render("orderConfirmation", { order });
   } catch (error) {
     console.error("Error fetching order:", error);
-    res.status(500).send("Error fetching order");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+    .send("Error fetching order");
   }
 };
 
@@ -240,12 +244,13 @@ const paymentFailure = async (req, res) => {
     const order = await Order.findById(req.params.id).populate(
       "items.productId"
     );
-    if (!order) return res.status(404).send("Order not found");
+    if (!order) return res.status(HTTP_STATUS_CODES.NOT_FOUND).send("Order not found");
 
     res.render("paymentFailure", { order });
   } catch (error) {
     console.error("Error fetching order:", error);
-    res.status(500).send("Error fetching order");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+    .send("Error fetching order");
   }
 };
 
@@ -257,11 +262,11 @@ const orderCancel = async (req, res) => {
       "items.productId"
     );
     if (!order) {
-      return res.status(404).send("Order not found");
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).send("Order not found");
     }
 
     order.orderStatus = "Cancelled";
-    if (order.paymentStatus === "Paid") {
+    if (order.paymentStatus === "Paid" || order.paymentStatus === "Partially Refunded") {
       order.paymentStatus = "Refunded";
       order.items.map((x) => (x.paymentStatus = "Refunded"));
     } else {
@@ -313,7 +318,8 @@ const orderCancel = async (req, res) => {
     res.redirect("/userProfile");
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error fetching order");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+    .send("Error fetching order");
   }
 };
 
@@ -326,12 +332,13 @@ const itemCancel = async (req, res) => {
     );
 
     if (!order) {
-      return res.status(404).send("Order not found");
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).send("Order not found");
     }
 
     const item = order.items.find((item) => String(item._id) === itemId);
     if (!item || item.orderStatus === "Cancelled") {
-      return res.status(400).send("Invalid item or already cancelled.");
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST)
+      .send("Invalid item or already cancelled.");
     }
 
     item.orderStatus = "Cancelled";
@@ -385,7 +392,8 @@ const itemCancel = async (req, res) => {
     res.redirect("/userProfile");
   } catch (error) {
     console.error("Error cancelling item in order:", error);
-    res.status(500).send("Error processing cancellation");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+    .send("Error processing cancellation");
   }
 };
 
@@ -396,17 +404,19 @@ const orderReturn = async (req, res) => {
     const userId = req.session.user;
 
     if (!reason || reason.trim() === "") {
-      return res.status(400).send("Return reason is required");
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST)
+      .send("Return reason is required");
     }
 
     const order = await Order.findOne({ _id: orderId, userId });
 
     if (!order) {
-      return res.status(404).send("Order not found");
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).send("Order not found");
     }
 
     if (order.orderStatus !== "Delivered") {
-      return res.status(400).send("Only delivered orders can be returned");
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST)
+      .send("Only delivered orders can be returned");
     }
 
     order.orderStatus = "Return Pending";
@@ -418,7 +428,8 @@ const orderReturn = async (req, res) => {
     res.redirect("/userProfile");
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error processing return");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+    .send("Error processing return");
   }
 };
 
@@ -429,27 +440,30 @@ const itemReturn = async (req, res) => {
     const userId = req.session.user;
 
     if (!reason || reason.trim() === "") {
-      return res.status(400).send("Return reason is required");
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST)
+      .send("Return reason is required");
     }
 
     const order = await Order.findOne({ _id: orderId, userId });
 
     if (!order) {
-      return res.status(404).send("Order not found");
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).send("Order not found");
     }
 
     const item = order.items.find((item) => String(item._id) === itemId);
 
     if (!item) {
-      return res.status(404).send("Item not found in order");
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).send("Item not found in order");
     }
 
     if (item.orderStatus !== "Delivered") {
-      return res.status(400).send("Only delivered items can be returned");
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST)
+      .send("Only delivered items can be returned");
     }
 
     if (item.orderStatus === "Returned") {
-      return res.status(400).send("Item is already returned");
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST)
+      .send("Item is already returned");
     }
 
     item.orderStatus = "Return Pending";
@@ -504,7 +518,8 @@ const itemReturn = async (req, res) => {
     res.redirect("/userProfile");
   } catch (error) {
     console.error("Error processing item return:", error);
-    res.status(500).send("Error processing return");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+    .send("Error processing return");
   }
 };
 

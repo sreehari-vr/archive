@@ -5,6 +5,7 @@ const category = require("../../models/categorySchema");
 const Cart = require("../../models/cartSchema");
 const Order = require("../../models/orderSchema");
 const Wallet = require("../../models/walletSchema");
+const HTTP_STATUS_CODES = require("../../utils/httpStatusCodes");
 
 const env = require("dotenv").config();
 const nodemailer = require("nodemailer");
@@ -22,7 +23,8 @@ const loadLanding = async (req, res) => {
     return res.render("landing", { product: productData });
   } catch (error) {
     console.log("Home page not found", error);
-    res.status(500).send("Server error");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+    .send("Server error");
   }
 };
 
@@ -44,7 +46,8 @@ const loadHomepage = async (req, res) => {
     }
   } catch (error) {
     console.log("Home page not found", error);
-    res.status(500).send("Server error");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+    .send("Server error");
   }
 };
 
@@ -53,7 +56,8 @@ const loadDetailPage = async (req, res) => {
     const productId = req.params.id;
     const product = await Product.findById(productId).populate("category");
     if (!product) {
-      res.status(500).send("Product not found");
+      res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+      .send("Product not found");
     }
     const categoryOffer = product.category?.offer || 0; 
     const productOffer = product.productOffer || 0;
@@ -77,7 +81,8 @@ const loadSignup = async (req, res) => {
     return res.render("signup");
   } catch (error) {
     console.log("Home page not loading:", error);
-    res.status(500).send("Server error");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+    .send("Server error");
   }
 };
 
@@ -90,7 +95,8 @@ const loadLogin = async (req, res) => {
     }
   } catch (error) {
     console.log("Home page not loading:", error);
-    res.status(500).send("Server error");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+    .send("Server error");
   }
 };
 
@@ -129,7 +135,33 @@ async function sendVerificationEmail(email, otp) {
 const signup = async (req, res) => {
   try {
     const { name, email, phone, password, cPassword, referral } = req.body;
-    if (password !== cPassword) {
+
+    const namePattern = /^[A-Za-z\s'-]+$/;
+    const emailPattern =
+          /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const phonePattern = /^[0-9]{10}$/;
+    const alpha = /[a-zA-Z]/.test(password);
+        const num = /\d/.test(password);
+
+    if (!name || name.trim() === "") {
+      return res.render("signup", { message: "Please enter your name" });
+    } else if (!namePattern.test(name)) {
+      return res.render("signup", { message: "Please enter a valid name" });
+    }
+
+    if (!emailPattern.test(email)) {
+      return res.render("signup", { message: "Please enter a valid email" });
+    }
+
+    if (!phonePattern.test(phone)) {
+      return res.render("signup", { message: "Please enter a valid phone number" });
+    }
+
+    if(password.length<8){
+      return res.render("signup", { message: "Password is too short" });
+    }else if(!alpha || !num){
+      return res.render("signup", { message: "Password should contain numbers and alphabets" });
+    }else if (password !== cPassword) {
       return res.render("signup", { message: "Passwords do not match" });
     }
     const findUser = await user.findOne({ email });
@@ -224,12 +256,13 @@ const verifyOtp = async (req, res) => {
       res.json({ success: true, redirectUrl: "/login" });
     } else {
       res
-        .status(400)
+        .status(HTTP_STATUS_CODES.BAD_REQUEST)
         .json({ success: false, message: "Invalid OTP, Please try again" });
     }
   } catch (error) {
     console.error("Error Verifying OTP", error);
-    res.status(500).json({ success: false, message: "An error occured" });
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+    .json({ success: false, message: "An error occured" });
   }
 };
 
@@ -252,7 +285,8 @@ const resendOtp = async (req, res) => {
   try {
     const { email } = req?.session?.userData;
     if (!email) {
-      return res.status(400).json({
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST)
+      .json({
         success: false,
         message: "Session expired. Please sign up again.",
       });
@@ -262,7 +296,8 @@ const resendOtp = async (req, res) => {
     const emailSent = await sendVerificationEmail(email, newOtp);
 
     if (!emailSent) {
-      return res.status(500).json({
+      return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+      .json({
         success: false,
         message: "Failed to resend OTP. Try again later.",
       });
@@ -273,7 +308,7 @@ const resendOtp = async (req, res) => {
     console.log("OTP Resent", newOtp);
   } catch (error) {
     console.error("Error resending OTP", error);
-    res.status(500).json({
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)    .json({
       success: false,
       message: "An error occurred while resending OTP",
     });
@@ -320,7 +355,7 @@ const userProfile = async (req, res) => {
     return res.render("userProfile");
   } catch (error) {
     console.log("Home page not loading:", error);
-    res.status(500).send("Server error");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send("Server error");
   }
 };
 
@@ -333,7 +368,7 @@ const renderUserProfile = async (req, res) => {
 
     if (!data) {
       console.log("User does not exist");
-      return res.status(404).json({ error: "User not found" });
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ error: "User not found" });
     }
 
     const { page = 1, limit = 5 } = req.query;
@@ -366,16 +401,16 @@ const renderUserProfile = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
   }
 };
 
 const loadChangeEmail = async (req, res) => {
   try {
-    return res.render("changeEmail");
+    return res.render("changeEmail",{message: null});
   } catch (error) {
     console.log("Home page not loading:", error);
-    res.status(500).send("Server error");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send("Server error");
   }
 };
 
@@ -383,38 +418,50 @@ const verifyEmail = async (req, res) => {
   try {
     const { email } = req.body;
 
-    userExist = await user.findOne({ email, phone: { $ne: null } });
+    // Check if the user exists in the database
+    const userExist = await user.findOne({ email, phone: { $ne: null } });
+
     if (userExist) {
-      otp = generateOtp();
-      emailSend = await sendVerificationEmail(email, otp);
+      // Generate and send OTP
+      const otp = generateOtp();
+      const emailSend = await sendVerificationEmail(email, otp);
+
       if (emailSend) {
+        // Store OTP and user data in the session
         req.session.userOtp = otp;
         req.session.userData = req.body;
         req.session.email = email;
-        res.render("changeEmailOtp");
-        console.log("Email sent:", email);
-        console.log("OTP:", otp);
+        console.log(otp)
+        return res.render("changeEmailOtp", { message: null }); // Render the OTP page
       } else {
-        res.json("email-error");
+        return res.render("changeEmail", {
+          message: "Failed to send email. Please try again later.",
+        });
       }
     } else {
-      res.render("changeEmail", {
-        message: "User with this email not exist",
+      // Email does not exist in the database
+      return res.render("changeEmail", {
+        message: "User with this email does not exist. Please try again.",
       });
     }
   } catch (error) {
-    console.log(error);
+    console.error("Error during email verification:", error);
+    return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+    .render("changeEmail", {
+      message: "An error occurred. Please try again later.",
+    });
   }
 };
+
 
 const verifyEmailOtp = async (req, res) => {
   try {
     otpEntered = req.body.otp;
     if (otpEntered === req.session.userOtp) {
       req.session.userData = req.body.userData;
-      res.render("newEmail", { userData: req.session.userData });
+      res.render("newEmail", { userData: req.session.userData , message: null});
     } else {
-      res.render("changeEmail", { message: "otp not matching" });
+      res.render("changeEmailOtp", { message: "otp not matching" });
     }
   } catch (error) {
     console.log(error);
@@ -426,29 +473,32 @@ const updateEmail = async (req, res) => {
     const newEmail = req.body.newEmail;
     const id = req.session.user;
 
-    if (!id) {
-      return res
-        .status(400)
-        .json({ success: false, message: "User not logged in" });
+    if (!id || !newEmail) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST)
+      .json({ success: false, message: "Invalid request" });
     }
 
-    if (!newEmail) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Email cannot be empty" });
+    // Check if email exists
+    const emailExists = await user.findOne({ email: newEmail });
+    if (emailExists) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST)
+      .json({ success: false, message: "Email already in use" });
     }
 
+    // Update email and session
     await user.findByIdAndUpdate(id, { email: newEmail });
+    req.session.email = newEmail;
+    
+    // Wait for session to save
+    await new Promise(resolve => req.session.save(resolve));
 
-    return res
-      .status(200)
-      .json({ success: true, message: "Email updated successfully!" });
+    return res.status(HTTP_STATUS_CODES.OK)
+    .json({ success: true, message: "Email updated successfully!" });
+
   } catch (error) {
     console.error("Error updating email:", error);
-    return res.status(500).json({
-      success: false,
-      message: "An error occurred while updating the email.",
-    });
+    return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+    .json({ success: false, message: "Server error" });
   }
 };
 
@@ -457,7 +507,8 @@ const loadChangePass = async (req, res) => {
     return res.render("changePassword");
   } catch (error) {
     console.log("page not loading:", error);
-    res.status(500).send("Server error");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+    .send("Server error");
   }
 };
 
@@ -468,54 +519,79 @@ const changePassword = async (req, res) => {
 
     if (!userId) {
       return res
-        .status(401)
+        .status(HTTP_STATUS_CODES.UNAUTHORIZED)
         .json({ success: false, message: "User not logged in" });
     }
 
     const User = await user.findById(userId);
 
+    // Verify the current password
     const isMatch = await bcrypt.compare(currentPassword, User.password);
     if (!isMatch) {
       return res
-        .status(400)
+        .status(HTTP_STATUS_CODES.BAD_REQUEST)
         .json({ success: false, message: "Current password is incorrect" });
     }
 
+    // Check if the new password matches the confirm password
     if (newPassword !== confirmPassword) {
       return res
-        .status(400)
+        .status(HTTP_STATUS_CODES.BAD_REQUEST)
         .json({ success: false, message: "New passwords do not match" });
     }
 
-    if (newPassword === currentPassword) {
-      return res.status(400).json({
+    // Validate the new password
+    const passwordValidation = {
+      length: newPassword.length >= 8,
+      containsLetter: /[a-zA-Z]/.test(newPassword),
+      containsNumber: /\d/.test(newPassword),
+    };
+
+    if (!passwordValidation.length) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        message: "New password must be different from the current password",
+        message: "New password must be at least 8 characters long.",
+      });
+    }
+    if (!passwordValidation.containsLetter || !passwordValidation.containsNumber) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+        success: false,
+        message: "New password must contain both letters and numbers.",
       });
     }
 
+    // Ensure the new password is not the same as the current password
+    if (newPassword === currentPassword) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+        success: false,
+        message: "New password must be different from the current password.",
+      });
+    }
+
+    // Hash the new password and save it
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     User.password = hashedPassword;
     await User.save();
 
     return res
-      .status(200)
+      .status(HTTP_STATUS_CODES.OK)
       .json({ success: true, message: "Password changed successfully" });
   } catch (error) {
     console.error("Error updating password:", error);
-    res.status(500).json({
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "An error occurred while changing the password",
+      message: "An error occurred while changing the password.",
     });
   }
 };
+
 
 const loadAddAddress = async (req, res) => {
   try {
     return res.render("addAddress");
   } catch (error) {
     console.log("Address page not loading:", error);
-    res.status(500).send("Server error");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send("Server error");
   }
 };
 
@@ -531,14 +607,34 @@ const addAddress = async (req, res) => {
       phone,
       altPhone,
     } = req.body;
+
     const userId = req.session.user;
-    const data = await user.findById(userId);
+
+    const errors = {};
+
+    // Validation for input fields
+    const namePattern = /^(?!\s*$)[A-Za-z\s]+$/;
+    const pincodePattern = /^\d{6}$/;
+    const phonePattern = /^\d{10}$/;
+
+    if (!name || !namePattern.test(name)) errors.name = "Name should contain alphabets only.";
+    if (!city || !namePattern.test(city)) errors.city = "City should contain alphabets only.";
+    if (!landMark || !namePattern.test(landMark)) errors.landMark = "Landmark should contain alphabets only.";
+    if (!state || !namePattern.test(state)) errors.state = "State should contain alphabets only.";
+    if (!pincode || !pincodePattern.test(pincode)) errors.pincode = "Pincode should be a 6-digit number.";
+    if (!phone || !phonePattern.test(phone)) errors.phone = "Phone number should be a 10-digit number.";
+    if (!altPhone || !phonePattern.test(altPhone)) errors.altPhone = "Alternate phone number should be a 10-digit number.";
+    if (phone === altPhone) errors.altPhone = "Phone and alternate phone number should be different.";
+
+    if (Object.keys(errors).length > 0) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ errors });
+    }
+
     const userAddress = await Address.findOne({ userId });
-    const addressCount = userAddress ? userAddress.address.length : 0;
     const maxCount = 3;
+
     if (userAddress) {
       const addressCount = userAddress.address.length;
-
       if (addressCount < maxCount) {
         userAddress.address.push({
           addressType,
@@ -551,9 +647,9 @@ const addAddress = async (req, res) => {
           altPhone,
         });
         await userAddress.save();
-        res.redirect("/userProfile");
+        return res.status(HTTP_STATUS_CODES.OK).json({ success: "Address added successfully!" });
       } else {
-        res.status(400).send("Maximum of 3 addresses allowed");
+        return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ errors: { addressType: "Maximum of 3 addresses allowed." } });
       }
     } else {
       const newAddress = new Address({
@@ -572,13 +668,15 @@ const addAddress = async (req, res) => {
         ],
       });
       await newAddress.save();
-      res.redirect("/userProfile");
+      return res.status(HTTP_STATUS_CODES.OK).json({ success: "Address added successfully!" });
     }
   } catch (error) {
-    console.log("Error occured while adding address:", error);
-    res.status(500).send("Server error");
+    console.error("Error occurred while adding address:", error);
+    return res.status(500).json({ errors: { server: "Server error occurred. Please try again." } });
   }
 };
+
+
 
 const loadEditAddress = async (req, res) => {
   const addressId = req.params.id;
@@ -592,48 +690,86 @@ const loadEditAddress = async (req, res) => {
     return res.render("editAddress", { address });
   } catch (error) {
     console.log(" page not loading:", error);
-    res.status(500).send("Server error");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send("Server error");
   }
 };
 
 const editAddress = async (req, res) => {
-  const addressId = req.params.id;
-  const userId = req.session.user;
-  const updatedData = {
-    addressType: req.body.addressType,
-    name: req.body.name,
-    city: req.body.city,
-    landMark: req.body.landMark,
-    state: req.body.state,
-    pincode: req.body.pincode,
-    phone: req.body.phone,
-    altPhone: req.body.altPhone,
-  };
-
   try {
-    const userAddress = await Address.findOne({ userId });
-    if (!userAddress) {
-      return res.status(404).send("User address document not found");
+    const addressId = req.params.id;
+    const userId = req.session.user;
+    const {
+      addressType,
+      name,
+      city,
+      landMark,
+      state,
+      pincode,
+      phone,
+      altPhone,
+    } = req.body;
+
+    const errors = {};
+
+    // Validation for input fields using the same patterns as addAddress
+    const namePattern = /^(?!\s*$)[A-Za-z\s]+$/;
+    const pincodePattern = /^\d{6}$/;
+    const phonePattern = /^\d{10}$/;
+
+    // Perform all validations
+    if (!name || !namePattern.test(name)) errors.name = "Name should contain alphabets only.";
+    if (!city || !namePattern.test(city)) errors.city = "City should contain alphabets only.";
+    if (!landMark || !namePattern.test(landMark)) errors.landMark = "Landmark should contain alphabets only.";
+    if (!state || !namePattern.test(state)) errors.state = "State should contain alphabets only.";
+    if (!pincode || !pincodePattern.test(pincode)) errors.pincode = "Pincode should be a 6-digit number.";
+    if (!phone || !phonePattern.test(phone)) errors.phone = "Phone number should be a 10-digit number.";
+    if (!altPhone || !phonePattern.test(altPhone)) errors.altPhone = "Alternate phone number should be a 10-digit number.";
+    if (phone === altPhone) errors.altPhone = "Phone and alternate phone number should be different.";
+
+    // If there are validation errors, return them
+    if (Object.keys(errors).length > 0) {
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ errors });
     }
 
+    // Find the user's address document
+    const userAddress = await Address.findOne({ userId });
+    if (!userAddress) {
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ 
+        errors: { server: "User address document not found" }
+      });
+    }
+
+    // Find the specific address to update
     const addressIndex = userAddress.address.findIndex(
       (addr) => addr._id.toString() === addressId
     );
     if (addressIndex === -1) {
-      return res.status(404).send("Address not found");
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ 
+        errors: { server: "Address not found" }
+      });
     }
 
+    // Update the address with validated data
     userAddress.address[addressIndex] = {
       ...userAddress.address[addressIndex].toObject(),
-      ...updatedData,
+      addressType,
+      name,
+      city,
+      landMark,
+      state,
+      pincode,
+      phone,
+      altPhone,
     };
 
     await userAddress.save();
+    return res.status(HTTP_STATUS_CODES.OK).json({ success: "Address updated successfully!" });
 
-    res.redirect("/userProfile");
   } catch (error) {
-    console.log("Error updating address:", error);
-    res.status(500).send("Server error");
+    console.error("Error updating address:", error);
+    return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ 
+      errors: { server: "Server error occurred. Please try again." }
+    });
   }
 };
 
@@ -650,10 +786,10 @@ const deleteAddress = async (req, res) => {
       { userId },
       { $pull: { address: { _id: addressId } } }
     );
-    res.redirect("/userProfile");
+    res.redirect("/userProfile?deleteSuccess=true");
   } catch (error) {
     console.log("Error deleting address:", error);
-    res.status(500).send("Server error");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send("Server error");
   }
 };
 
@@ -705,7 +841,7 @@ const loadCheckout = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in loadCheckout:", error);
-    res.status(500).send("An error occurred while loading the checkout page.");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send("An error occurred while loading the checkout page.");
   }
 };
 
@@ -777,7 +913,7 @@ const loadForgotPassword = async (req, res) => {
     return res.render("forgotPass");
   } catch (error) {
     console.log("page not loading:", error);
-    res.status(500).send("Server error");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send("Server error");
   }
 };
 
@@ -827,12 +963,12 @@ const newPassword = async (req, res) => {
     const { newPassword, confirmPassword } = req.body;
 
     if (newPassword !== confirmPassword) {
-      return res.status(400).json({ message: "New passwords do not match" });
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ message: "New passwords do not match" });
     }
 
     const User = await user.findOne({ email: req.session.email });
     if (!User) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ message: "User not found" });
     }
 
     User.password = await bcrypt.hash(newPassword, 10);
@@ -846,7 +982,7 @@ const newPassword = async (req, res) => {
   } catch (error) {
     console.error("Error updating password:", error);
     res
-      .status(500)
+      .status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
       .json({ message: "An error occurred while changing the password" });
   }
 };
@@ -875,7 +1011,7 @@ const searchProducts = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching search results:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send("Internal Server Error");
   }
 };
 

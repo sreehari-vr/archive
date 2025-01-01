@@ -19,61 +19,76 @@
     </section>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
-        document.getElementById('emailForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
+        window.addEventListener('load', () => {
+            localStorage.removeItem('otpTimer');
+            console.log("Local storage key 'otpTimer' cleared");
+        });
+    </script>
+    
+<script>
+    document.getElementById('emailForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
 
-            const emailInput = document.getElementById('email');
-            const emailError = document.getElementById('email-error');
-            const emailValue = emailInput.value.trim();
+        const emailInput = document.getElementById('email');
+        const emailError = document.getElementById('email-error');
+        const emailValue = emailInput.value.trim();
 
-            emailError.textContent = "";
+        emailError.textContent = "";
 
-            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-            if (!emailValue.match(emailPattern)) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Email',
-                    text: 'Please enter a valid email address.',
+        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+        if (!emailValue.match(emailPattern)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Email',
+                text: 'Please enter a valid email address.',
+            });
+            return;
+        }
+
+        try {
+            const response = await fetch('/update-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ newEmail: emailValue }),
+                credentials: 'same-origin' // Include credentials for session
+            });
+
+            const result = await response.json();
+            console.log(result);
+
+            if (response.ok && result.success) {
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: result.message,
                 });
-                return;
-            }
-
-            try {
-                const response = await fetch('/update-email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ newEmail: emailValue }),
-                });
-
-                const result = await response.json();
-                console.log(result);
-
-                if (response.ok && result.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: result.message,
-                    }).then(() => {
-                        window.location.href = '/userProfile';
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: result.message || 'An error occurred.',
-                    });
-                }
-            } catch (error) {
-                console.error("Error:", error);
+                
+                // Add delay before redirect
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                
+                // Then redirect after a short delay
+                setTimeout(() => {
+                    window.location.href = '/userProfile';
+                }, 500);
+            } else {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'An unexpected error occurred. Please try again.',
+                    text: result.message || 'An error occurred.',
                 });
             }
-        });
-    </script>
+        } catch (error) {
+            console.error("Error:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An unexpected error occurred. Please try again.',
+            });
+        }
+    });
+</script>
+
 
     <%- include("../../views/partials/user/footer") %>

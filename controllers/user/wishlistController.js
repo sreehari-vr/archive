@@ -1,4 +1,5 @@
 const Wishlist = require("../../models/wishlistSchema");
+const HTTP_STATUS_CODES = require("../../utils/httpStatusCodes");
 
 const loadWishlist = async (req, res) => {
   try {
@@ -39,7 +40,7 @@ const addWishlist = async (req, res) => {
     }
     res.redirect("/wishlist");
   } catch (error) {
-    console.error("Error loading page:", error);
+    console.error("Error adding:", error);
   }
 };
 
@@ -56,7 +57,9 @@ const removeWishlist = async (req, res) => {
       { $pull: { items: { _id: removingProduct } } }
     );
     res.redirect("/wishlist");
-  } catch (error) {}
+  } catch (error) {
+    console.error("Error removing:", error);
+  }
 };
 
 module.exports = {
