@@ -51,6 +51,7 @@ const loadAddCoupon = async (req, res) => {
 
 const addCoupon = async (req, res) => {
   try {
+    // Extract and parse numeric fields to ensure they are treated as numbers
     const {
       code,
       description,
@@ -61,73 +62,85 @@ const addCoupon = async (req, res) => {
       perUserLimit,
     } = req.body;
 
+    const parsedDiscount = Number(discount);
+    const parsedMinPurchase = Number(minPurchase);
+    const parsedUsageLimit = usageLimit ? Number(usageLimit) : null;
+    const parsedPerUserLimit = perUserLimit ? Number(perUserLimit) : null;
 
+    // Validate input values
     const existingCoupon = await Coupon.findOne({ code: code.toUpperCase() });
     if (existingCoupon) {
-      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
-        success: false, 
-        error: "Coupon code already exists" 
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+        success: false,
+        error: "Coupon code already exists",
       });
     }
 
-    if (discount <= 0) {
+    if (parsedDiscount <= 0) {
       return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        error: "Discount amount must be greater than 0"
+        error: "Discount amount must be greater than 0",
       });
     }
 
-    if (minPurchase < 0) {
+    if (parsedMinPurchase < 0) {
       return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        error: "Minimum purchase amount cannot be negative"
+        error: "Minimum purchase amount cannot be negative",
       });
     }
 
-    if (usageLimit && usageLimit <= 0) {
+    if (parsedUsageLimit && parsedUsageLimit <= 0) {
       return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        error: "Usage limit must be greater than 0"
+        error: "Usage limit must be greater than 0",
       });
     }
 
-    if (perUserLimit && perUserLimit < 0) {
+    if (parsedPerUserLimit && parsedPerUserLimit < 0) {
       return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        error: "Per user limit can't be negative."
+        error: "Per user limit can't be negative.",
       });
     }
 
-    if (discount >= minPurchase) {
+    if (parsedDiscount >= parsedMinPurchase) {
       return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        error: "Discount amount must be less than minimum purchase amount"
+        error: "Discount amount must be less than minimum purchase amount",
       });
     }
 
     if (!expDate) {
       return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        error: "Expiry date is required"
+        error: "Expiry date is required",
       });
     }
 
     const newCoupon = new Coupon({
-      code,
+      code: code.toUpperCase(),
       description,
-      discount,
+      discount: parsedDiscount,
       expiryDate: expDate,
-      minPurchase,
-      usageLimit,
-      perUserLimit,
+      minPurchase: parsedMinPurchase,
+      usageLimit: parsedUsageLimit,
+      perUserLimit: parsedPerUserLimit,
     });
     await newCoupon.save();
 
-    return res.status(HTTP_STATUS_CODES.OK).json({ success: true, message: "Coupon added" });
+    return res.status(HTTP_STATUS_CODES.OK).json({
+      success: true,
+      message: "Coupon added successfully",
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Error adding coupon:", error);
+    return res
+      .status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+      .json({ success: false, error: "Internal server error" });
   }
 };
+
 
 const inactivateCoupon = async (req, res) => {
   const id = req.query.id;
@@ -186,85 +199,100 @@ const updateCoupon = async (req, res) => {
       perUserLimit,
     } = req.body;
 
+    // Parse numeric values
+    const parsedDiscount = Number(discount);
+    const parsedMinPurchase = Number(minPurchase);
+    const parsedUsageLimit = usageLimit ? Number(usageLimit) : null;
+    const parsedPerUserLimit = perUserLimit ? Number(perUserLimit) : null;
+
+    // Find the coupon by ID
     const coupon = await Coupon.findById(id);
     if (!coupon) {
-      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({ error: "Coupon not found." });
+      return res
+        .status(HTTP_STATUS_CODES.NOT_FOUND)
+        .json({ success: false, error: "Coupon not found." });
     }
+
+    // Check for duplicate code
     const existingCoupon = await Coupon.findOne({
       code: code.toUpperCase(),
-      _id: { $ne: id } 
+      _id: { $ne: id }, // Exclude the current coupon ID
     });
 
     if (existingCoupon) {
-      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ 
+      return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        error: "Coupon code already exists" 
+        error: "Coupon code already exists",
       });
     }
 
-    if (discount <= 0) {
+    // Validation checks
+    if (parsedDiscount <= 0) {
       return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        error: "Discount amount must be greater than 0"
+        error: "Discount amount must be greater than 0",
       });
     }
 
-    if (minPurchase < 0) {
+    if (parsedMinPurchase < 0) {
       return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        error: "Minimum purchase amount cannot be negative"
+        error: "Minimum purchase amount cannot be negative",
       });
     }
 
-    if (usageLimit && usageLimit <= 0) {
+    if (parsedUsageLimit && parsedUsageLimit <= 0) {
       return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        error: "Usage limit must be greater than 0"
+        error: "Usage limit must be greater than 0",
       });
     }
 
-    if (perUserLimit && perUserLimit < 0) {
+    if (parsedPerUserLimit && parsedPerUserLimit < 0) {
       return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        error: "Per user limit can't be negative."
+        error: "Per user limit can't be negative.",
       });
     }
 
-    if (discount >= minPurchase) {
+    if (parsedDiscount >= parsedMinPurchase) {
       return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        error: "Discount amount must be less than minimum purchase amount"
+        error: "Discount amount must be less than minimum purchase amount",
       });
     }
 
     if (!expDate) {
       return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        error: "Expiry date is required"
+        error: "Expiry date is required",
       });
     }
 
-    coupon.code = code;
+    // Update coupon fields
+    coupon.code = code.toUpperCase();
     coupon.description = description;
-    coupon.discount = discount;
+    coupon.discount = parsedDiscount;
     coupon.expiryDate = expDate;
-    coupon.minPurchase = minPurchase;
-    coupon.usageLimit = usageLimit;
-    coupon.perUserLimit = perUserLimit;
+    coupon.minPurchase = parsedMinPurchase;
+    coupon.usageLimit = parsedUsageLimit;
+    coupon.perUserLimit = parsedPerUserLimit;
 
-    await coupon.save()
+    await coupon.save();
 
     res.status(HTTP_STATUS_CODES.OK).json({
-        success: true,
-        message: "Coupon updated successfully.",
-        updatedCoupon: coupon,
-      });
-
+      success: true,
+      message: "Coupon updated successfully.",
+      updatedCoupon: coupon,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
+    console.error("Error updating coupon:", error);
+    res
+      .status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+      .json({ success: false, error: "Internal server error" });
   }
 };
+
 
 module.exports = {
   loadCoupon,

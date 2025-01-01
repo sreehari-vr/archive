@@ -139,11 +139,11 @@
 
     const code = document.getElementById("code").value.trim();
     const description = document.getElementById("description").value.trim();
-    const discount = Number(document.getElementById('discount').value.trim());
+    const discount = parseFloat(document.getElementById('discount').value.trim());
     const expDate = document.getElementById("expDate").value.trim();
-    const minPurchase = Number(document.getElementById('minPurchase').value.trim());
-    const usageLimit = Number(document.getElementById('usageLimit').value.trim());
-    const perUserLimit = Number(document.getElementById('pageUserLimit').value.trim());
+    const minPurchase = parseFloat(document.getElementById('minPurchase').value.trim());
+    const usageLimit = parseFloat(document.getElementById('usageLimit').value.trim());
+    const perUserLimit = parseFloat(document.getElementById('pageUserLimit').value.trim());
 
     const codePattern = /^[A-Za-z0-9]{3,15}$/;
     if (!code) {
@@ -229,11 +229,11 @@ function addCoupon(event) {
 
     const code = document.getElementById('code').value.trim();
     const description = document.getElementById('description').value.trim();
-    const discount = Number(document.getElementById('discount').value.trim());
+    const discount = parseFloat(document.getElementById('discount').value.trim());
     const expDate = document.getElementById('expDate').value.trim();
-    const minPurchase = Number(document.getElementById('minPurchase').value.trim());
-    const usageLimit = Number(document.getElementById('usageLimit').value.trim());
-    const perUserLimit = Number(document.getElementById('pageUserLimit').value.trim());
+    const minPurchase = parseFloat(document.getElementById('minPurchase').value.trim());
+    const usageLimit = parseFloat(document.getElementById('usageLimit').value.trim());
+    const perUserLimit = parseFloat(document.getElementById('pageUserLimit').value.trim());
 
     $.ajax({
         method: 'POST',
